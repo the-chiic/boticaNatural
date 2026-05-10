@@ -23,10 +23,14 @@
                 <i class="fa-regular fa-user"></i>
             </button>
             <div class="menuUsuarioDesplegable" id="menuUsuario">
-                <a href="/login">Iniciar Sesión</a>
-                <a href="/register">Registrarse</a>
-                <div class="divisorMenu" style="height: 1px; background: #eee; margin: 0.5rem 0;"></div>
-                <a href="/logout" style="color: #ff4d4d;">Cerrar Sesión</a>
+                @if(session('logged_in'))
+                    <a href="/perfil">Mi Perfil</a>
+                    <div class="divisorMenu" style="height: 1px; background: #eee; margin: 0.5rem 0;"></div>
+                    <a href="/logout" style="color: #ff4d4d;">Cerrar Sesión</a>
+                @else
+                    <a href="/login">Iniciar Sesión</a>
+                    <a href="/register">Registrarse</a>
+                @endif
             </div>
         </div>
         
