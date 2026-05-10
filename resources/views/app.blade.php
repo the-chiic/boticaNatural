@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
         @include('head')
         @stack('style')
@@ -11,7 +11,7 @@
             @yield('content')
         </main>
 
-        @include('footer')
+        @include('components.footer')
 
         @stack('scripts')
     </body>

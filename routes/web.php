@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('home.index');
@@ -26,3 +27,23 @@ Route::get('/perfil', function () {
     return view('profile.index');
 });
 
+// Auth Routes from coworker
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
+Route::post('/login', function (Request $request) {
+    if ($request->email === 'admin' && $request->password === '12345') {
+        return redirect('/admin');
+    }
+    // Para el demo, cualquier otro login va al perfil
+    return redirect('/perfil');
+});
+
+Route::get('/register', function () {
+    return view('auth.register');
+});
+
+Route::get('/admin', function () {
+    return "<h1>Panel de Administración (En preparación)</h1><p>Has entrado como admin.</p>";
+});
