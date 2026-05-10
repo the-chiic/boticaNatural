@@ -1,10 +1,10 @@
-<nav class="barra-navegacion">
-    <div class="navegacion-izquierda">
+<nav class="barraNavegacion">
+    <div class="navegacionIzquierda">
         <a href="/" class="marca" style="text-decoration: none;">
-            <i class="fa-solid fa-leaf icono-marca"></i>
+            <i class="fa-solid fa-leaf iconoMarca"></i>
             LA BOTICA NATURAL
         </a>
-        <div class="enlaces-navegacion">
+        <div class="enlacesNavegacion">
             <a href="#">CATÁLOGO</a>
             <a href="#">INFUSIONES</a>
             <a href="#">COSMÉTICA</a>
@@ -12,25 +12,25 @@
         </div>
     </div>
     
-    <div class="navegacion-derecha">
-        <div class="barra-busqueda">
-            <i class="fa-solid fa-magnifying-glass icono-busqueda"></i>
+    <div class="navegacionDerecha">
+        <div class="barraBusqueda">
+            <i class="fa-solid fa-magnifying-glass iconoBusqueda"></i>
             <input type="text" placeholder="Buscar...">
         </div>
         
-        <div class="menu-usuario-contenedor">
-            <button class="boton-icono" id="boton-usuario">
+        <div class="menuUsuarioContenedor">
+            <button class="botonIcono" id="botonUsuario">
                 <i class="fa-regular fa-user"></i>
             </button>
-            <div class="menu-usuario-desplegable" id="menu-usuario">
+            <div class="menuUsuarioDesplegable" id="menuUsuario">
                 <a href="/login">Iniciar Sesión</a>
                 <a href="/register">Registrarse</a>
-                <div class="divisor-menu"></div>
+                <div class="divisorMenu"></div>
                 <a href="#">Panel Admin</a>
             </div>
         </div>
         
-        <button class="boton-icono sin-borde">
+        <button class="botonIcono sinBorde">
             <i class="fa-solid fa-bag-shopping"></i>
         </button>
     </div>

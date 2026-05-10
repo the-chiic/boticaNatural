@@ -23,8 +23,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const botonUsuario = document.getElementById('boton-usuario');
-            const menuUsuario = document.getElementById('menu-usuario');
+            const botonUsuario = document.getElementById('botonUsuario');
+            const menuUsuario = document.getElementById('menuUsuario');
 
             if (botonUsuario && menuUsuario) {
                 botonUsuario.addEventListener('click', function(e) {

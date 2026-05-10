@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="contenedor-autenticacion">
+<div class="contenedorAutenticacion">
 
-    <div class="autenticacion-izquierda">
-        <div class="envoltura-formulario">
+    <div class="autenticacionIzquierda">
+        <div class="envolturaFormulario">
             
-            <div class="cabecera-autenticacion">
+            <div class="cabeceraAutenticacion">
                 <div class="marca">
-                    <i class="fa-solid fa-leaf icono-marca"></i>
+                    <i class="fa-solid fa-leaf iconoMarca"></i>
                     LA BOTICA NATURAL
                 </div>
                 <h1>ÚNETE A NOSOTROS</h1>
@@ -16,41 +16,41 @@
             </div>
 
             <form action="#" method="POST">
-                <div class="grupo-formulario">
-                    <div class="cabecera-grupo-formulario">
-                        <label class="etiqueta-formulario" for="name">Nombre Completo</label>
+                <div class="grupoFormulario">
+                    <div class="cabeceraGrupoFormulario">
+                        <label class="etiquetaFormulario" for="name">Nombre Completo</label>
                     </div>
-                    <input type="text" id="name" class="control-formulario" placeholder="Tu nombre">
+                    <input type="text" id="name" class="controlFormulario" placeholder="Tu nombre">
                 </div>
 
-                <div class="grupo-formulario">
-                    <div class="cabecera-grupo-formulario">
-                        <label class="etiqueta-formulario" for="email">Correo Electrónico</label>
+                <div class="grupoFormulario">
+                    <div class="cabeceraGrupoFormulario">
+                        <label class="etiquetaFormulario" for="email">Correo Electrónico</label>
                     </div>
-                    <input type="email" id="email" class="control-formulario" placeholder="tubotanica@gmail.com">
+                    <input type="email" id="email" class="controlFormulario" placeholder="tubotanica@gmail.com">
                 </div>
 
-                <div class="grupo-formulario">
-                    <div class="cabecera-grupo-formulario">
-                        <label class="etiqueta-formulario" for="password">Contraseña</label>
+                <div class="grupoFormulario">
+                    <div class="cabeceraGrupoFormulario">
+                        <label class="etiquetaFormulario" for="password">Contraseña</label>
                     </div>
-                    <input type="password" id="password" class="control-formulario" placeholder="........">
+                    <input type="password" id="password" class="controlFormulario" placeholder="........">
                 </div>
 
-                <div class="grupo-formulario">
-                    <div class="cabecera-grupo-formulario">
-                        <label class="etiqueta-formulario" for="password_confirmation">Confirmar Contraseña</label>
+                <div class="grupoFormulario">
+                    <div class="cabeceraGrupoFormulario">
+                        <label class="etiquetaFormulario" for="password_confirmation">Confirmar Contraseña</label>
                     </div>
-                    <input type="password" id="password_confirmation" class="control-formulario" placeholder="........">
+                    <input type="password" id="password_confirmation" class="controlFormulario" placeholder="........">
                 </div>
 
-                <button type="submit" class="boton boton-principal">CREAR CUENTA</button>
+                <button type="submit" class="boton botonPrincipal">CREAR CUENTA</button>
             </form>
 
             <div class="divisor">O REGÍSTRATE CON</div>
 
-            <button type="button" class="boton boton-contorno">
-                <i class="fa-brands fa-google icono-google"></i>
+            <button type="button" class="boton botonContorno">
+                <i class="fa-brands fa-google iconoGoogle"></i>
                 GOOGLE
             </button>
             
@@ -61,10 +61,10 @@
     </div>
 
     <!-- Parte derecha -->
-    <div class="autenticacion-derecha">
-        <img src="https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1400&auto=format&fit=crop" alt="Bosque Verde" class="imagen-fondo">
-        <div class="capa-oscura"></div>
-        <div class="contenido-derecha">
+    <div class="autenticacionDerecha">
+        <img src="https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1400&auto=format&fit=crop" alt="Bosque Verde" class="imagenFondo">
+        <div class="capaOscura"></div>
+        <div class="contenidoDerecha">
             <h2>NATURALEZA EN TI</h2>
             <p>"Descubre el equilibrio perfecto que<br>la botánica tiene reservado para tu salud."</p>
             <div class="linea"></div>
