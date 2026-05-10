@@ -17,6 +17,9 @@ Route::get('/producto/{id}', function () {
 });
 
 Route::get('/carrito', function () {
+    if (!session('logged_in')) {
+        return redirect('/login');
+    }
     return view('cart.index');
 });
 
@@ -34,6 +37,7 @@ Route::get('/login', function () {
 })->name('login');
 
 Route::post('/login', function (Request $request) {
+    session(['logged_in' => true]);
     if ($request->email === 'admin' && $request->password === '12345') {
         return redirect('/admin');
     }
@@ -43,6 +47,11 @@ Route::post('/login', function (Request $request) {
 
 Route::get('/register', function () {
     return view('auth.register');
+});
+
+Route::get('/logout', function () {
+    session()->forget('logged_in');
+    return redirect('/');
 });
 
 // Admin Routes (Organized)
