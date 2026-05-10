@@ -25,11 +25,13 @@
             <div class="menuUsuarioDesplegable" id="menuUsuario">
                 <a href="/login">Iniciar Sesión</a>
                 <a href="/register">Registrarse</a>
+                <div class="divisorMenu" style="height: 1px; background: #eee; margin: 0.5rem 0;"></div>
+                <a href="/logout" style="color: #ff4d4d;">Cerrar Sesión</a>
             </div>
         </div>
         
-        <button class="botonIcono sinBorde">
-            <i class="fa-solid fa-bag-shopping"></i>
-        </button>
+        <a href="/carrito" class="enlaceIcono">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </a>
     </div>
 </nav>
