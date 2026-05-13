@@ -1,0 +1,52 @@
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4rem;
+}
+
+@media (min-width: 1024px) {
+    .checkout-layout {
+        grid-template-columns: 1fr 420px;
+    }
+}
+
+.checkout-form-section {
+    background: white;
+    padding: 3rem;
+    border-radius: 2rem;
+}
+
+.form-group-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.input-field {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: 1px solid rgba(27, 48, 34, 0.1);
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    outline: none;
+    margin-top: 0.5rem;
+}
+
+.input-field:focus {
+    border-color: var(--brand-green);
+}
+
+.checkout-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: var(--brand-green);
+}
+
+.order-review-card {
+    background: var(--brand-cream);
+    border: 1px solid rgba(27, 48, 34, 0.05);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    height: fit-content;
+}

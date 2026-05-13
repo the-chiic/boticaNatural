@@ -1,0 +1,210 @@
+/* Adapted from coworker's style.css */
+
+:root {
+    --color-principal: #1a3c34;
+    --color-principal-oscuro: #132c26;
+    --color-acento: #a87b51;
+    --color-blanco: #ffffff;
+    --color-capa-oscura: rgba(0, 0, 0, 0.4);
+}
+
+/* Home Specific Sections */
+
+/* Hero */
+.seccionHero {
+    position: relative;
+    height: calc(100vh - 5rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-image: url('https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=1400&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    color: var(--color-blanco);
+}
+
+.seccionHero .capaOscura {
+    position: absolute;
+    inset: 0;
+    background: var(--color-capa-oscura);
+    z-index: 1;
+}
+
+.contenidoHero {
+    position: relative;
+    z-index: 3;
+    max-width: 50rem;
+    padding: 0 1.25rem;
+}
+
+.tituloHero {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 0.3em;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    color: white;
+}
+
+.subtituloHero {
+    font-size: 1.25rem;
+    margin-bottom: 2.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.botonesHero {
+    display: flex;
+    gap: 1.25rem;
+    justify-content: center;
+}
+
+/* Categorías */
+.contenedorCentrado {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem;
+}
+
+.cabeceraSeccion {
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.cabeceraSeccion h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--color-principal);
+}
+
+.cuadriculaCategorias {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.tarjetaCategoria {
+    position: relative;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    height: 450px;
+    display: flex;
+    align-items: flex-end;
+    color: var(--color-blanco);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tarjetaCategoria:hover {
+    transform: translateY(-10px);
+}
+
+.imagenCategoria {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+    transition: transform 0.6s;
+}
+
+.tarjetaCategoria:hover .imagenCategoria {
+    transform: scale(1.1);
+}
+
+.tarjetaCategoria::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    z-index: 2;
+}
+
+.contenidoTarjetaCategoria {
+    position: relative;
+    z-index: 3;
+    padding: 2rem;
+    width: 100%;
+}
+
+.infusionesBg { background-image: url('https://images.unsplash.com/photo-1576092762791-dd9e2220d960?q=80&w=800&auto=format&fit=crop'); }
+.aceitesBg { background-image: url('https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop'); }
+.cosmeticaBg { background-image: url('https://images.unsplash.com/photo-1556228573-7303e8707198?q=80&w=800&auto=format&fit=crop'); }
+
+/* Products Grid */
+.seccionMasVendidos {
+    padding: 5rem 0;
+}
+
+.cuadriculaProductos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+/* Features */
+.seccionCaracteristicas {
+    background-color: #f9f9f9;
+    padding: 5rem 0;
+}
+
+.cuadriculaCaracteristicas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 3rem;
+    text-align: center;
+}
+
+.iconoCaracteristica {
+    font-size: 2.5rem;
+    color: var(--color-principal);
+    margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.boton {
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.875rem;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+}
+
+.botonPrincipal {
+    background-color: var(--color-principal);
+    color: white;
+}
+
+.botonPrincipal:hover {
+    background-color: var(--color-principal-oscuro);
+    transform: translateY(-2px);
+}
+
+.botonContorno {
+    background-color: transparent;
+    border: 2px solid var(--color-principal);
+    color: var(--color-principal);
+}
+
+.botonBlanco {
+    border-color: white;
+    color: white;
+}
+
+.botonBlanco:hover {
+    background-color: white;
+    color: var(--color-principal);
+}
