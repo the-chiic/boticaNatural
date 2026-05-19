@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
     // Perfil de usuario protegido y dinámico
     Route::get('/perfil', [ControladorPerfil::class, 'verPerfil'])->name('profile');
     Route::put('/perfil/actualizar', [ControladorPerfil::class, 'actualizarDatos'])->name('profile.update');
+    Route::post('/perfil/direccion', [ControladorPerfil::class, 'agregarDireccion'])->name('profile.address.add');
 });
 
 // Admin Routes (Organized)

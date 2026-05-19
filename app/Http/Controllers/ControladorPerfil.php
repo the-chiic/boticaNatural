@@ -49,4 +49,38 @@ class ControladorPerfil extends Controller
         // Volver atrás con alerta verde de éxito
         return back()->with('success', '¡Tus datos personales se han actualizado con éxito!');
     }
+
+    // Añadir nueva dirección
+    public function agregarDireccion(Request $solicitud)
+    {
+        // Validar campos recibidos
+        $solicitud->validate([
+            'address' => ['required', 'string', 'max:255'],
+            'province' => ['nullable', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:100'],
+            'post_code' => ['required', 'string', 'max:20'],
+            'country' => ['required', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'name_destination' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $idUsuario = Auth::id();
+
+        // Insertar registro en la base de datos
+        DB::table('addresses')->insert([
+            'user_id' => $idUsuario,
+            'address' => $solicitud->address,
+            'province' => $solicitud->province,
+            'city' => $solicitud->city,
+            'post_code' => $solicitud->post_code,
+            'country' => $solicitud->country,
+            'phone' => $solicitud->phone,
+            'name_destination' => $solicitud->name_destination ?? Auth::user()->name,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Volver atrás con alerta verde de éxito
+        return back()->with('success', '¡La nueva dirección ha sido añadida con éxito!');
+    }
 }
