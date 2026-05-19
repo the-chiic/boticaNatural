@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'pw', 'google_auth', 'phone'])]
+#[Hidden(['pw', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -26,7 +26,31 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'pw' => 'hashed',
         ];
+    }
+
+    /**
+     * Override the password field name to use 'pw' en vez de 'password'
+     */
+    public function getAuthPasswordName()
+    {
+        return 'pw';
+    }
+
+    /**
+     * Override the password field to use 'pw' en vez de 'password'
+     */
+    public function getAuthPassword()
+    {
+        return $this->pw;
+    }
+
+    /**
+     * Deshabilitar el token de "recordarme" ya que la tabla no tiene la columna remember_token
+     */
+    public function getRememberTokenName()
+    {
+        return '';
     }
 }

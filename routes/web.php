@@ -3,11 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ControladorAutenticacion;
+use App\Http\Controllers\ControladorPerfil;
+use App\Http\Controllers\HomeController;
 
-Route::get('/', function () {
-    return view('home.index');
-});
+// ==========================================
+// RUTAS PÚBLICAS (Accesibles por cualquiera)
+// ==========================================
 
+// Ruta principal (Index). Usa el método 'index' del HomeController.
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Catálogo de productos
 Route::get('/catalogo', function () {
     return view('catalog.index');
 });
@@ -16,6 +23,12 @@ Route::get('/producto/{id}', function () {
     return view('catalog.show');
 });
 
+// ==========================================
+// RUTAS DE CARRITO Y PERFIL
+// ==========================================
+
+// El carrito está protegido manualmente (redirección en la vista), 
+// aunque en un futuro debería usar el middleware 'auth'.
 Route::get('/carrito', function () {
     if (!session('logged_in')) {
         return redirect('/login');
@@ -27,31 +40,30 @@ Route::get('/checkout', function () {
     return view('cart.checkout');
 });
 
-Route::get('/perfil', function () {
-    return view('profile.index');
-});
-
 // Auth Routes
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-Route::post('/login', function (Request $request) {
-    session(['logged_in' => true]);
-    if ($request->email === 'admin' && $request->password === '12345') {
-        return redirect('/admin');
-    }
-    // Para el demo, cualquier otro login va al perfil
-    return redirect('/perfil');
+Route::middleware('guest')->group(function () {
+    // Rutas de Login normal en Español
+    Route::get('/iniciar-sesion', [ControladorAutenticacion::class, 'mostrarFormularioLogin'])->name('login');
+    Route::post('/iniciar-sesion', [ControladorAutenticacion::class, 'iniciarSesion']);
+    
+    // Rutas de Registro normal en Español
+    Route::get('/registrarse', [ControladorAutenticacion::class, 'mostrarFormularioRegistro'])->name('register');
+    Route::post('/registrarse', [ControladorAutenticacion::class, 'registrar']);
+    
+    // Rutas para Login con Google en Español
+    Route::get('/autenticacion/google', [ControladorAutenticacion::class, 'redireccionarAGoogle'])->name('login.google');
+    Route::get('/autenticacion/google/callback', [ControladorAutenticacion::class, 'manejarCallbackGoogle']);
 });
 
-Route::get('/register', function () {
-    return view('auth.register');
-});
-
-Route::get('/logout', function () {
-    session()->forget('logged_in');
-    return redirect('/');
+Route::middleware('auth')->group(function () {
+    // Rutas protegidas (sólo usuarios logueados pueden salir)
+    Route::post('/cerrar-sesion', [ControladorAutenticacion::class, 'cerrarSesion'])->name('logout');
+    // Para mantener compatibilidad si usan enlaces <a>
+    Route::get('/cerrar-sesion', [ControladorAutenticacion::class, 'cerrarSesion']);
+    
+    // Perfil de usuario protegido y dinámico
+    Route::get('/perfil', [ControladorPerfil::class, 'verPerfil'])->name('profile');
+    Route::put('/perfil/actualizar', [ControladorPerfil::class, 'actualizarDatos'])->name('profile.update');
 });
 
 // Admin Routes (Organized)

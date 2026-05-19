@@ -26,10 +26,10 @@
                 @if(session('logged_in'))
                     <a href="/perfil">Mi Perfil</a>
                     <div class="divisorMenu" style="height: 1px; background: #eee; margin: 0.5rem 0;"></div>
-                    <a href="/logout" style="color: #ff4d4d;">Cerrar Sesión</a>
+                    <a href="/cerrar-sesion" style="color: #ff4d4d;">Cerrar Sesión</a>
                 @else
-                    <a href="/login">Iniciar Sesión</a>
-                    <a href="/register">Registrarse</a>
+                    <a href="/iniciar-sesion">Iniciar Sesión</a>
+                    <a href="/registrarse">Registrarse</a>
                 @endif
             </div>
         </div>
