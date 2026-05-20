@@ -28,7 +28,7 @@
             <ul class="listaContacto">
                 <li><i class="fa-solid fa-location-dot"></i> Calle xxxxx xxx xx, 06006 Badajoz, España</li>
                 <li><i class="fa-solid fa-phone"></i> +34 xxx xxx xxx</li>
-                <li><i class="fa-regular fa-envelope"></i> hola@laboticanatural.com</li>
+                <li><i class="fa-regular fa-envelope"></i> laboticanatural@gmail.com</li>
             </ul>
         </div>
 
@@ -44,7 +44,7 @@
 
     <div class="pieInferior">
         <div class="derechos">
-            &copy; 2024 La Botica Natural. Todos los derechos reservados.
+            &copy; 2026 La Botica Natural. Todos los derechos reservados.
         </div>
         <div class="enlacesLegales">
             <a href="#">Aviso Legal</a>

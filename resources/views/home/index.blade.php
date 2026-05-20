@@ -47,32 +47,35 @@
     </div>
 </section>
 
-<!-- Sección Best Sellers -->
+
+<!-- Sección Novedades (Productos más recientes) -->
 <section id="novedades" class="seccionMasVendidos contenedorCentrado">
     <div class="cabeceraSeccion" style="display: flex; justify-content: space-between; align-items: flex-end; text-align: left;">
         <div>
-            <h2>Lo más querido por nuestra comunidad.</h2>
-            <p style="color: rgba(27, 48, 34, 0.6);">Selección de nuestros favoritos.</p>
+            <h2>Recién llegados a nuestra tienda.</h2>
+            <p style="color: rgba(27, 48, 34, 0.6);">Los últimos productos añadidos.</p>
         </div>
         <a href="{{ route('catalog.index') }}" class="boton botonContorno" style="width: auto;">VER TODO EL CATÁLOGO</a>
     </div>
 
     <div class="cuadriculaProductos product-grid">
-        @foreach($featuredProducts as $product)
+        @foreach($latestProducts as $product)
         <div class="product-card">
             <a href="{{ route('catalog.show', $product->id) }}">
                 <div class="product-img">
-                    <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" alt="{{ $product->name }}">
-                    <div class="product-overlay">
-                        <span>VER DETALLE</span>
+                    <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" alt="{{ $product->name }}" style="transition: transform 0.5s;">
+                    <div class="product-overlay" style="position: absolute; inset: 0; background: rgba(27, 48, 34, 0.05); opacity: 0; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center;">
+                        <span style="background: white; color: var(--brand-green); padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: bold;">VER DETALLE</span>
                     </div>
                 </div>
             </a>
             <div class="product-details">
                 <span style="font-size: 10px; font-weight: bold; color: rgba(27, 48, 34, 0.4); text-transform: uppercase; letter-spacing: 0.2em; display: block; margin-bottom: 0.5rem;">
-                    {{ $product->categories->first()?->name ?? 'Destacado' }}
+                    {{ $product->categories->first()?->name ?? 'Nuevo' }}
                 </span>
-                <h4 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 1rem;">{{ $product->name }}</h4>
+                <h4 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 1rem;">
+                    <a href="{{ route('catalog.show', $product->id) }}">{{ $product->name }}</a>
+                </h4>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <span style="font-size: 1.25rem; font-weight: 300;">{{ number_format($product->price, 2, ',', '.') }}€</span>
                     <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.75rem; border-radius: 0.5rem;">
@@ -84,6 +87,7 @@
         @endforeach
     </div>
 </section>
+
 
 <!-- Sección Características / Valores -->
 <section id="sobre-nosotros" class="seccionCaracteristicas">

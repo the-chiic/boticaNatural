@@ -37,4 +37,20 @@ class Category extends Model
     {
         return $this->belongsToMany(Category::class, 'subcategory', 'id', 'parent_id');
     }
+
+    /**
+     * Obtiene todas las categorías ordenadas por nombre.
+     */
+    public static function getAllOrdered()
+    {
+        return self::orderBy('name')->get();
+    }
+
+    /**
+     * Obtiene todas las categorías sin ordenar.
+     */
+    public static function getAll()
+    {
+        return self::all();
+    }
 }

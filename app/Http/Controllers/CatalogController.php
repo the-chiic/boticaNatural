@@ -2,72 +2,73 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CatalogFilterRequest;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Http\Request;
 
 class CatalogController extends Controller
 {
     /**
-     * Muestra el catálogo de productos con sus categorías.
+     * Obtiene todas las categorías ordenadas.
      */
-    public function index(Request $request)
+    public function getCategories()
     {
-        // Obtenemos todas las categorías
-        $categories = Category::orderBy('name')->get();
-        
-        // Iniciamos la consulta de productos activos
-        $query = Product::with('categories')->where('status', 1);
-        
-        // Filtramos por categorías si se seleccionaron
-        if ($request->has('categories') && is_array($request->categories) && count($request->categories) > 0) {
-            $query->whereHas('categories', function($q) use ($request) {
-                $q->whereIn('category.id', $request->categories);
-            });
-        }
+        return Category::getAllOrdered();
+    }
 
-        // Filtramos por búsqueda de texto
-        if ($request->has('search') && $request->search != '') {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // Filtramos por rango de precio
+    /**
+     * Obtiene productos filtrados según los parámetros.
+     */
+    public function getFilteredProducts(CatalogFilterRequest $request)
+    {
+        $categories = $request->input('categories');
+        $search = $request->input('search');
         $minPrice = $request->input('min_price');
         $maxPrice = $request->input('max_price');
+        $sort = $request->input('sort');
 
-        if ($minPrice !== null && $minPrice !== '' && $maxPrice !== null && $maxPrice !== '' && $minPrice > $maxPrice) {
-            [$minPrice, $maxPrice] = [$maxPrice, $minPrice];
-        }
-
-        if ($minPrice !== null && $minPrice !== '') {
-            $query->where('price', '>=', $minPrice);
-        }
-
-        if ($maxPrice !== null && $maxPrice !== '') {
-            $query->where('price', '<=', $maxPrice);
-        }
-
-        // Ordenamos
-        if ($request->has('sort') && $request->sort != '') {
-            if ($request->sort === 'price_asc') {
-                $query->orderBy('price', 'asc');
-            } elseif ($request->sort === 'price_desc') {
-                $query->orderBy('price', 'desc');
-            } else {
-                $query->orderBy('id', 'desc'); // Destacados o defecto
-            }
-        } else {
-            $query->orderBy('id', 'desc');
-        }
+        $query = Product::getFilteredProducts($categories, $search, $minPrice, $maxPrice, $sort);
         
-        // Paginamos los resultados
-        $products = $query->paginate(12);
+        return $query->paginate(12);
+    }
+
+    /**
+     * Renderiza los resultados del catálogo para peticiones AJAX.
+     */
+    public function renderCatalogResults($products)
+    {
+        return view('catalog.partials.results', compact('products'))->render();
+    }
+
+    /**
+     * Muestra el catálogo de productos con sus categorías.
+     */
+    public function index(CatalogFilterRequest $request)
+    {
+        $categories = $this->getCategories();
+        $products = $this->getFilteredProducts($request);
 
         if ($request->ajax()) {
-            return view('catalog.partials.results', compact('products'))->render();
+            return $this->renderCatalogResults($products);
         }
         
         return view('catalog.index', compact('products', 'categories'));
+    }
+
+    /**
+     * Obtiene un producto activo por ID.
+     */
+    public function getProductById($id)
+    {
+        return Product::getActiveById($id);
+    }
+
+    /**
+     * Obtiene productos relacionados a un producto específico.
+     */
+    public function getRelatedProducts($productId)
+    {
+        return Product::getRelated($productId, 4);
     }
 
     /**
@@ -75,25 +76,17 @@ class CatalogController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with('categories')->where('status', 1)->findOrFail($id);
-        
-        $relatedProducts = Product::with('categories')
-            ->where('status', 1)
-            ->where('id', '!=', $id)
-            ->inRandomOrder()
-            ->take(4)
-            ->get();
+        $product = $this->getProductById($id);
+        $relatedProducts = $this->getRelatedProducts($id);
         
         return view('catalog.show', compact('product', 'relatedProducts'));
     }
 
     /**
-     * Muestra la página principal (Home) con categorías resueltas y productos destacados.
+     * Resuelve las URLs de fondo para las categorías según su nombre.
      */
-    public function home()
+    public function resolveCategoriesForDisplay($categories)
     {
-        $categories = Category::all();
-        
         $resolvedCategories = [];
         foreach ($categories as $category) {
             $nameLower = mb_strtolower($category->name);
@@ -119,6 +112,14 @@ class CatalogController extends Controller
             ];
         }
 
+        return $resolvedCategories;
+    }
+
+    /**
+     * Obtiene las categorías para display en el home, duplicando si es necesario.
+     */
+    public function getDisplayCategories($resolvedCategories)
+    {
         $displayCategories = $resolvedCategories;
         if (count($resolvedCategories) > 0 && count($resolvedCategories) < 6) {
             $displayCategories = array_merge($resolvedCategories, $resolvedCategories);
@@ -126,13 +127,43 @@ class CatalogController extends Controller
                 $displayCategories = array_merge($displayCategories, $resolvedCategories);
             }
         }
+        return $displayCategories;
+    }
 
-        $featuredProducts = Product::with('categories')
-            ->where('status', 1)
-            ->inRandomOrder()
-            ->take(4)
-            ->get();
+    /**
+     * Obtiene los productos destacados.
+     */
+    public function getFeaturedProducts()
+    {
+        return Product::getFeatured(4);
+    }
 
-        return view('home.index', compact('displayCategories', 'featuredProducts'));
+    /**
+     * Obtiene los productos más recientes añadidos a la BBDD.
+     */
+    public function getLatestProducts()
+    {
+        return Product::getLatest(4);
+    }
+
+    /**
+     * Obtiene productos relacionados aleatorios para el home.
+     */
+    public function getRelatedProductsForHome()
+    {
+        return Product::getRelated(0, 4);
+    }
+
+    /**
+     * Muestra la página principal (Home) con categorías resueltas y productos recientes.
+     */
+    public function home()
+    {
+        $categories = Category::getAll();
+        $resolvedCategories = $this->resolveCategoriesForDisplay($categories);
+        $displayCategories = $this->getDisplayCategories($resolvedCategories);
+        $latestProducts = $this->getLatestProducts();
+
+        return view('home.index', compact('displayCategories', 'latestProducts'));
     }
 }
