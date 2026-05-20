@@ -1,7 +1,23 @@
 // Botica Natural - Catalog JS
 
+// Debounce function to limit rate of function calls
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // Function to handle filter form submission via AJAX
-window.submitFilterForm = function() {
+window.submitFilterForm = function(e) {
+    if (e) {
+        e.preventDefault();
+    }
     const form = document.getElementById('filterForm');
     const url = new URL(form.action);
     const formData = new FormData(form);
@@ -20,6 +36,9 @@ window.submitFilterForm = function() {
         window.history.pushState({}, '', url);
     });
 };
+
+// Debounced version for real-time filtering
+window.debouncedSubmitFilterForm = debounce(window.submitFilterForm, 300);
 
 // Function to reset all catalog filters via AJAX
 window.resetCatalogFilters = function(e) {
@@ -127,8 +146,8 @@ function initPriceFilter() {
 
     minInput.addEventListener('input', syncFromInputs);
     maxInput.addEventListener('input', syncFromInputs);
-    minInput.addEventListener('change', window.submitFilterForm);
-    maxInput.addEventListener('change', window.submitFilterForm);
+    minInput.addEventListener('keyup', debounce(window.submitFilterForm, 300));
+    maxInput.addEventListener('keyup', debounce(window.submitFilterForm, 300));
 
     syncFromInputs();
 }

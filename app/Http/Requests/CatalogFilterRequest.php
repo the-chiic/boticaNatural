@@ -21,7 +21,7 @@ class CatalogFilterRequest extends FormRequest
     {
         return [
             'categories' => 'nullable|array',
-            'categories.*' => 'integer|exists:categories,id',
+            'categories.*' => 'integer|exists:category,id',
             'search' => 'nullable|string|max:255',
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0',
