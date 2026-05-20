@@ -21,7 +21,7 @@ class ControladorPerfil extends Controller
             ->get();
 
         // 2. Obtener las direcciones reales del usuario desde la base de datos
-        $direcciones = DB::table('addresses')
+        $direcciones = DB::table('address')
             ->where('user_id', $idUsuario)
             ->get();
 
@@ -67,7 +67,7 @@ class ControladorPerfil extends Controller
         $idUsuario = Auth::id();
 
         // Insertar registro en la base de datos
-        DB::table('addresses')->insert([
+        DB::table('address')->insert([
             'user_id' => $idUsuario,
             'address' => $solicitud->address,
             'province' => $solicitud->province,

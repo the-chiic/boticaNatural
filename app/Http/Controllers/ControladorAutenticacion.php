@@ -53,7 +53,7 @@ class ControladorAutenticacion extends Controller
         // Validar datos ingresados
         $solicitud->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:user'],
             'password' => ['required', 'string', 'min:8', 'confirmed'], // requiere campo password_confirmation en el HTML
         ]);
 
@@ -85,7 +85,7 @@ class ControladorAutenticacion extends Controller
     // Redirigir al proveedor de Google
     public function redireccionarAGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     // Manejar el callback de respuesta desde Google
@@ -93,7 +93,7 @@ class ControladorAutenticacion extends Controller
     {
         try {
             // Creamos el driver de Socialite
-            $proveedor = Socialite::driver('google');
+            $proveedor = Socialite::driver('google')->stateless();
 
             // --- EVITAR EL ERROR DE CERTIFICADO SSL cURL 60 EN XAMPP (WINDOWS) ---
             // Si estamos en entorno local, desactivamos la verificación SSL de Guzzle de forma temporal.
@@ -129,8 +129,12 @@ class ControladorAutenticacion extends Controller
             return redirect('/');
 
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Google Auth Error: ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
             // En caso de error, volver al login mostrando el mensaje real del error para diagnosticarlo
-            return redirect('/iniciar-sesion')->withErrors(['email' => 'Error Google: ' . $e->getMessage()]);
+            $mensaje = $e->getMessage() ?: get_class($e);
+            return redirect('/iniciar-sesion')->withErrors(['email' => 'Error Google: ' . $mensaje]);
         }
     }
 }
