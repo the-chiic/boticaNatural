@@ -7,6 +7,20 @@
     </select>
 </div>
 
+@if($products->isEmpty())
+<div class="no-products-container" style="text-align: center; padding: 5rem 2rem; background: rgba(255, 255, 255, 0.6); border-radius: 1.5rem; border: 1px dashed rgba(27, 48, 34, 0.15); margin-top: 1rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);">
+    <div style="font-size: 4.5rem; color: rgba(27, 48, 34, 0.18); margin-bottom: 1.5rem;">
+        <i class="fa-solid fa-seedling"></i>
+    </div>
+    <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--brand-green); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">No encontramos lo que buscas</h3>
+    <p style="font-size: 0.95rem; color: rgba(27, 48, 34, 0.6); max-width: 400px; margin: 0 auto 2.25rem; line-height: 1.6;">
+        Prueba a buscar con otra palabra, ajusta los filtros de precio o explora otras categorías.
+    </p>
+    <button type="button" onclick="resetCatalogFilters(event)" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; padding: 0.75rem 2rem; font-size: 0.875rem; font-weight: bold; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s; background: var(--brand-green); color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(27, 48, 34, 0.2);">
+        <i class="fa-solid fa-rotate-left"></i> Restablecer Filtros
+    </button>
+</div>
+@else
 <div class="product-grid">
     @foreach($products as $product)
     <div class="product-card" style="position: relative;">
@@ -38,3 +52,4 @@
 <div class="mt-6 flex justify-center pagination-container">
     {{ $products->appends(request()->query())->links('pagination::bootstrap-5') }}
 </div>
+@endif

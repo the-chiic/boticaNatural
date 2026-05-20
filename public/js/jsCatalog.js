@@ -21,6 +21,45 @@ window.submitFilterForm = function() {
     });
 };
 
+// Function to reset all catalog filters via AJAX
+window.resetCatalogFilters = function(e) {
+    if (e) {
+        e.preventDefault();
+    }
+    const form = document.getElementById('filterForm');
+    if (!form) return;
+
+    // 1. Limpiar input de búsqueda
+    const searchInput = form.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+
+    // 2. Desmarcar categorías
+    const checkboxes = form.querySelectorAll('input[name="categories[]"]');
+    checkboxes.forEach(cb => cb.checked = false);
+
+    // 3. Restablecer precios
+    const minInput = document.getElementById('price_min_input');
+    const maxInput = document.getElementById('price_max_input');
+    const minRange = document.getElementById('price_min_range');
+    const maxRange = document.getElementById('price_max_range');
+    
+    if (minInput && maxInput && minRange && maxRange) {
+        minInput.value = 0;
+        maxInput.value = 200;
+        minRange.value = 0;
+        maxRange.value = 200;
+        
+        // Disparar eventos para actualizar visualmente el slider
+        minRange.dispatchEvent(new Event('input'));
+        maxRange.dispatchEvent(new Event('input'));
+    }
+
+    // 4. Enviar formulario por AJAX
+    window.submitFilterForm();
+};
+
 function initPriceFilter() {
     const filter = document.querySelector('.price-filter');
     if (!filter) {

@@ -13,10 +13,10 @@
     </div>
     
     <div class="navegacionDerecha">
-        <div class="barraBusqueda">
-            <i class="fa-solid fa-magnifying-glass iconoBusqueda"></i>
-            <input type="text" placeholder="Buscar...">
-        </div>
+        <form action="/catalogo" method="GET" class="barraBusqueda">
+            <i class="fa-solid fa-magnifying-glass iconoBusqueda" style="cursor: pointer;" onclick="this.closest('form').submit();"></i>
+            <input type="text" name="search" placeholder="Buscar..." value="{{ request('search') }}">
+        </form>
         
         <div class="menuUsuarioContenedor">
             <button class="botonIcono" id="botonUsuario">

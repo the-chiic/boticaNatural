@@ -216,7 +216,7 @@
 .carruselWrapper {
     position: relative;
     width: 100%;
-    padding: 0 2rem;
+    padding: 0 4.5rem;
 }
 
 .carruselCategorias {
@@ -301,11 +301,11 @@
 }
 
 .botonCarruselIzquierda {
-    left: 0;
+    left: 1rem;
 }
 
 .botonCarruselDerecha {
-    right: 0;
+    right: 1rem;
 }
 
 /* ── Responsive ── */
@@ -318,7 +318,7 @@
 
 @media (max-width: 768px) {
     .carruselWrapper {
-        padding: 0 1rem;
+        padding: 0 3.5rem;
     }
 
     .cuadriculaCategorias.carruselTrack .tarjetaCategoria {
@@ -344,11 +344,11 @@
     }
 
     .botonCarruselIzquierda {
-        left: 0.25rem;
+        left: 0.5rem;
     }
 
     .botonCarruselDerecha {
-        right: 0.25rem;
+        right: 0.5rem;
     }
 }
 

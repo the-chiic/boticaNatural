@@ -24,7 +24,14 @@
                 <aside class="filters-sidebar">
                     <div class="filter-group">
                         <span class="filter-title">Buscar Producto</span>
-                        <input type="text" name="search" value="{{ request('search') }}" oninput="submitFilterForm(event)" placeholder="Ej. Aceite esencial..." style="width: 100%; padding: 0.5rem 1rem; border: 1px solid rgba(27, 48, 34, 0.2); border-radius: 0.5rem; outline: none; font-size: 0.875rem; color: var(--brand-green);">
+                        <input type="text" name="search" value="{{ request('search') }}" oninput="submitFilterForm(event)" placeholder="Ej. Aceite esencial..." style="width: 100%; padding: 0.5rem 1rem; border: 1px solid rgba(27, 48, 34, 0.2); border-radius: 0.5rem; outline: none; font-size: 0.875rem; color: var(--brand-green); margin-bottom: 0.75rem;">
+                        <button type="button" onclick="resetCatalogFilters(event)" class="btn-reset-filters" 
+                                style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.55rem 1rem; font-size: 0.75rem; font-weight: bold; border-radius: 0.5rem; background: transparent; border: 1px solid rgba(27, 48, 34, 0.2); color: rgba(27, 48, 34, 0.7); cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;"
+                                onmouseover="this.style.backgroundColor='rgba(27, 48, 34, 0.05)'; this.style.borderColor='var(--brand-green)'; this.style.color='var(--brand-green)';"
+                                onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='rgba(27, 48, 34, 0.2)'; this.style.color='rgba(27, 48, 34, 0.7)';"
+                        >
+                            <i class="fa-solid fa-rotate-left"></i> Limpiar Filtros
+                        </button>
                     </div>
                     <div class="filter-group">
                         <span class="filter-title">Categorías</span>

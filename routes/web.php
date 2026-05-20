@@ -4,11 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AdminController;
 use App\Models\Category;
+use App\Models\Product;
 
-Route::get('/', function () {
-    $categories = Category::all();
-    return view('home.index', compact('categories'));
-});
+Route::get('/', [App\Http\Controllers\CatalogController::class, 'home'])->name('home');
 
 Route::get('/catalogo', [App\Http\Controllers\CatalogController::class, 'index'])->name('catalog.index');
 

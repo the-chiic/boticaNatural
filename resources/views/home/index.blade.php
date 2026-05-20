@@ -19,41 +19,6 @@
 </section>
 
 <!-- Sección Categorías -->
-@php
-    $resolvedCategories = [];
-    foreach ($categories as $category) {
-        $nameLower = mb_strtolower($category->name);
-        $bgUrl = 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=800&auto=format&fit=crop'; // default
-        
-        if (str_contains($nameLower, 'infusion') || str_contains($nameLower, 'té') || str_contains($nameLower, 'te')) {
-            $bgUrl = 'https://images.unsplash.com/photo-1576092762791-dd9e2220d960?q=80&w=800&auto=format&fit=crop';
-        } elseif (str_contains($nameLower, 'aceite')) {
-            $bgUrl = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop';
-        } elseif (str_contains($nameLower, 'cosmet') || str_contains($nameLower, 'cosmét')) {
-            $bgUrl = 'https://images.unsplash.com/photo-1556228573-7303e8707198?q=80&w=800&auto=format&fit=crop';
-        } elseif (str_contains($nameLower, 'medic')) {
-            $bgUrl = 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=800&auto=format&fit=crop';
-        } elseif (str_contains($nameLower, 'herbol') || str_contains($nameLower, 'plant') || str_contains($nameLower, 'natural')) {
-            $bgUrl = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=800&auto=format&fit=crop';
-        }
-        
-        $resolvedCategories[] = [
-            'id' => $category->id,
-            'name' => $category->name,
-            'description' => $category->description ?? 'Descubre nuestra selección de ' . $category->name,
-            'bgUrl' => $bgUrl
-        ];
-    }
-
-    // Ensure we have at least 6 categories for seamless infinite scrolling
-    $displayCategories = $resolvedCategories;
-    if (count($resolvedCategories) > 0 && count($resolvedCategories) < 6) {
-        $displayCategories = array_merge($resolvedCategories, $resolvedCategories);
-        if (count($displayCategories) < 6) {
-            $displayCategories = array_merge($displayCategories, $resolvedCategories);
-        }
-    }
-@endphp
 
 <section id="categorias" class="seccionCategorias contenedorCentrado">
     <div class="cabeceraSeccion">
@@ -93,30 +58,23 @@
     </div>
 
     <div class="cuadriculaProductos product-grid">
-        @php
-            $products = [
-                ['id' => 2, 'name' => 'Aceite de Eucalipto', 'price' => '18.90€', 'img' => asset('img/imgPrueba.png'), 'cat' => 'Best Seller'],
-                ['id' => 7, 'name' => 'Bruma de Rosas', 'price' => '22.00€', 'img' => asset('img/imgPrueba.png'), 'cat' => 'Nuevo'],
-                ['id' => 10, 'name' => 'Crema Facial Algas', 'price' => '28.00€', 'img' => asset('img/imgPrueba.png'), 'cat' => 'Premium'],
-                ['id' => 5, 'name' => 'Aceite de Menta', 'price' => '14.20€', 'img' => asset('img/imgPrueba.png'), 'cat' => 'Popular'],
-            ];
-        @endphp
-
-        @foreach($products as $product)
+        @foreach($featuredProducts as $product)
         <div class="product-card">
-            <a href="/producto/{{ $product['id'] }}">
+            <a href="/producto/{{ $product->id }}">
                 <div class="product-img">
-                    <img src="{{ $product['img'] }}" alt="{{ $product['name'] }}">
+                    <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" alt="{{ $product->name }}">
                     <div class="product-overlay">
                         <span>VER DETALLE</span>
                     </div>
                 </div>
             </a>
             <div class="product-details">
-                <span style="font-size: 10px; font-weight: bold; color: rgba(27, 48, 34, 0.4); text-transform: uppercase; letter-spacing: 0.2em; display: block; margin-bottom: 0.5rem;">{{ $product['cat'] }}</span>
-                <h4 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 1rem;">{{ $product['name'] }}</h4>
+                <span style="font-size: 10px; font-weight: bold; color: rgba(27, 48, 34, 0.4); text-transform: uppercase; letter-spacing: 0.2em; display: block; margin-bottom: 0.5rem;">
+                    {{ $product->categories->first()?->name ?? 'Destacado' }}
+                </span>
+                <h4 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 1rem;">{{ $product->name }}</h4>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 1.25rem; font-weight: 300;">{{ $product['price'] }}</span>
+                    <span style="font-size: 1.25rem; font-weight: 300;">{{ number_format($product->price, 2, ',', '.') }}€</span>
                     <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.75rem; border-radius: 0.5rem;">
                         Añadir
                     </button>
