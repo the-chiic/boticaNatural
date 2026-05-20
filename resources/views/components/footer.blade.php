@@ -16,10 +16,10 @@
         <div class="columnaPie">
             <h3>TIENDA</h3>
             <ul>
-                <li><a href="/catalogo">Todos los Productos</a></li>
-                <li><a href="/#categorias">Categorías</a></li>
-                <li><a href="/#novedades">Novedades</a></li>
-                <li><a href="/#sobre-nosotros">Sobre Nosotros</a></li>
+                <li><a href="{{ route('catalog.index') }}">Todos los Productos</a></li>
+                <li><a href="{{ url('/#categorias') }}">Categorías</a></li>
+                <li><a href="{{ url('/#novedades') }}">Novedades</a></li>
+                <li><a href="{{ url('/#sobre-nosotros') }}">Sobre Nosotros</a></li>
             </ul>
         </div>
 

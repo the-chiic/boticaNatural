@@ -13,7 +13,7 @@
         <h1 class="tituloHero">Bienestar diario inspirado en la naturaleza.</h1>
         <p class="subtituloHero">Productos artesanales, sostenibles y puros para una vida consciente.</p>
         <div class="botonesHero">
-            <a href="/catalogo" class="boton botonPrincipal">VER PRODUCTOS</a>
+            <a href="{{ route('catalog.index') }}" class="boton botonPrincipal">VER PRODUCTOS</a>
         </div>
     </div>
 </section>
@@ -36,7 +36,7 @@
                     <div class="contenidoTarjetaCategoria">
                         <h3>{{ $cat['name'] }}</h3>
                         <p>{{ $cat['description'] }}</p>
-                        <a href="/catalogo?categories[]={{ $cat['id'] }}" class="enlaceExplorar">EXPLORAR <i class="fa-solid fa-arrow-right"></i></a>
+                        <a href="{{ route('catalog.index') }}?categories[]={{ $cat['id'] }}" class="enlaceExplorar">EXPLORAR <i class="fa-solid fa-arrow-right"></i></a>
                     </div>
                 </div>
                 @endforeach
@@ -54,13 +54,13 @@
             <h2>Lo más querido por nuestra comunidad.</h2>
             <p style="color: rgba(27, 48, 34, 0.6);">Selección de nuestros favoritos.</p>
         </div>
-        <a href="/catalogo" class="boton botonContorno" style="width: auto;">VER TODO EL CATÁLOGO</a>
+        <a href="{{ route('catalog.index') }}" class="boton botonContorno" style="width: auto;">VER TODO EL CATÁLOGO</a>
     </div>
 
     <div class="cuadriculaProductos product-grid">
         @foreach($featuredProducts as $product)
         <div class="product-card">
-            <a href="/producto/{{ $product->id }}">
+            <a href="{{ route('catalog.show', $product->id) }}">
                 <div class="product-img">
                     <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" alt="{{ $product->name }}">
                     <div class="product-overlay">

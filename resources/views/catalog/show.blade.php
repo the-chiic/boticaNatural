@@ -9,7 +9,7 @@
         <div class="container">
             <!-- Breadcrumbs -->
             <div class="mb-8" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(27, 48, 34, 0.4);">
-                <a href="/">Inicio</a> / <a href="{{ route('catalog.index') }}">Catálogo</a> / <span style="color: var(--brand-green);">{{ $product->name }}</span>
+                <a href="{{ url('/') }}">Inicio</a> / <a href="{{ route('catalog.index') }}">Catálogo</a> / <span style="color: var(--brand-green);">{{ $product->name }}</span>
             </div>
 
             <div class="product-show-layout">
