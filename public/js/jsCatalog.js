@@ -1,4 +1,122 @@
 // Botica Natural - Catalog JS
+
+// Function to handle filter form submission via AJAX
+window.submitFilterForm = function() {
+    const form = document.getElementById('filterForm');
+    const url = new URL(form.action);
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+
+    url.search = params.toString();
+
+    fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('catalog-results').innerHTML = html;
+        window.history.pushState({}, '', url);
+    });
+};
+
+function initPriceFilter() {
+    const filter = document.querySelector('.price-filter');
+    if (!filter) {
+        return;
+    }
+
+    const minLimit = Number(filter.dataset.min || 0);
+    const maxLimit = Number(filter.dataset.max || 200);
+    const minInput = document.getElementById('price_min_input');
+    const maxInput = document.getElementById('price_max_input');
+    const minRange = document.getElementById('price_min_range');
+    const maxRange = document.getElementById('price_max_range');
+    const rangeFill = document.getElementById('price_slider_range');
+
+    if (!minInput || !maxInput || !minRange || !maxRange || !rangeFill) {
+        return;
+    }
+
+    const clamp = (value, min, max) => Math.min(Math.max(Number(value) || 0, min), max);
+
+    const paintRange = () => {
+        const minValue = clamp(minRange.value, minLimit, maxLimit);
+        const maxValue = clamp(maxRange.value, minLimit, maxLimit);
+        const minPercent = ((minValue - minLimit) / (maxLimit - minLimit)) * 100;
+        const maxPercent = ((maxValue - minLimit) / (maxLimit - minLimit)) * 100;
+
+        rangeFill.style.left = `${minPercent}%`;
+        rangeFill.style.right = `${100 - maxPercent}%`;
+    };
+
+    const syncFromRanges = () => {
+        let minValue = clamp(minRange.value, minLimit, maxLimit);
+        let maxValue = clamp(maxRange.value, minLimit, maxLimit);
+
+        if (minValue > maxValue) {
+            [minValue, maxValue] = [maxValue, minValue];
+        }
+
+        minRange.value = minValue;
+        maxRange.value = maxValue;
+        minInput.value = minValue;
+        maxInput.value = maxValue;
+        paintRange();
+    };
+
+    const syncFromInputs = () => {
+        let minValue = clamp(minInput.value, minLimit, maxLimit);
+        let maxValue = clamp(maxInput.value, minLimit, maxLimit);
+
+        if (minValue > maxValue) {
+            maxValue = minValue;
+        }
+
+        minInput.value = minValue;
+        maxInput.value = maxValue;
+        minRange.value = minValue;
+        maxRange.value = maxValue;
+        paintRange();
+    };
+
+    minRange.addEventListener('input', syncFromRanges);
+    maxRange.addEventListener('input', syncFromRanges);
+    minRange.addEventListener('change', window.submitFilterForm);
+    maxRange.addEventListener('change', window.submitFilterForm);
+
+    minInput.addEventListener('input', syncFromInputs);
+    maxInput.addEventListener('input', syncFromInputs);
+    minInput.addEventListener('change', window.submitFilterForm);
+    maxInput.addEventListener('change', window.submitFilterForm);
+
+    syncFromInputs();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Catalog Loaded');
+    initPriceFilter();
+
+    // Handle pagination links via AJAX
+    document.addEventListener('click', function(e) {
+        const paginationLink = e.target.closest('.pagination-container a');
+        if (paginationLink) {
+            e.preventDefault();
+            fetch(paginationLink.href, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('catalog-results').innerHTML = html;
+                window.history.pushState({}, '', paginationLink.href);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    });
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function() {
+        window.location.reload();
+    });
 });

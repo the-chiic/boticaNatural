@@ -9,32 +9,37 @@
         <div class="container">
             <!-- Breadcrumbs -->
             <div class="mb-8" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(27, 48, 34, 0.4);">
-                <a href="/">Inicio</a> / <a href="/catalogo">Catálogo</a> / <span style="color: var(--brand-green);">Aceite de Eucalipto</span>
+                <a href="/">Inicio</a> / <a href="{{ route('catalog.index') }}">Catálogo</a> / <span style="color: var(--brand-green);">{{ $product->name }}</span>
             </div>
 
             <div class="product-show-layout">
                 <!-- Image -->
                 <div class="product-gallery">
-                    <img src="{{ asset('img/imgPrueba.png') }}" class="main-image" alt="Aceite de Eucalipto">
+                    <img src="{{ asset('img/imgPrueba.png') }}" class="main-image" alt="{{ $product->name }}">
                 </div>
 
 
 
                 <!-- Info -->
                 <div class="product-info-panel">
-                    <span class="product-category-tag">Aceites Esenciales</span>
-                    <h1 class="product-title-large">ACEITE DE EUCALIPTO PURO</h1>
-                    <span class="product-price-large">18.90€</span>
+                    <span class="product-category-tag">{{ $product->categories->first()->name ?? 'Sin categoría' }}</span>
+                    <h1 class="product-title-large">{{ mb_strtoupper($product->name) }}</h1>
+                    <span class="product-price-large">{{ number_format($product->price, 2) }}€</span>
 
                     <p class="product-description">
-                        Nuestro aceite esencial de eucalipto es 100% puro y natural, obtenido mediante destilación al vapor. Ideal para aromaterapia, ayuda a despejar las vías respiratorias y aporta una sensación de frescura y energía renovada a tu hogar.
+                        @if($product->description)
+                            {{ $product->description }}
+                        @else
+                            Descubre las maravillosas propiedades de nuestro producto <strong>{{ $product->name }}</strong>.
+                            Cuidadosamente seleccionado para brindarte la mejor experiencia natural. Ideal para incorporar a tu rutina diaria y aprovechar todos los beneficios que la naturaleza tiene para ofrecerte.
+                        @endif
                     </p>
 
 
                     <div class="purchase-actions">
                         <div class="quantity-selector">
                             <button class="qty-btn" id="minus">-</button>
-                            <input type="number" value="1" class="qty-input" id="qty">
+                            <input type="number" value="1" min="1" class="qty-input" id="qty">
                             <button class="qty-btn" id="plus">+</button>
                         </div>
                         <button class="btn-primary" style="flex: 1; padding: 1.25rem;">
@@ -48,8 +53,8 @@
                             <span>100% Orgánico</span>
                         </div>
                         <div class="benefit-item">
-                            <div class="benefit-icon"><i class="fas fa-moon"></i></div>
-                            <span>Ayuda al sueño</span>
+                            <div class="benefit-icon"><i class="fas fa-spa"></i></div>
+                            <span>Bienestar natural</span>
                         </div>
                         <div class="benefit-item">
                             <div class="benefit-icon"><i class="fas fa-shipping-fast"></i></div>
@@ -66,35 +71,28 @@
     </div>
 
     <!-- Related Products (reuse home grid) -->
-    <section class="section-padding" style="background: var(--brand-cream);">
+    <section class="section-padding related-products-section" style="background: var(--brand-cream);">
         <div class="container">
             <h2 class="section-title text-center mb-8">TAMBIÉN TE PUEDE GUSTAR</h2>
             <div class="title-line"></div>
             
-            <div class="product-grid" style="margin-top: 4rem;">
-                <!-- Product clones for demo -->
-                @php
-                    $related = [
-                        ['id' => 2, 'name' => 'Aceite de Eucalipto', 'price' => '18.90€', 'img' => 'https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&q=80&w=600'],
-                        ['id' => 3, 'name' => 'Jabón de Caléndula', 'price' => '8.00€', 'img' => 'https://images.unsplash.com/photo-1600857062241-98e5dba7f214?auto=format&fit=crop&q=80&w=600'],
-                        ['id' => 4, 'name' => 'Bálsamo de Karité', 'price' => '15.75€', 'img' => 'https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&q=80&w=600'],
-                        ['id' => 5, 'name' => 'Aceite de Menta', 'price' => '14.20€', 'img' => 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=800'],
-                    ];
-                @endphp
-
-                @foreach($related as $product)
+            <div class="product-grid related-products-grid">
+                @foreach($relatedProducts as $related)
                 <div class="product-card">
-                    <a href="/producto/{{ $product['id'] }}">
+                    <a href="{{ route('catalog.show', $related->id) }}">
                         <div class="product-img">
-                            <img src="{{ $product['img'] }}" alt="{{ $product['name'] }}">
+                            <img src="{{ asset('img/imgPrueba.png') }}" alt="{{ $related->name }}" style="transition: transform 0.5s;">
+                            <div class="product-overlay" style="position: absolute; inset: 0; background: rgba(27, 48, 34, 0.05); opacity: 0; transition: opacity 0.3s; display: flex; align-items: center; justify-content: center;">
+                                <span style="background: white; color: var(--brand-green); padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: bold;">VER DETALLE</span>
+                            </div>
                         </div>
                     </a>
                     <div class="product-details">
                         <h4 style="font-weight: bold; font-size: 1.125rem; margin-bottom: 1rem;">
-                            <a href="/producto/{{ $product['id'] }}">{{ $product['name'] }}</a>
+                            <a href="{{ route('catalog.show', $related->id) }}">{{ $related->name }}</a>
                         </h4>
                         <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <span style="font-size: 1.25rem; font-weight: 300;">{{ $product['price'] }}</span>
+                            <span style="font-size: 1.25rem; font-weight: 300;">{{ number_format($related->price, 2) }}€</span>
                             <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.75rem; border-radius: 0.5rem;">
                                 Añadir
                             </button>

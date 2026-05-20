@@ -208,3 +208,147 @@
     background-color: white;
     color: var(--color-principal);
 }
+
+/* ═══════════════════════════════════════════════
+   Carrusel Infinito de Categorías – Premium
+   ═══════════════════════════════════════════════ */
+
+.carruselWrapper {
+    position: relative;
+    width: 100%;
+    padding: 0 2rem;
+}
+
+.carruselCategorias {
+    overflow: hidden;
+    width: 100%;
+    padding: 2.5rem 0;
+}
+
+.cuadriculaCategorias.carruselTrack {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 2rem;
+    width: 100%;
+    /* transition is handled by JS for precise control */
+}
+
+/* ── Card sizing ── */
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria {
+    flex: 0 0 calc((100% - 4rem) / 3) !important;
+    max-width: calc((100% - 4rem) / 3) !important;
+    box-sizing: border-box;
+    transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1),
+                filter 0.55s cubic-bezier(0.25, 1, 0.5, 1),
+                box-shadow 0.55s ease;
+    filter: brightness(0.72);
+    transform: scale(0.93);
+}
+
+/* ── Hover for non-highlighted cards ── */
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria:hover {
+    transform: scale(0.96) translateY(-6px);
+    filter: brightness(0.85);
+    box-shadow: 0 12px 28px rgba(26, 60, 52, 0.15);
+}
+
+/* ── Highlighted center card ── */
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria.tarjetaDestacada {
+    filter: brightness(1);
+    transform: scale(1.06);
+    box-shadow: 0 18px 40px rgba(26, 60, 52, 0.22);
+    z-index: 5;
+}
+
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria.tarjetaDestacada:hover {
+    transform: scale(1.09) translateY(-8px);
+    box-shadow: 0 22px 50px rgba(26, 60, 52, 0.30);
+}
+
+/* ── Navigation buttons ── */
+.botonCarrusel {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3.5rem;
+    height: 3.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(26, 60, 52, 0.10);
+    border-radius: 50%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    color: var(--color-principal);
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 10;
+}
+
+.botonCarrusel:hover {
+    background: var(--color-principal);
+    color: #ffffff;
+    box-shadow: 0 8px 30px rgba(26, 60, 52, 0.28);
+    transform: translateY(-50%) scale(1.08);
+}
+
+.botonCarrusel:active {
+    transform: translateY(-50%) scale(0.92);
+    transition-duration: 0.1s;
+}
+
+.botonCarruselIzquierda {
+    left: 0;
+}
+
+.botonCarruselDerecha {
+    right: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria {
+        flex: 0 0 calc((100% - 4rem) / 3) !important;
+        max-width: calc((100% - 4rem) / 3) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .carruselWrapper {
+        padding: 0 1rem;
+    }
+
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        filter: brightness(1) !important;
+        transform: scale(1) !important;
+    }
+
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria:hover {
+        transform: translateY(-6px) !important;
+    }
+
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria.tarjetaDestacada {
+        transform: scale(1) !important;
+        box-shadow: 0 10px 30px rgba(26, 60, 52, 0.15);
+    }
+
+    .botonCarrusel {
+        width: 2.75rem;
+        height: 2.75rem;
+        font-size: 1rem;
+    }
+
+    .botonCarruselIzquierda {
+        left: 0.25rem;
+    }
+
+    .botonCarruselDerecha {
+        right: 0.25rem;
+    }
+}
+

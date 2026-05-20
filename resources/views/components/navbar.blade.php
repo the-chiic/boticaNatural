@@ -6,9 +6,9 @@
         </a>
         <div class="enlacesNavegacion">
             <a href="/catalogo">CATÁLOGO</a>
-            <a href="/catalogo">INFUSIONES</a>
-            <a href="/catalogo">COSMÉTICA</a>
-            <a href="/catalogo">ACEITES</a>
+            <a href="/#categorias">CATEGORÍAS</a>
+            <a href="/#novedades">NOVEDADES</a>
+            <a href="/#sobre-nosotros">SOBRE NOSOTROS</a>
         </div>
     </div>
     

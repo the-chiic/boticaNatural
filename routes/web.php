@@ -3,18 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AdminController;
+use App\Models\Category;
 
 Route::get('/', function () {
-    return view('home.index');
+    $categories = Category::all();
+    return view('home.index', compact('categories'));
 });
 
-Route::get('/catalogo', function () {
-    return view('catalog.index');
-});
+Route::get('/catalogo', [App\Http\Controllers\CatalogController::class, 'index'])->name('catalog.index');
 
-Route::get('/producto/{id}', function () {
-    return view('catalog.show');
-});
+Route::get('/producto/{id}', [App\Http\Controllers\CatalogController::class, 'show'])->name('catalog.show');
 
 Route::get('/carrito', function () {
     if (!session('logged_in')) {

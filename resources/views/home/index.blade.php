@@ -1,7 +1,7 @@
 @extends('landingPage')
 
 @push('style')
-    <link rel="stylesheet" href="{{ asset('css/styleHome.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/styleHome.css') }}?v={{ time() }}">
 @endpush
 
 @section('main_content')
@@ -14,47 +14,76 @@
         <p class="subtituloHero">Productos artesanales, sostenibles y puros para una vida consciente.</p>
         <div class="botonesHero">
             <a href="/catalogo" class="boton botonPrincipal">VER PRODUCTOS</a>
-            <a href="#" class="boton botonContorno botonBlanco">CONOCER MÁS</a>
         </div>
     </div>
 </section>
 
 <!-- Sección Categorías -->
-<section class="seccionCategorias contenedorCentrado">
+@php
+    $resolvedCategories = [];
+    foreach ($categories as $category) {
+        $nameLower = mb_strtolower($category->name);
+        $bgUrl = 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=800&auto=format&fit=crop'; // default
+        
+        if (str_contains($nameLower, 'infusion') || str_contains($nameLower, 'té') || str_contains($nameLower, 'te')) {
+            $bgUrl = 'https://images.unsplash.com/photo-1576092762791-dd9e2220d960?q=80&w=800&auto=format&fit=crop';
+        } elseif (str_contains($nameLower, 'aceite')) {
+            $bgUrl = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop';
+        } elseif (str_contains($nameLower, 'cosmet') || str_contains($nameLower, 'cosmét')) {
+            $bgUrl = 'https://images.unsplash.com/photo-1556228573-7303e8707198?q=80&w=800&auto=format&fit=crop';
+        } elseif (str_contains($nameLower, 'medic')) {
+            $bgUrl = 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=800&auto=format&fit=crop';
+        } elseif (str_contains($nameLower, 'herbol') || str_contains($nameLower, 'plant') || str_contains($nameLower, 'natural')) {
+            $bgUrl = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=800&auto=format&fit=crop';
+        }
+        
+        $resolvedCategories[] = [
+            'id' => $category->id,
+            'name' => $category->name,
+            'description' => $category->description ?? 'Descubre nuestra selección de ' . $category->name,
+            'bgUrl' => $bgUrl
+        ];
+    }
+
+    // Ensure we have at least 6 categories for seamless infinite scrolling
+    $displayCategories = $resolvedCategories;
+    if (count($resolvedCategories) > 0 && count($resolvedCategories) < 6) {
+        $displayCategories = array_merge($resolvedCategories, $resolvedCategories);
+        if (count($displayCategories) < 6) {
+            $displayCategories = array_merge($displayCategories, $resolvedCategories);
+        }
+    }
+@endphp
+
+<section id="categorias" class="seccionCategorias contenedorCentrado">
     <div class="cabeceraSeccion">
         <h2>Descubre nuestra selección cuidadosamente curada de productos botánicos.</h2>
     </div>
     
-    <div class="cuadriculaCategorias">
-        <div class="tarjetaCategoria">
-            <div class="imagenCategoria infusionesBg"></div>
-            <div class="contenidoTarjetaCategoria">
-                <h3>Infusiones</h3>
-                <p>Mezclas curativas y relajantes.</p>
-                <a href="/catalogo" class="enlaceExplorar">EXPLORAR <i class="fa-solid fa-arrow-right"></i></a>
+    <div class="carruselWrapper">
+        <button class="botonCarrusel botonCarruselIzquierda" id="prevCatBtn" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+        
+        <div class="carruselCategorias" id="carruselCategorias">
+            <div class="cuadriculaCategorias carruselTrack" id="carruselTrack">
+                @foreach($displayCategories as $cat)
+                <div class="tarjetaCategoria">
+                    <div class="imagenCategoria" style="background-image: url('{{ $cat['bgUrl'] }}');"></div>
+                    <div class="contenidoTarjetaCategoria">
+                        <h3>{{ $cat['name'] }}</h3>
+                        <p>{{ $cat['description'] }}</p>
+                        <a href="/catalogo?categories[]={{ $cat['id'] }}" class="enlaceExplorar">EXPLORAR <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                @endforeach
             </div>
         </div>
-        <div class="tarjetaCategoria">
-            <div class="imagenCategoria aceitesBg"></div>
-            <div class="contenidoTarjetaCategoria">
-                <h3>Aceites</h3>
-                <p>Esencias puras para tu bienestar.</p>
-                <a href="/catalogo" class="enlaceExplorar">EXPLORAR <i class="fa-solid fa-arrow-right"></i></a>
-            </div>
-        </div>
-        <div class="tarjetaCategoria">
-            <div class="imagenCategoria cosmeticaBg"></div>
-            <div class="contenidoTarjetaCategoria">
-                <h3>Cosmética</h3>
-                <p>Cuidado natural para tu piel.</p>
-                <a href="/catalogo" class="enlaceExplorar">EXPLORAR <i class="fa-solid fa-arrow-right"></i></a>
-            </div>
-        </div>
+        
+        <button class="botonCarrusel botonCarruselDerecha" id="nextCatBtn" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 </section>
 
 <!-- Sección Best Sellers -->
-<section class="seccionMasVendidos contenedorCentrado">
+<section id="novedades" class="seccionMasVendidos contenedorCentrado">
     <div class="cabeceraSeccion" style="display: flex; justify-content: space-between; align-items: flex-end; text-align: left;">
         <div>
             <h2>Lo más querido por nuestra comunidad.</h2>
@@ -99,7 +128,7 @@
 </section>
 
 <!-- Sección Características / Valores -->
-<section class="seccionCaracteristicas">
+<section id="sobre-nosotros" class="seccionCaracteristicas">
     <div class="contenedorCentrado cuadriculaCaracteristicas">
         <div class="itemCaracteristica">
             <i class="fa-solid fa-leaf iconoCaracteristica"></i>
@@ -125,3 +154,7 @@
 </section>
 
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/jsHome.js') }}"></script>
+@endpush

@@ -17,10 +17,9 @@
             <h3>TIENDA</h3>
             <ul>
                 <li><a href="/catalogo">Todos los Productos</a></li>
-                <li><a href="/catalogo">Infusiones</a></li>
-                <li><a href="/catalogo">Cosmética Natural</a></li>
-                <li><a href="/catalogo">Aceites Esenciales</a></li>
-                <li><a href="/catalogo">Packs Regalo</a></li>
+                <li><a href="/#categorias">Categorías</a></li>
+                <li><a href="/#novedades">Novedades</a></li>
+                <li><a href="/#sobre-nosotros">Sobre Nosotros</a></li>
             </ul>
         </div>
 

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->smallIncrements('id');
             $table->unsignedSmallInteger('promotion_id')->nullable();
             $table->string('name', 150);
+            $table->string('description', 200)->nullable();
             $table->boolean('status')->default(1);
             $table->decimal('price', 10, 2);
             $table->unsignedInteger('stock')->default(0);
