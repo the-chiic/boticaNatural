@@ -26,10 +26,10 @@
                 @if(session('logged_in'))
                     <a href="{{ url('/perfil') }}">Mi Perfil</a>
                     <div class="divisorMenu" style="height: 1px; background: #eee; margin: 0.5rem 0;"></div>
-                    <a href="{{ url('/logout') }}" style="color: #ff4d4d;">Cerrar Sesión</a>
+                    <a href="{{ route('logout') }}" style="color: #ff4d4d;">Cerrar Sesión</a>
                 @else
                     <a href="{{ route('login') }}">Iniciar Sesión</a>
-                    <a href="{{ url('/register') }}">Registrarse</a>
+                    <a href="{{ route('register') }}">Registrarse</a>
                 @endif
             </div>
         </div>
