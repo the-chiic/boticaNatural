@@ -15,6 +15,11 @@
                 <i class="fa-solid fa-seedling"></i> Productos
             </li>
         </a>
+        <a href="{{ route('admin.categorias') }}">
+            <li class="{{ Request::routeIs('admin.categorias') ? 'active' : '' }}">
+                <i class="fa-solid fa-tags"></i> Categorías
+            </li>
+        </a>
         <a href="{{ route('admin.pedidos') }}">
             <li class="{{ Request::routeIs('admin.pedidos') ? 'active' : '' }}">
                 <i class="fa-solid fa-bag-shopping"></i> Pedidos
@@ -23,6 +28,11 @@
         <a href="{{ route('admin.clientes') }}">
             <li class="{{ Request::routeIs('admin.clientes') ? 'active' : '' }}">
                 <i class="fa-solid fa-users"></i> Clientes
+            </li>
+        </a>
+        <a href="{{ route('admin.promociones') }}">
+            <li class="{{ Request::routeIs('admin.promociones') ? 'active' : '' }}">
+                <i class="fa-solid fa-ticket"></i> Promociones
             </li>
         </a>
         <a href="{{ route('admin.estadisticas') }}">

@@ -1,8 +1,11 @@
 :root {
-    --brand-green: #1B3022;
-    --brand-cream: #F5F5F1;
-    --brand-accent: #2D5A27;
-    --brand-dark: #0D1A12;
+    --brand-green: #1E3A2E;
+    --brand-cream: #FAF9F6;
+    --brand-accent: #6B7F5A;
+    --brand-dark: #111612;
+    --brand-beige: #EDE7DB;
+    --brand-sage: #A3B49A;
+    --brand-brown: #8B6F4A;
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 }
 

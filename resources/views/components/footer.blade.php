@@ -3,7 +3,7 @@
         <div class="columnaPie columnaMarca">
             <div class="marca">
                 <i class="fa-solid fa-leaf iconoMarca"></i>
-                LA BOTICA NATURAL
+                {{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}
             </div>
             <p>Bienestar diario inspirado en la naturaleza. Ofrecemos los mejores productos botánicos artesanales para cuidar tu cuerpo y mente de forma sostenible.</p>
             <div class="redesSociales">
@@ -26,9 +26,9 @@
         <div class="columnaPie">
             <h3>CONTACTO</h3>
             <ul class="listaContacto">
-                <li><i class="fa-solid fa-location-dot"></i> Calle xxxxx xxx xx, 06006 Badajoz, España</li>
-                <li><i class="fa-solid fa-phone"></i> +34 xxx xxx xxx</li>
-                <li><i class="fa-regular fa-envelope"></i> laboticanatural@gmail.com</li>
+                <li><i class="fa-solid fa-location-dot"></i> {{ \Illuminate\Support\Facades\Cache::get('shop_address', 'Calle de la Naturaleza, 42, 28014 Madrid') }}</li>
+                <li><i class="fa-solid fa-phone"></i> {{ \Illuminate\Support\Facades\Cache::get('shop_phone', '+34 900 123 456') }}</li>
+                <li><i class="fa-regular fa-envelope"></i> {{ \Illuminate\Support\Facades\Cache::get('shop_email', 'contacto@laboticanatural.com') }}</li>
             </ul>
         </div>
 
@@ -44,7 +44,7 @@
 
     <div class="pieInferior">
         <div class="derechos">
-            &copy; 2026 La Botica Natural. Todos los derechos reservados.
+            &copy; 2026 {{ \Illuminate\Support\Facades\Cache::get('shop_name', 'La Botica Natural') }}. Todos los derechos reservados.
         </div>
         <div class="enlacesLegales">
             <a href="#">Aviso Legal</a>
