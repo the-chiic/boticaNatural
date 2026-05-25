@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ControladorAutenticacion;
 use App\Http\Controllers\ControladorPerfil;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ViewController;
 use App\Models\Category;
 use App\Models\Product;
 
@@ -25,8 +26,10 @@ Route::post('/carrito/actualizar/{id}', [CartController::class, 'update'])->name
 Route::post('/carrito/eliminar/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/carrito/vaciar', [CartController::class, 'clear'])->name('cart.clear');
 
-Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-Route::post('/checkout', [CartController::class, 'placeOrder'])->name('cart.placeOrder');
+Route::get('/checkout', [ViewController::class, 'checkout'])->name('cart.checkout');
+Route::post('/checkout/prepare', [CartController::class, 'preparePayment'])->name('cart.preparePayment');
+Route::post('/checkout/confirm', [CartController::class, 'confirmPayment'])->name('cart.confirmPayment');
+Route::get('/checkout/success', [ViewController::class, 'checkoutSuccess'])->name('cart.success');
 
 
 // Auth Routes
@@ -101,4 +104,15 @@ Route::get('/mantenimiento', function () {
     }
     return view('errors.maintenance');
 })->name('maintenance');
+
+// Ruta temporal para ejecutar migraciones en el hosting
+Route::get('/run-migrations', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return 'Migraciones ejecutadas correctamente:<br><pre>' . \Illuminate\Support\Facades\Artisan::output() . '</pre>';
+    } catch (\Exception $e) {
+        return 'Error al ejecutar las migraciones: ' . $e->getMessage();
+    }
+});
+
 
