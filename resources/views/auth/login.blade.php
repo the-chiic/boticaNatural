@@ -13,7 +13,7 @@
             <div class="cabeceraAutenticacion">
                 <div class="marca">
                     <i class="fa-solid fa-leaf iconoMarca"></i>
-                    LA BOTICA NATURAL
+                    {{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}
                 </div>
                 <h1>BIENVENIDO DE NUEVO</h1>
                 <p>Tu camino hacia el bienestar natural continúa aquí.</p>
