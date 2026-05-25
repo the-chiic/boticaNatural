@@ -13,6 +13,12 @@
                 <a href="{{ url('/') }}">Inicio</a> / <a href="{{ route('catalog.index') }}">Catálogo</a> / <span style="color: var(--brand-green); font-weight: 500;">{{ $product->name }}</span>
             </div>
 
+            @if(session('success'))
+                <div class="alert alert-success mb-4" style="background: rgba(76, 175, 80, 0.12); color: var(--brand-green); padding: 0.75rem 1rem; border-radius: 0.5rem; font-family: var(--fuente-sans);">
+                    <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+                </div>
+            @endif
+
             <div class="product-show-layout">
                 <!-- Image Gallery -->
                 <div class="product-gallery">

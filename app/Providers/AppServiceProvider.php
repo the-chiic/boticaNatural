@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($rootUrl = config('app.url')) {
+            URL::forceRootUrl(rtrim($rootUrl, '/'));
+        }
+
         // Auto-creación de columnas de verificación para evitar errores en el servidor
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('user')) {
