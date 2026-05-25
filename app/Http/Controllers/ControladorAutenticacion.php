@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use App\Mail\RecuperarContrasenaMail;
+use App\Mail\VerificarEmailMail;
 
 class ControladorAutenticacion extends Controller
 {
@@ -24,7 +28,13 @@ class ControladorAutenticacion extends Controller
         $credenciales = $solicitud->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+        ], [
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El formato del correo electrónico no es válido.',
+            'password.required' => 'La contraseña es obligatoria.',
         ]);
+
+        // (Verificación por correo desactivada temporalmente)
 
         // Intentar autenticar. Laravel usa 'password' del array y lo mapea internamente a 'pw' por el modelo User.
         if (Auth::attempt(['email' => $solicitud->email, 'password' => $solicitud->password])) {
@@ -55,17 +65,35 @@ class ControladorAutenticacion extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:user'],
             'password' => ['required', 'string', 'min:8', 'confirmed'], // requiere campo password_confirmation en el HTML
+        ], [
+            'name.required' => 'El nombre completo es obligatorio.',
+            'name.string' => 'El nombre debe ser una cadena de texto.',
+            'name.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El formato del correo electrónico no es válido.',
+            'email.max' => 'El correo electrónico no puede tener más de 255 caracteres.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
+
+        // Generar un token único de verificación por correo
+        $token = Str::random(60);
 
         // Crear usuario en base de datos encriptando la contraseña
         $usuario = User::create([
             'name' => $solicitud->name,
             'email' => $solicitud->email,
             'pw' => Hash::make($solicitud->password), // Contraseña Hasheada segura
+            'verification_token' => $token,
         ]);
 
-        // Redirigir al login con un mensaje verde de éxito
-        return redirect()->route('login')->with('status', '¡Registro completado con éxito! Por favor, inicia sesión con tus nuevas credenciales.');
+        // Iniciar sesión automáticamente tras el registro (correo de activación desactivado temporalmente)
+        Auth::login($usuario);
+        session(['logged_in' => true]);
+
+        return redirect('/');
     }
 
     // Procesar el cierre de sesión (Cerrar Sesión)
@@ -136,5 +164,187 @@ class ControladorAutenticacion extends Controller
             $mensaje = $e->getMessage() ?: get_class($e);
             return redirect('/iniciar-sesion')->withErrors(['email' => 'Error Google: ' . $mensaje]);
         }
+    }
+
+    // --- Recuperación de Contraseña (Forgot Password) --- //
+
+    // Mostrar el formulario de solicitud de recuperación
+    public function mostrarFormularioRecuperar()
+    {
+        return view('auth.forgot-password');
+    }
+
+    // Enviar el correo con el enlace de recuperación
+    public function enviarEnlaceRecuperacion(Request $solicitud)
+    {
+        $solicitud->validate([
+            'email' => ['required', 'email'],
+        ], [
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El formato del correo electrónico no es válido.',
+        ]);
+
+        $usuario = User::where('email', $solicitud->email)->first();
+
+        if ($usuario) {
+            $token = Str::random(60);
+
+            // Guardar o actualizar el token en password_reset_tokens
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $usuario->email],
+                [
+                    'token' => Hash::make($token),
+                    'created_at' => now()
+                ]
+            );
+
+            // Enviar el correo
+            try {
+                $enlace = route('password.reset', ['token' => $token]) . '?email=' . urlencode($usuario->email);
+                Mail::to($usuario->email)->send(new RecuperarContrasenaMail($usuario->name, $enlace));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error al enviar correo de recuperación de contraseña: ' . $e->getMessage());
+                return back()->withErrors(['email' => 'Error de conexión de correo: no se pudo enviar el email.']);
+            }
+        }
+
+        // Por seguridad, siempre mostramos el mensaje de que fue enviado para evitar pesca de correos (User Enumeration)
+        return back()->with('status', '¡Te hemos enviado un correo con instrucciones para restablecer tu contraseña!');
+    }
+
+    // Mostrar formulario para escribir la nueva contraseña
+    public function mostrarFormularioRestablecer($token, Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email']
+        ]);
+
+        // Validar el token en la base de datos
+        $registro = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+
+        if (!$registro || !Hash::check($token, $registro->token)) {
+            return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación es inválido o ha expirado.']);
+        }
+
+        // Comprobar expiración del token (60 minutos)
+        if (strtotime($registro->created_at) < strtotime('-60 minutes')) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación ha caducado.']);
+        }
+
+        return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
+    }
+
+    // Actualizar la contraseña
+    public function actualizarContrasena(Request $solicitud)
+    {
+        $solicitud->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'token.required' => 'El token de recuperación es obligatorio.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El formato del correo electrónico no es válido.',
+            'password.required' => 'La nueva contraseña es obligatoria.',
+            'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+        ]);
+
+        // Validar el token en la base de datos
+        $registro = DB::table('password_reset_tokens')->where('email', $solicitud->email)->first();
+
+        if (!$registro || !Hash::check($solicitud->token, $registro->token)) {
+            return back()->withErrors(['email' => 'El token es inválido o ha expirado.']);
+        }
+
+        // Comprobar expiración del token (60 minutos)
+        if (strtotime($registro->created_at) < strtotime('-60 minutes')) {
+            DB::table('password_reset_tokens')->where('email', $solicitud->email)->delete();
+            return redirect()->route('password.request')->withErrors(['email' => 'El enlace ha caducado.']);
+        }
+
+        // Buscar el usuario y actualizar contraseña (campo pw)
+        $usuario = User::where('email', $solicitud->email)->first();
+        if ($usuario) {
+            $usuario->update([
+                'pw' => Hash::make($solicitud->password)
+            ]);
+
+            // Borrar el token usado
+            DB::table('password_reset_tokens')->where('email', $solicitud->email)->delete();
+        }
+
+        return redirect()->route('login')->with('status', '¡Tu contraseña ha sido restablecida con éxito! Ya puedes iniciar sesión.');
+    }
+
+    // --- Verificación de Email (Account Activation) --- //
+
+    // Mostrar la pantalla de aviso de verificación
+    public function mostrarAvisoVerificacion()
+    {
+        if (!session('verify_email')) {
+            return redirect()->route('login');
+        }
+        return view('auth.verify-email-notice');
+    }
+
+    // Reenviar el correo de activación
+    public function reenviarVerificacion(Request $solicitud)
+    {
+        $email = $solicitud->email ?: session('verify_email');
+
+        if (!$email) {
+            return redirect()->route('login');
+        }
+
+        $usuario = User::where('email', $email)->first();
+
+        if (!$usuario) {
+            return redirect()->route('login');
+        }
+
+        if ($usuario->email_verified_at) {
+            return redirect()->route('login')->with('status', 'Tu cuenta ya está activa. Inicia sesión.');
+        }
+
+        // Generar un nuevo token
+        $token = Str::random(60);
+        $usuario->update([
+            'verification_token' => $token
+        ]);
+
+        // Enviar el correo
+        try {
+            $enlace = route('verification.verify', ['token' => $token]);
+            Mail::to($usuario->email)->send(new VerificarEmailMail($usuario->name, $enlace));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error al reenviar correo de verificación: ' . $e->getMessage());
+            return back()->withErrors(['email' => 'No se pudo enviar el correo de activación.']);
+        }
+
+        return back()->with('status', '¡Hemos reenviado el correo de activación con éxito!');
+    }
+
+    // Procesar la verificación al hacer clic en el botón del correo
+    public function verificarEmail($token)
+    {
+        $usuario = User::where('verification_token', $token)->first();
+
+        if (!$usuario) {
+            return redirect()->route('login')->withErrors(['email' => 'El enlace de activación es inválido o ya ha sido utilizado.']);
+        }
+
+        // Activar la cuenta
+        $usuario->update([
+            'email_verified_at' => now(),
+            'verification_token' => null
+        ]);
+
+        // Iniciar sesión del usuario automáticamente
+        Auth::login($usuario);
+        session(['logged_in' => true]);
+
+        return redirect('/')->with('status', '¡Tu cuenta ha sido activada con éxito! Bienvenido a La Botica Natural.');
     }
 }

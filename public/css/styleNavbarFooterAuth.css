@@ -897,3 +897,108 @@ input {
     font-size: 0.875em;
     color: var(--color-texto-claro);
 }
+
+/* =========================================================================
+   ESTILOS PREMIUM PARA BOTÓN DE GOOGLE Y VALIDACIÓN DE FORMULARIOS
+   ========================================================================= */
+
+.botonGoogleOriginal {
+    background-color: var(--color-blanco) !important;
+    color: #3c4043 !important;
+    border: 0.0625em solid #dadce0 !important;
+    border-radius: 1.5em !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.8125em !important;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+    text-decoration: none !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+    font-size: 0.875em !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    gap: 0.625em !important;
+}
+
+.botonGoogleOriginal:hover {
+    background-color: #f8fafd !important;
+    border-color: #d2e3fc !important;
+    box-shadow: 0 2px 5px rgba(60,64,67,0.15) !important;
+    color: #1a73e8 !important;
+}
+
+.botonGoogleOriginal svg {
+    flex-shrink: 0;
+}
+
+/* Form Validation Styles */
+.controlFormulario.invalido {
+    border-color: #ef4444 !important;
+    background-color: #fffafb !important;
+}
+
+.controlFormulario.invalido:focus {
+    box-shadow: 0 0 0 0.1875em rgba(239, 68, 68, 0.15) !important;
+    border-color: #ef4444 !important;
+}
+
+.errorFeedback {
+    color: #ef4444 !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    margin-top: 0.375em !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.3125em !important;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Indicador de fuerza de contraseña opcional (Premium touch) */
+.passwordStrengthMeter {
+    margin-top: 0.5em;
+    display: flex;
+    gap: 0.25em;
+    height: 0.25em;
+    width: 100%;
+}
+
+.passwordStrengthBar {
+    flex: 1;
+    background-color: #eee;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.passwordRequirementsInfo {
+    font-size: 0.75rem;
+    color: var(--color-texto-claro);
+    margin-top: 0.5em;
+    line-height: 1.4;
+}
+
+.passwordRequirementsInfo ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.passwordRequirementsInfo li {
+    display: flex;
+    align-items: center;
+    gap: 0.375em;
+    margin-bottom: 0.25em;
+}
+
+.passwordRequirementsInfo li.cumplido {
+    color: #10b981;
+}
+
+.passwordRequirementsInfo li.incumplido {
+    color: #ef4444;
+}

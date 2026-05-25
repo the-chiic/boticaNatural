@@ -1,14 +1,14 @@
 <nav class="barraNavegacion">
     <div class="navegacionIzquierda">
-        <a href="/" class="marca" style="text-decoration: none;">
+        <a href="{{ url('/') }}" class="marca" style="text-decoration: none;">
             <i class="fa-solid fa-leaf iconoMarca"></i>
             LA BOTICA NATURAL
         </a>
         <div class="enlacesNavegacion">
-            <a href="/catalogo">CATÁLOGO</a>
-            <a href="/catalogo">INFUSIONES</a>
-            <a href="/catalogo">COSMÉTICA</a>
-            <a href="/catalogo">ACEITES</a>
+            <a href="{{ url('catalogo') }}">CATÁLOGO</a>
+            <a href="{{ url('catalogo') }}">INFUSIONES</a>
+            <a href="{{ url('catalogo') }}">COSMÉTICA</a>
+            <a href="{{ url('catalogo') }}">ACEITES</a>
         </div>
     </div>
     
@@ -24,17 +24,17 @@
             </button>
             <div class="menuUsuarioDesplegable" id="menuUsuario">
                 @if(session('logged_in'))
-                    <a href="/perfil">Mi Perfil</a>
+                    <a href="{{ url('perfil') }}">Mi Perfil</a>
                     <div class="divisorMenu" style="height: 1px; background: #eee; margin: 0.5rem 0;"></div>
-                    <a href="/cerrar-sesion" style="color: #ff4d4d;">Cerrar Sesión</a>
+                    <a href="{{ url('cerrar-sesion') }}" style="color: #ff4d4d;">Cerrar Sesión</a>
                 @else
-                    <a href="/iniciar-sesion">Iniciar Sesión</a>
-                    <a href="/registrarse">Registrarse</a>
+                    <a href="{{ url('iniciar-sesion') }}">Iniciar Sesión</a>
+                    <a href="{{ url('registrarse') }}">Registrarse</a>
                 @endif
             </div>
         </div>
         
-        <a href="/carrito" class="enlaceIcono">
+        <a href="{{ url('carrito') }}" class="enlaceIcono">
             <i class="fa-solid fa-cart-shopping"></i>
         </a>
     </div>
