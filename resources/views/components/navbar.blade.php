@@ -1,54 +1,72 @@
 <nav class="barraNavegacion">
     <div class="navegacionIzquierda">
-        <a href="{{ url('/') }}" class="marca" style="text-decoration: none;">
+        <a href="{{ url('/') }}" class="marca">
             <i class="fa-solid fa-leaf iconoMarca"></i>
             {{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}
         </a>
         <div class="enlacesNavegacion">
-            <a href="{{ route('catalog.index') }}">CATÁLOGO</a>
-            <a href="{{ url('/#categorias') }}">CATEGORÍAS</a>
-            <a href="{{ url('/#novedades') }}">NOVEDADES</a>
-            <a href="{{ url('/#sobre-nosotros') }}">SOBRE NOSOTROS</a>
+            <a href="{{ route('catalog.index') }}">Catálogo</a>
+            <a href="{{ url('/#categorias') }}">Categorías</a>
+            <a href="{{ url('/#novedades') }}">Novedades</a>
+            <a href="{{ url('/#sobre-nosotros') }}">Sobre nosotros</a>
         </div>
     </div>
-    
+
     <div class="navegacionDerecha">
         <form action="{{ route('catalog.index') }}" method="GET" class="barraBusqueda">
-            <i class="fa-solid fa-magnifying-glass iconoBusqueda" style="cursor: pointer;" onclick="this.closest('form').submit();"></i>
-            <input type="text" name="search" placeholder="Buscar..." value="{{ request('search') }}">
+            <i class="fa-solid fa-magnifying-glass iconoBusqueda" onclick="this.closest('form').submit();" role="button" tabindex="0" aria-label="Buscar"></i>
+            <input type="text" name="search" placeholder="Buscar..." value="{{ request('search') }}" aria-label="Buscar productos">
         </form>
-        
-        <div class="menuUsuarioContenedor">
-            <button class="botonIcono" id="botonUsuario">
-                <i class="fa-regular fa-user"></i>
-            </button>
-            <div class="menuUsuarioDesplegable" id="menuUsuario">
-                @if(session('logged_in'))
-                    <a href="{{ url('/perfil') }}">Mi Perfil</a>
-                    <div class="divisorMenu" style="height: 1px; background: #eee; margin: 0.5rem 0;"></div>
-                    <a href="{{ route('logout') }}" style="color: #ff4d4d;">Cerrar Sesión</a>
-                @else
-                    <a href="{{ route('login') }}">Iniciar Sesión</a>
-                    <a href="{{ route('register') }}">Registrarse</a>
-                @endif
+
+        <div class="nav-acciones-iconos">
+            <div class="menuUsuarioContenedor">
+                <button
+                    type="button"
+                    class="nav-icono-btn nav-icono-perfil {{ session('logged_in') ? 'nav-icono-perfil--activo' : '' }}"
+                    id="botonUsuario"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    aria-controls="menuUsuario"
+                    aria-label="{{ session('logged_in') ? 'Menú de mi cuenta' : 'Iniciar sesión' }}"
+                >
+                    <i class="fa-solid fa-user"></i>
+                </button>
+                <div class="menuUsuarioDesplegable" id="menuUsuario" role="menu">
+                    @if(session('logged_in'))
+                        <p class="menuUsuarioTitulo" role="presentation">Mi cuenta</p>
+                        <a href="{{ route('profile') }}" role="menuitem" class="menuUsuarioEnlace">
+                            <i class="fa-solid fa-id-card"></i>
+                            <span>Mi perfil</span>
+                        </a>
+                        <div class="divisorMenu" role="separator"></div>
+                        <a href="{{ route('logout') }}" role="menuitem" class="menuUsuarioEnlace menuUsuarioEnlace--salir">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Cerrar sesión</span>
+                        </a>
+                    @else
+                        <p class="menuUsuarioTitulo" role="presentation">Acceso</p>
+                        <a href="{{ route('login') }}" role="menuitem" class="menuUsuarioEnlace menuUsuarioEnlace--principal">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <span>Iniciar sesión</span>
+                        </a>
+                    @endif
+                </div>
             </div>
-        </div>
-        
-        <a href="{{ url('/carrito') }}" class="enlaceIcono" style="position: relative;">
-            <i class="fa-solid fa-cart-shopping"></i>
-            @php
-                $cartCount = 0;
-                if (session('cart')) {
-                    foreach (session('cart') as $item) {
-                        $cartCount += $item['qty'];
+
+            <a href="{{ route('cart.index') }}" class="nav-icono-btn nav-icono-carrito" aria-label="Ver carrito">
+                <i class="fa-solid fa-cart-shopping"></i>
+                @php
+                    $cartCount = 0;
+                    if (session('cart')) {
+                        foreach (session('cart') as $item) {
+                            $cartCount += $item['qty'];
+                        }
                     }
-                }
-            @endphp
-            @if($cartCount > 0)
-                <span class="badge-carrito" style="position: absolute; top: -6px; right: -8px; background: var(--brand-accent); color: white; border-radius: 50%; width: 17px; height: 17px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-family: 'Instrument Sans', sans-serif;">
-                    {{ $cartCount }}
-                </span>
-            @endif
-        </a>
+                @endphp
+                @if($cartCount > 0)
+                    <span class="nav-badge-carrito">{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
+                @endif
+            </a>
+        </div>
     </div>
 </nav>

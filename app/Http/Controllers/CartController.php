@@ -56,8 +56,11 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart);
+        session()->save();
 
-        return redirect()->route('cart.index')->with('success', '¡Producto añadido al carrito!');
+        return redirect()
+            ->back()
+            ->with('success', '¡Producto añadido al carrito!');
     }
 
     /**

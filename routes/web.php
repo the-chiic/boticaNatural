@@ -45,6 +45,17 @@ Route::middleware('guest')->group(function () {
     // Rutas para Login con Google en Español
     Route::get('/autenticacion/google', [ControladorAutenticacion::class, 'redireccionarAGoogle'])->name('login.google');
     Route::get('/autenticacion/google/callback', [ControladorAutenticacion::class, 'manejarCallbackGoogle']);
+
+    // Rutas para Recuperación de Contraseña (Forgot Password)
+    Route::get('/recuperar-contrasena', [ControladorAutenticacion::class, 'mostrarFormularioRecuperar'])->name('password.request');
+    Route::post('/recuperar-contrasena', [ControladorAutenticacion::class, 'enviarEnlaceRecuperacion'])->name('password.email');
+    Route::get('/restablecer-contrasena/{token}', [ControladorAutenticacion::class, 'mostrarFormularioRestablecer'])->name('password.reset');
+    Route::post('/restablecer-contrasena', [ControladorAutenticacion::class, 'actualizarContrasena'])->name('password.update');
+
+    // Rutas para Verificación de Email (Account Verification)
+    Route::get('/verificar-correo/aviso', [ControladorAutenticacion::class, 'mostrarAvisoVerificacion'])->name('verification.notice');
+    Route::post('/verificar-correo/reenviar', [ControladorAutenticacion::class, 'reenviarVerificacion'])->name('verification.send');
+    Route::get('/verificar-correo/{token}', [ControladorAutenticacion::class, 'verificarEmail'])->name('verification.verify');
 });
 
 Route::middleware('auth')->group(function () {

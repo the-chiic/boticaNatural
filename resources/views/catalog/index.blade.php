@@ -14,16 +14,19 @@
 
             <h1 class="section-title">Todos los Productos</h1>
 
-            <form id="filterForm" method="GET" action="{{ route('catalog.index') }}">
-                <!-- Dummy inputs to prevent old cached jsCatalog.js from crashing -->
-                <input type="hidden" id="category_input" value="">
-                <a href="#" class="filter-link" style="display:none;"></a>
+            @if(session('success'))
+                <div class="alert alert-success mb-4" style="background: rgba(76, 175, 80, 0.12); color: var(--brand-green); padding: 0.75rem 1rem; border-radius: 0.5rem; font-family: var(--fuente-sans);">
+                    <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+                </div>
+            @endif
 
-                <div class="catalog-layout">
-                    <!-- Filters Sidebar -->
-                    <aside class="filters-sidebar">
-                        
-                        <!-- Search Product -->
+            <div class="catalog-layout">
+                <!-- Filtros en su propio form (no envolver los formularios de "Añadir al carrito") -->
+                <aside class="filters-sidebar">
+                    <form id="filterForm" method="GET" action="{{ route('catalog.index') }}">
+                        <input type="hidden" id="category_input" value="">
+                        <a href="#" class="filter-link" style="display:none;"></a>
+
                         <div class="filter-group">
                             <span class="filter-title">Buscar Producto</span>
                             <input type="text" name="search" value="{{ request('search') }}" oninput="debouncedSubmitFilterForm(event)" placeholder="Ej. Aceite esencial..." style="margin-bottom: 0.75rem;">
@@ -32,7 +35,6 @@
                             </button>
                         </div>
 
-                        <!-- Categories -->
                         <div class="filter-group">
                             <span class="filter-title">Categorías</span>
                             <ul class="filter-list">
@@ -50,7 +52,6 @@
                             </ul>
                         </div>
 
-                        <!-- Price Range Filter -->
                         <div class="filter-group price-filter" data-min="0" data-max="200">
                             <span class="filter-title">Precio</span>
                             <div class="price-inputs">
@@ -74,15 +75,13 @@
                                 <span>200&euro;</span>
                             </div>
                         </div>
+                    </form>
+                </aside>
 
-                    </aside>
-
-                    <!-- Products Grid -->
-                    <main id="catalog-results">
-                        @include('catalog.partials.results')
-                    </main>
-                </div>
-            </form>
+                <main id="catalog-results">
+                    @include('catalog.partials.results')
+                </main>
+            </div>
         </div>
     </div>
 @endsection

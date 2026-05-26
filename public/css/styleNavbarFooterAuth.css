@@ -208,48 +208,158 @@ input {
     color: var(--color-principal);
 }
 
-/* Menu Usuario Desplegable */
+/* Iconos derecha (perfil + carrito) */
+.nav-acciones-iconos {
+    display: flex;
+    align-items: center;
+    gap: 0.625em;
+}
+
+.nav-icono-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75em;
+    height: 2.75em;
+    border-radius: 50%;
+    border: 1px solid rgba(27, 48, 34, 0.12);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--color-principal);
+    font-size: 1.05em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.nav-icono-btn:hover {
+    background: rgba(27, 48, 34, 0.06);
+    border-color: rgba(27, 48, 34, 0.22);
+    color: var(--color-acento);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(27, 48, 34, 0.08);
+}
+
+.nav-icono-perfil--activo {
+    background: rgba(27, 48, 34, 0.08);
+    border-color: var(--color-principal);
+    color: var(--color-principal);
+}
+
+.nav-icono-perfil[aria-expanded="true"] {
+    background: var(--color-principal);
+    border-color: var(--color-principal);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(27, 48, 34, 0.2);
+}
+
+.nav-badge-carrito {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 1.125em;
+    height: 1.125em;
+    padding: 0 0.2em;
+    background: var(--color-acento);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 0.625em;
+    font-weight: 700;
+    line-height: 1.125em;
+    text-align: center;
+    border: 2px solid var(--color-blanco, #fff);
+}
+
+/* Menú usuario */
 .menuUsuarioContenedor {
     position: relative;
 }
 
 .menuUsuarioDesplegable {
     position: absolute;
-    top: 2.125em;
+    top: calc(100% + 0.5em);
     right: 0;
     background-color: var(--color-blanco);
-    min-width: 12.5em;
-    border-radius: 0.75em;
-    box-shadow: 0 0.625em 1.875em rgba(0, 0, 0, 0.1);
-    border: 0.0625em solid var(--color-borde-claro);
+    min-width: 13.5em;
+    border-radius: 0.875em;
+    box-shadow: 0 12px 40px rgba(27, 48, 34, 0.12);
+    border: 1px solid var(--color-borde-claro);
     padding: 0.5em;
     z-index: 1000;
     display: none;
+    animation: menuUsuarioEntrada 0.2s ease;
+}
+
+@keyframes menuUsuarioEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .menuUsuarioDesplegable.activo {
     display: block;
 }
 
-.menuUsuarioDesplegable a {
-    display: block;
-    padding: 0.75em 1em;
-    font-size: 0.875em;
-    color: var(--color-texto);
-    border-radius: 0.5em;
-    transition: background-color 0.2s;
-    text-align: left;
+.menuUsuarioTitulo {
+    margin: 0.35em 0.75em 0.5em;
+    font-size: 0.65em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(27, 48, 34, 0.45);
 }
 
-.menuUsuarioDesplegable a:hover {
+.menuUsuarioEnlace {
+    display: flex;
+    align-items: center;
+    gap: 0.65em;
+    padding: 0.7em 0.85em;
+    font-size: 0.875em;
+    font-weight: 500;
+    color: var(--color-texto);
+    border-radius: 0.5em;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.menuUsuarioEnlace i {
+    width: 1.1em;
+    text-align: center;
+    opacity: 0.75;
+}
+
+.menuUsuarioEnlace:hover {
     background-color: var(--color-fondo-oscuro);
     color: var(--color-principal);
 }
 
+.menuUsuarioEnlace--principal {
+    color: var(--color-principal);
+    font-weight: 600;
+}
+
+.menuUsuarioEnlace--principal:hover {
+    background: rgba(27, 48, 34, 0.08);
+}
+
+.menuUsuarioEnlace--salir {
+    color: #c0392b;
+}
+
+.menuUsuarioEnlace--salir:hover {
+    background: rgba(192, 57, 43, 0.08);
+    color: #a93226;
+}
+
 .divisorMenu {
-    height: 0.0625em;
+    height: 1px;
     background-color: var(--color-borde-claro);
-    margin: 0.3125em 0.5em;
+    margin: 0.35em 0.5em;
 }
 
 /* Auth Layout (Split View) */
@@ -936,4 +1046,109 @@ input {
 .itemCaracteristica p {
     font-size: 0.875em;
     color: var(--color-texto-claro);
+}
+
+/* =========================================================================
+   ESTILOS PREMIUM PARA BOTÓN DE GOOGLE Y VALIDACIÓN DE FORMULARIOS
+   ========================================================================= */
+
+.botonGoogleOriginal {
+    background-color: var(--color-blanco) !important;
+    color: #3c4043 !important;
+    border: 0.0625em solid #dadce0 !important;
+    border-radius: 1.5em !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.8125em !important;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+    text-decoration: none !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+    font-size: 0.875em !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    gap: 0.625em !important;
+}
+
+.botonGoogleOriginal:hover {
+    background-color: #f8fafd !important;
+    border-color: #d2e3fc !important;
+    box-shadow: 0 2px 5px rgba(60,64,67,0.15) !important;
+    color: #1a73e8 !important;
+}
+
+.botonGoogleOriginal svg {
+    flex-shrink: 0;
+}
+
+/* Form Validation Styles */
+.controlFormulario.invalido {
+    border-color: #ef4444 !important;
+    background-color: #fffafb !important;
+}
+
+.controlFormulario.invalido:focus {
+    box-shadow: 0 0 0 0.1875em rgba(239, 68, 68, 0.15) !important;
+    border-color: #ef4444 !important;
+}
+
+.errorFeedback {
+    color: #ef4444 !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    margin-top: 0.375em !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.3125em !important;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Indicador de fuerza de contraseña opcional (Premium touch) */
+.passwordStrengthMeter {
+    margin-top: 0.5em;
+    display: flex;
+    gap: 0.25em;
+    height: 0.25em;
+    width: 100%;
+}
+
+.passwordStrengthBar {
+    flex: 1;
+    background-color: #eee;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.passwordRequirementsInfo {
+    font-size: 0.75rem;
+    color: var(--color-texto-claro);
+    margin-top: 0.5em;
+    line-height: 1.4;
+}
+
+.passwordRequirementsInfo ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.passwordRequirementsInfo li {
+    display: flex;
+    align-items: center;
+    gap: 0.375em;
+    margin-bottom: 0.25em;
+}
+
+.passwordRequirementsInfo li.cumplido {
+    color: #10b981;
+}
+
+.passwordRequirementsInfo li.incumplido {
+    color: #ef4444;
 }
