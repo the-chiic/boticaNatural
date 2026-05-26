@@ -110,5 +110,48 @@
                 @endforelse
             </div>
         </div>
+
+        <!-- Elegant Notepad / Quick Reminders Widget -->
+        <div class="panel" style="margin-top: 30px;">
+            <div class="panel-header" style="border-bottom: 1px solid rgba(139, 111, 74, 0.1); padding-bottom: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="display: flex; align-items: center; gap: 8px; font-size: 16px;"><i class="fa-solid fa-note-sticky" style="color: var(--olive-green);"></i> Bloc de Notas y Remisiones</h3>
+                <span id="saveStatus" style="font-size: 11px; color: var(--olive-green); opacity: 0; transition: opacity 0.3s;">Guardado</span>
+            </div>
+            <div class="notepad-body" style="display: flex; flex-direction: column; gap: 15px;">
+                <p style="font-size: 12px; color: var(--olive-green); margin: 0; line-height: 1.5;">Usa este bloc para guardar recordatorios, fórmulas botánicas o notas de inventario. Se guardará de manera automática y local en tu navegador.</p>
+                <textarea id="adminNotepad" placeholder="Ej. Encargar frascos goteros de ámbar de 50ml..." style="width: 100%; min-height: 150px; padding: 15px; border: 1px solid var(--beige); border-radius: 12px; background-color: var(--cream); font-size: 13px; line-height: 1.6; color: var(--dark); resize: vertical; outline: none; transition: border-color 0.3s;" oninput="saveAdminNotes()"></textarea>
+            </div>
+        </div>
     </div>
 </x-admin.layout>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load saved notes
+        const notepad = document.getElementById('adminNotepad');
+        if (notepad) {
+            notepad.value = localStorage.getItem('botica_admin_notes') || '';
+        }
+    });
+
+    let autoSaveTimeout;
+    function saveAdminNotes() {
+        const notepad = document.getElementById('adminNotepad');
+        const statusEl = document.getElementById('saveStatus');
+        
+        if (notepad) {
+            localStorage.setItem('botica_admin_notes', notepad.value);
+            
+            // Show "Guardado" status
+            if (statusEl) {
+                statusEl.style.opacity = '1';
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => {
+                    statusEl.style.opacity = '0';
+                }, 1500);
+            }
+        }
+    }
+</script>
+@endpush

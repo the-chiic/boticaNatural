@@ -31,6 +31,7 @@
                     <th>Descuento</th>
                     <th>Vigencia</th>
                     <th>Estado</th>
+                    <th>Ver en Web</th>
                     <th style="text-align: right;">Acciones</th>
                 </tr>
             </thead>
@@ -75,13 +76,34 @@
                             </div>
                         </td>
                         <td>
-                            @if(!$promotion->is_active)
-                                <span class="badge badge-danger">Inactivo</span>
-                            @elseif($isExpired)
-                                <span class="badge badge-danger" style="background-color: var(--brown); color: var(--cream);">Expirado</span>
-                            @else
-                                <span class="badge badge-success">Activo</span>
-                            @endif
+                            <button type="button" class="status-toggle-btn" 
+                                onclick="togglePromotionStatus({{ $promotion->id }}, this)" 
+                                data-active="{{ $promotion->is_active ? 1 : 0 }}" 
+                                data-expired="{{ $isExpired ? 1 : 0 }}"
+                                style="border: none; background: transparent; padding: 0; cursor: pointer; outline: none;"
+                                title="{{ $isExpired ? 'Esta promoción ha expirado' : 'Haga clic para alternar estado' }}"
+                                {{ $isExpired ? 'disabled' : '' }}>
+                                @if(!$promotion->is_active)
+                                    <span class="badge badge-danger" style="display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; cursor: pointer;"><i class="fa-solid fa-toggle-off" style="font-size: 14px; opacity: 0.85;"></i> Inactivo</span>
+                                @elseif($isExpired)
+                                    <span class="badge badge-danger" style="background-color: var(--brown); color: var(--cream); display: inline-flex; align-items: center; gap: 4px; cursor: not-allowed;"><i class="fa-solid fa-circle-exclamation" style="font-size: 11px;"></i> Expirado</span>
+                                @else
+                                    <span class="badge badge-success" style="display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; cursor: pointer;"><i class="fa-solid fa-toggle-on" style="font-size: 14px; opacity: 0.85;"></i> Activo</span>
+                                @endif
+                            </button>
+                        </td>
+                        <td>
+                            <button type="button" class="web-toggle-btn" 
+                                onclick="togglePromotionWeb({{ $promotion->id }}, this)" 
+                                data-show="{{ $promotion->show_on_web ? 1 : 0 }}" 
+                                style="border: none; background: transparent; padding: 0; cursor: pointer; outline: none;"
+                                title="Alternar visibilidad en la web de clientes">
+                                @if($promotion->show_on_web)
+                                    <span class="badge badge-success" style="background-color: var(--olive-green); color: var(--white); display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; cursor: pointer;"><i class="fa-solid fa-eye" style="font-size: 13px;"></i> Visible</span>
+                                @else
+                                    <span class="badge badge-danger" style="background-color: var(--sage-green); color: var(--dark-green); display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; cursor: pointer;"><i class="fa-solid fa-eye-slash" style="font-size: 13px;"></i> Oculto</span>
+                                @endif
+                            </button>
                         </td>
                         <td style="text-align: right;">
                             <button class="btn-icon-link edit" title="Editar" 
@@ -91,6 +113,7 @@
                                     code: '{{ addslashes($promotion->code) }}',
                                     discount: '{{ $promotion->discount }}',
                                     is_active: '{{ $promotion->is_active ? 1 : 0 }}',
+                                    show_on_web: '{{ $promotion->show_on_web ? 1 : 0 }}',
                                     starts_at: '{{ $promotion->starts_at ? $promotion->starts_at->format('Y-m-d') : '' }}',
                                     ends_at: '{{ $promotion->ends_at ? $promotion->ends_at->format('Y-m-d') : '' }}'
                                 })">
@@ -153,12 +176,21 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="is_active">Estado Inicial</label>
-                        <select id="is_active" name="is_active" required>
-                            <option value="1" selected>Activo (Habilitado para compras)</option>
-                            <option value="0">Inactivo (Deshabilitado)</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="is_active">Estado Inicial</label>
+                            <select id="is_active" name="is_active" required>
+                                <option value="1" selected>Activo (Habilitado para compras)</option>
+                                <option value="0">Inactivo (Deshabilitado)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="show_on_web">Mostrar en Web de Clientes</label>
+                            <select id="show_on_web" name="show_on_web" required>
+                                <option value="1" selected>Visible (Mostrar banner)</option>
+                                <option value="0">Oculto (Ocultar banner)</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="form-actions" style="margin-top: 25px;">
@@ -183,6 +215,7 @@
             form.reset();
             document.getElementById('promotion_id').value = "";
             document.getElementById('is_active').value = "1";
+            document.getElementById('show_on_web').value = "1";
             
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('active'), 10);
@@ -197,6 +230,7 @@
             document.getElementById('code').value = promotion.code;
             document.getElementById('discount').value = parseFloat(promotion.discount);
             document.getElementById('is_active').value = promotion.is_active;
+            document.getElementById('show_on_web').value = promotion.show_on_web;
             document.getElementById('starts_at').value = promotion.starts_at;
             document.getElementById('ends_at').value = promotion.ends_at;
             
@@ -224,6 +258,165 @@
                 } else {
                     row.style.display = 'none';
                 }
+            });
+        }
+
+        function togglePromotionStatus(id, buttonEl) {
+            if (buttonEl.getAttribute('data-expired') === '1') {
+                return;
+            }
+
+            const currentActive = parseInt(buttonEl.getAttribute('data-active'));
+            const newActive = currentActive === 1 ? 0 : 1;
+            
+            buttonEl.style.opacity = '0.5';
+            buttonEl.style.pointerEvents = 'none';
+
+            fetch(`/admin/promociones/${id}/toggle`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                buttonEl.style.opacity = '1';
+                buttonEl.style.pointerEvents = 'auto';
+
+                if (data.success) {
+                    const isActive = data.is_active;
+                    buttonEl.setAttribute('data-active', isActive ? '1' : '0');
+                    
+                    if (isActive) {
+                        buttonEl.innerHTML = `<span class="badge badge-success" style="display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; cursor: pointer;"><i class="fa-solid fa-toggle-on" style="font-size: 14px; opacity: 0.85;"></i> Activo</span>`;
+                        
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: `¡Cupón ${data.code} activado!`,
+                            text: 'Aparecerá en la cabecera de la web del cliente.',
+                            showConfirmButton: false,
+                            timer: 3500,
+                            timerProgressBar: true,
+                            background: '#FAF9F6',
+                            color: '#1E3A2E',
+                            iconColor: '#6B7F5A'
+                        });
+                    } else {
+                        buttonEl.innerHTML = `<span class="badge badge-danger" style="display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; cursor: pointer;"><i class="fa-solid fa-toggle-off" style="font-size: 14px; opacity: 0.85;"></i> Inactivo</span>`;
+                        
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: `Cupón ${data.code} desactivado`,
+                            text: 'Se ha retirado de la web del cliente.',
+                            showConfirmButton: false,
+                            timer: 3500,
+                            timerProgressBar: true,
+                            background: '#FAF9F6',
+                            color: '#1E3A2E',
+                            iconColor: '#8B6F4A'
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo actualizar el estado del cupón.',
+                        confirmButtonColor: '#1E3A2E'
+                    });
+                }
+            })
+            .catch(error => {
+                buttonEl.style.opacity = '1';
+                buttonEl.style.pointerEvents = 'auto';
+                console.error('Error toggling promotion status:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Red',
+                    text: 'Hubo un problema de conexión al cambiar el estado.',
+                    confirmButtonColor: '#1E3A2E'
+                });
+            });
+        }
+
+        function togglePromotionWeb(id, buttonEl) {
+            const currentShow = parseInt(buttonEl.getAttribute('data-show'));
+            
+            buttonEl.style.opacity = '0.5';
+            buttonEl.style.pointerEvents = 'none';
+
+            fetch(`/admin/promociones/${id}/toggle-web`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                buttonEl.style.opacity = '1';
+                buttonEl.style.pointerEvents = 'auto';
+
+                if (data.success) {
+                    const isShow = data.show_on_web;
+                    buttonEl.setAttribute('data-show', isShow ? '1' : '0');
+                    
+                    if (isShow) {
+                        buttonEl.innerHTML = `<span class="badge badge-success" style="background-color: var(--olive-green); color: var(--white); display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; cursor: pointer;"><i class="fa-solid fa-eye" style="font-size: 13px;"></i> Visible</span>`;
+                        
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: `¡Banner del cupón ${data.code} visible!`,
+                            text: 'Se mostrará en la cabecera de la web pública.',
+                            showConfirmButton: false,
+                            timer: 3500,
+                            timerProgressBar: true,
+                            background: '#FAF9F6',
+                            color: '#1E3A2E',
+                            iconColor: '#6B7F5A'
+                        });
+                    } else {
+                        buttonEl.innerHTML = `<span class="badge badge-danger" style="background-color: var(--sage-green); color: var(--dark-green); display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; cursor: pointer;"><i class="fa-solid fa-eye-slash" style="font-size: 13px;"></i> Oculto</span>`;
+                        
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: `Banner del cupón ${data.code} oculto`,
+                            text: 'Se ha retirado de la cabecera de la web pública.',
+                            showConfirmButton: false,
+                            timer: 3500,
+                            timerProgressBar: true,
+                            background: '#FAF9F6',
+                            color: '#1E3A2E',
+                            iconColor: '#8B6F4A'
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo actualizar la visibilidad del cupón.',
+                        confirmButtonColor: '#1E3A2E'
+                    });
+                }
+            })
+            .catch(error => {
+                buttonEl.style.opacity = '1';
+                buttonEl.style.pointerEvents = 'auto';
+                console.error('Error toggling promotion web status:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Red',
+                    text: 'Hubo un problema de conexión al cambiar la visibilidad.',
+                    confirmButtonColor: '#1E3A2E'
+                });
             });
         }
 

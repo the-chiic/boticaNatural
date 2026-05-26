@@ -101,6 +101,8 @@ Route::prefix('admin')->group(function () {
     Route::post('/promociones', [AdminController::class, 'guardarPromocion'])->name('admin.promociones.store');
     Route::post('/promociones/{id}', [AdminController::class, 'actualizarPromocion'])->name('admin.promociones.update');
     Route::post('/promociones/{id}/eliminar', [AdminController::class, 'eliminarPromocion'])->name('admin.promociones.delete');
+    Route::put('/promociones/{id}/toggle', [AdminController::class, 'togglePromocion'])->name('admin.promociones.toggle');
+    Route::put('/promociones/{id}/toggle-web', [AdminController::class, 'togglePromocionWeb'])->name('admin.promociones.toggleWeb');
 
     // Configuración general y seguridad
     Route::get('/configuracion', [AdminController::class, 'configuracion'])->name('admin.configuracion');
@@ -125,5 +127,7 @@ Route::get('/run-migrations', function () {
         return 'Error al ejecutar las migraciones: ' . $e->getMessage();
     }
 });
+
+
 
 

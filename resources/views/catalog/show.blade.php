@@ -20,14 +20,51 @@
             @endif
 
             <div class="product-show-layout">
-                <!-- Image Gallery -->
+                <!-- Image Gallery Carousel -->
                 <div class="product-gallery">
-                    <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" class="main-image" alt="{{ $product->name }}">
+                    <div class="main-image-carousel-container">
+                        @if(count($product->gallery_images) > 1)
+                            <button type="button" class="gallery-carousel-btn prev" onclick="slideGallery(-1)" aria-label="Anterior">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                        @endif
+                        
+                        <div class="main-image-slider" id="imageSlider">
+                            @foreach($product->gallery_images as $index => $imgUrl)
+                                <img src="{{ $imgUrl }}" class="main-image-slide {{ $index === 0 ? 'active' : '' }}" alt="{{ $product->name }} {{ $index + 1 }}">
+                            @endforeach
+                        </div>
+                        
+                        @if(count($product->gallery_images) > 1)
+                            <button type="button" class="gallery-carousel-btn next" onclick="slideGallery(1)" aria-label="Siguiente">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        @endif
+                    </div>
+                    
+                    @if(count($product->gallery_images) > 1)
+                        <div class="thumbnails-container">
+                            @foreach($product->gallery_images as $index => $imgUrl)
+                                <div class="thumbnail-item {{ $index === 0 ? 'active' : '' }}" onclick="jumpToGalleryImage({{ $index }}, this)">
+                                    <img src="{{ $imgUrl }}" alt="{{ $product->name }} {{ $index + 1 }}">
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Info -->
                 <div class="product-info-panel">
-                    <span class="product-category-tag" style="font-family: var(--fuente-sans);">{{ $product->categories->first()->name ?? 'Sin categoría' }}</span>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 0.8rem; border-bottom: 1px solid rgba(27,48,34,0.05); padding-bottom: 0.5rem;">
+                        <span class="product-category-tag" style="font-family: var(--fuente-sans); margin-bottom: 0;">{{ $product->categories->first()->name ?? 'Sin categoría' }}</span>
+                        @if($product->stock > 10)
+                            <span class="stock-badge stock-in-stock" style="font-family: var(--fuente-sans);"><span class="dot"></span> EN STOCK - Listo para envío</span>
+                        @elseif($product->stock > 0)
+                            <span class="stock-badge stock-low" style="font-family: var(--fuente-sans);"><span class="dot"></span> ÚLTIMAS UNIDADES - Quedan {{ $product->stock }}</span>
+                        @else
+                            <span class="stock-badge stock-out" style="font-family: var(--fuente-sans);"><span class="dot"></span> TEMPORALMENTE AGOTADO</span>
+                        @endif
+                    </div>
                     <h1 class="product-title-large" style="font-family: var(--fuente-serif); font-weight: 500;">{{ mb_strtoupper($product->name) }}</h1>
                     <span class="product-price-large" style="font-family: var(--fuente-sans);">{{ number_format($product->price, 2) }}€</span>
 
@@ -70,6 +107,39 @@
                             <span>Devolución fácil</span>
                         </div>
                     </div>
+
+                    <!-- Accordion FAQ Widget -->
+                    <div class="faq-accordion" style="margin-top: 3.5rem; font-family: var(--fuente-sans);">
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                <span><i class="fa-solid fa-truck-fast" style="margin-right: 8px; color: var(--brand-green);"></i> Envío y Entregas</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Nuestros preparados botánicos y elixires se embalan de forma individual y cuidadosa en envases biodegradables y paja protectora natural. Realizamos envíos urgentes a toda España con entrega garantizada en 24/48 horas laborables.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                <span><i class="fa-solid fa-circle-question" style="margin-right: 8px; color: var(--brand-green);"></i> Conservación Botánica</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Al estar elaborados de forma artesanal y con ingredientes 100% ecológicos sin conservantes químicos sintéticos, aconsejamos mantener los productos en un sitio fresco y protegidos de la luz solar directa para preservar todas sus propiedades y frescura.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                <span><i class="fa-solid fa-shield-halved" style="margin-right: 8px; color: var(--brand-green);"></i> Garantía de Pureza Orgánica</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Colaboramos directamente con agricultores y destiladores de comercio justo que cuentan con sellos de agricultura ecológica certificada. Todos nuestros aceites y preparados se formulan de forma consciente y respetuosa con el medio ambiente.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -86,7 +156,7 @@
                 <div class="product-card">
                     <a href="{{ route('catalog.show', $related->id) }}">
                         <div class="product-img">
-                            <img src="{{ $related->image ? asset('storage/' . $related->image) : asset('img/imgPrueba.png') }}" alt="{{ $related->name }}">
+                            <img src="{{ $related->image_url }}" alt="{{ $related->name }}">
                             <div class="product-overlay">
                                 <span>Ver Detalle</span>
                             </div>
