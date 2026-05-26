@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('user_id');
-            $table->decimal('total_price', 10, 2)->default(0.00);
+            $table->unsignedInteger('user_id')->nullable(false);
+            $table->decimal('total_price', 10, 2)->nullable(false)->default(0.00);
             $table->dateTime('order_date')->useCurrent();
-            $table->boolean('status')->default(1);
+            $table->boolean('status')->nullable(false)->default(1);
             $table->timestamps();
 
             $table->foreign('user_id')

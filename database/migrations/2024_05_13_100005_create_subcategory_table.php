@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subcategory', function (Blueprint $table) {
-            $table->unsignedTinyInteger('id');
-            $table->unsignedTinyInteger('parent_id');
+            $table->unsignedTinyInteger('id')->nullable(false);
+            $table->unsignedTinyInteger('parent_id')->nullable(false);
             
             $table->primary(['id', 'parent_id']);
             

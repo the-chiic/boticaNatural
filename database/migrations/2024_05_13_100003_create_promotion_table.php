@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('promotion', function (Blueprint $table) {
             $table->smallIncrements('id');
-            $table->string('name', 100);
-            $table->string('code', 50)->unique('uni_code');
-            $table->decimal('discount', 5, 2);
-            $table->boolean('is_active')->default(1);
+            $table->string('name', 100)->nullable(false);
+            $table->string('code', 50)->nullable(false)->unique('uni_code');
+            $table->decimal('discount', 5, 2)->nullable(false);
+            $table->boolean('is_active')->nullable(false)->default(1);
             $table->dateTime('starts_at')->nullable();
             $table->dateTime('ends_at')->nullable();
             $table->timestamps();
