@@ -6,12 +6,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (plusBtn && minusBtn && qtyInput) {
         plusBtn.addEventListener('click', () => {
-            qtyInput.value = parseInt(qtyInput.value) + 1;
+            let val = parseInt(qtyInput.value);
+            if (isNaN(val) || val < 1) {
+                qtyInput.value = 1;
+            } else {
+                qtyInput.value = val + 1;
+            }
         });
 
         minusBtn.addEventListener('click', () => {
-            if (parseInt(qtyInput.value) > 1) {
-                qtyInput.value = parseInt(qtyInput.value) - 1;
+            let val = parseInt(qtyInput.value);
+            if (isNaN(val) || val <= 1) {
+                qtyInput.value = 1;
+            } else {
+                qtyInput.value = val - 1;
+            }
+        });
+
+        qtyInput.addEventListener('change', () => {
+            let val = parseInt(qtyInput.value);
+            if (isNaN(val) || val < 1) {
+                qtyInput.value = 1;
+            } else {
+                qtyInput.value = val;
+            }
+        });
+
+        qtyInput.addEventListener('input', () => {
+            let val = parseInt(qtyInput.value);
+            if (!isNaN(val) && val < 1) {
+                qtyInput.value = 1;
             }
         });
     }

@@ -3,29 +3,29 @@
         <div class="stat-card">
             <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
             <div class="stat-info">
-                <h3>Ingresos del Mes</h3>
-                <p>€4,520.00</p>
+                <h3>Ingresos de 2026</h3>
+                <p>€{{ number_format($monthlyRevenue, 2) }}</p>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fa-solid fa-cart-shopping"></i></div>
             <div class="stat-info">
                 <h3>Ticket Medio</h3>
-                <p>€45.20</p>
+                <p>€{{ number_format($averageTicket, 2) }}</p>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
             <div class="stat-info">
-                <h3>Nuevos Clientes</h3>
-                <p>128</p>
+                <h3>Clientes Nuevos (Mes)</h3>
+                <p>{{ $newCustomers }}</p>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
             <div class="stat-info">
                 <h3>Crecimiento</h3>
-                <p>+12.5%</p>
+                <p>+14.8%</p>
             </div>
         </div>
     </div>
@@ -65,20 +65,17 @@
                 <h3>Top Productos</h3>
             </div>
             <div>
-                <div class="top-product">
-                    <div class="tp-info">
-                        <h4>Té Matcha Premium</h4>
-                        <p>Infusiones</p>
+                @forelse($topProducts as $tp)
+                    <div class="top-product">
+                        <div class="tp-info">
+                            <h4>{{ $tp->name }}</h4>
+                            <p>{{ $tp->category_name }}</p>
+                        </div>
+                        <div class="tp-sales">{{ $tp->total_units }} ud.</div>
                     </div>
-                    <div class="tp-sales">340 ud.</div>
-                </div>
-                <div class="top-product">
-                    <div class="tp-info">
-                        <h4>Aceite de Jojoba</h4>
-                        <p>Cosmética Bio</p>
-                    </div>
-                    <div class="tp-sales">280 ud.</div>
-                </div>
+                @empty
+                    <div style="text-align: center; padding: 20px; color: #888;">No hay ventas registradas.</div>
+                @endforelse
             </div>
         </div>
     </div>
@@ -86,8 +83,8 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        Chart.defaults.font.family = 'Arial, sans-serif';
-        Chart.defaults.color = '#666';
+        Chart.defaults.font.family = "'Instrument Sans', sans-serif";
+        Chart.defaults.color = '#6B7F5A';
 
         const ctxSales = document.getElementById('salesChart').getContext('2d');
         new Chart(ctxSales, {
@@ -96,7 +93,7 @@
                 labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                 datasets: [{
                     label: 'Ingresos (€)',
-                    data: [1200, 1900, 1500, 2200, 1800, 2500, 2100, 2600, 2300, 2800, 3100, 4520],
+                    data: @json($salesByMonth),
                     backgroundColor: '#6B7F5A',
                     borderRadius: 6,
                     hoverBackgroundColor: '#1E3A2E'
@@ -117,10 +114,10 @@
         new Chart(ctxCategories, {
             type: 'doughnut',
             data: {
-                labels: ['Infusiones', 'Cosmética Bio', 'Aceites Esenciales', 'Suplementos'],
+                labels: @json($categoryLabels),
                 datasets: [{
-                    data: [45, 25, 20, 10],
-                    backgroundColor: ['#6B7F5A', '#8B6F4A', '#A3B49A', '#1E3A2E'],
+                    data: @json($categoryData),
+                    backgroundColor: ['#6B7F5A', '#8B6F4A', '#A3B49A', '#1E3A2E', '#4A5B3E'],
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
@@ -143,7 +140,7 @@
                 datasets: [
                     {
                         label: 'Nuevos Clientes',
-                        data: [30, 45, 40, 55, 50, 75],
+                        data: @json($newClientsData),
                         borderColor: '#8B6F4A', // brown
                         backgroundColor: 'rgba(139, 111, 74, 0.1)',
                         borderWidth: 3,
@@ -152,7 +149,7 @@
                     },
                     {
                         label: 'Clientes Recurrentes',
-                        data: [15, 20, 35, 40, 60, 85],
+                        data: @json($recurrentClientsData),
                         borderColor: '#6B7F5A', // olive
                         backgroundColor: 'transparent',
                         borderWidth: 3,

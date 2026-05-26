@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('product', function (Blueprint $table) {
             $table->smallIncrements('id');
             $table->unsignedSmallInteger('promotion_id')->nullable();
-            $table->string('name', 150);
-            $table->boolean('status')->default(1);
-            $table->decimal('price', 10, 2);
-            $table->unsignedInteger('stock')->default(0);
+            $table->unsignedInteger('img_id')->nullable(false);
+            $table->string('name', 150)->nullable(false);
+            $table->string('description', 200)->nullable(false);
+            $table->boolean('status')->nullable(false)->default(1);
+            $table->decimal('price', 10, 2)->nullable(false);
+            $table->unsignedInteger('stock')->nullable(false)->default(0);
             $table->timestamps();
 
             $table->foreign('promotion_id')
@@ -25,6 +27,12 @@ return new class extends Migration
                 ->on('promotion')
                 ->onUpdate('cascade')
                 ->onDelete('set null');
+                
+            $table->foreign('img_id')
+                ->references('id')
+                ->on('product_img')
+                ->onUpdate('cascade')
+                ->onDelete('cascade');
         });
     }
 

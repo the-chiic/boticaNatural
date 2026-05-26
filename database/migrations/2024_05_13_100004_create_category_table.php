@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('category', function (Blueprint $table) {
             $table->tinyIncrements('id');
-            $table->string('name', 50);
+            $table->string('name', 50)->nullable(false);
             $table->string('description', 255)->nullable();
+            $table->string('img', 100)->nullable(false)->unique('uni_img');
             $table->timestamps();
         });
     }

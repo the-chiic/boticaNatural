@@ -9,10 +9,10 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     
-    --color-brand-green: #1B3022;
-    --color-brand-cream: #F5F5F1;
-    --color-brand-accent: #2D5A27;
-    --color-brand-dark: #0D1A12;
+    --color-brand-green: #1E3A2E;
+    --color-brand-cream: #FAF9F6;
+    --color-brand-accent: #6B7F5A;
+    --color-brand-dark: #111612;
 }
 
 @layer base {
