@@ -624,3 +624,31 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Reglas responsivas adicionales para móviles y tablets */
+@media (max-width: 768px) {
+    .catalog-layout {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+    .filters-sidebar {
+        width: 100% !important;
+        position: static !important;
+    }
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        gap: 1rem !important;
+    }
+    .product-card {
+        border-radius: 0.75rem !important;
+    }
+    .product-details {
+        padding: 0.75rem !important;
+    }
+    .product-details h4 {
+        font-size: 0.9rem !important;
+    }
+    .price-label {
+        font-size: 1rem !important;
+    }
+}
