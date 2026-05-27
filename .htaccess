@@ -2,7 +2,7 @@ DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /pruebaAdriRetoques/
+    RewriteBase /FinalTienda/
 
     RewriteRule ^$ index.php [L]
 
