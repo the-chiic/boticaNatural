@@ -1229,3 +1229,66 @@ input {
         display: none !important;
     }
 }
+
+/* Reglas responsivas para la Barra de Navegación (Navbar) en móvil/tablet */
+@media (max-width: 768px) {
+    .barraNavegacion {
+        padding: 0 1rem !important;
+        height: 4.5em !important;
+    }
+    .navegacionIzquierda {
+        gap: 1rem !important;
+    }
+    .marca {
+        font-size: 0.9em !important;
+    }
+    .barraBusqueda {
+        display: none !important; /* Ocultar barra de búsqueda en móvil para evitar solapamientos */
+    }
+    .nav-acciones-iconos {
+        gap: 0.5em !important;
+    }
+    .nav-icono-btn {
+        width: 2.3em !important;
+        height: 2.3em !important;
+        font-size: 0.95em !important;
+    }
+}
+
+/* Reglas responsivas para el Pie de Página (Footer) en móvil/tablet */
+@media (max-width: 768px) {
+    .piePagina {
+        padding: 2.5rem 1rem 1.5rem !important;
+        text-align: center !important;
+    }
+    .pieSuperior {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 2rem !important;
+        margin-bottom: 2.5rem !important;
+    }
+    .columnaPie {
+        width: 100% !important;
+    }
+    .redesSociales {
+        justify-content: center !important;
+        margin-top: 1rem !important;
+    }
+    .listaContacto li {
+        justify-content: center !important;
+    }
+    .pieInferior {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 1rem !important;
+        text-align: center !important;
+    }
+    .enlacesLegales {
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
+    .metodosPago {
+        justify-content: center !important;
+    }
+}
