@@ -1214,3 +1214,18 @@ input {
         padding: 0.1rem 0.45rem;
     }
 }
+
+/* Reglas responsivas para pantallas de Autenticación */
+@media (max-width: 992px) {
+    .contenedorAutenticacion {
+        flex-direction: column !important;
+        min-height: auto !important;
+    }
+    .autenticacionIzquierda {
+        width: 100% !important;
+        padding: 3rem 1.5rem !important;
+    }
+    .autenticacionDerecha {
+        display: none !important;
+    }
+}
