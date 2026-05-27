@@ -36,5 +36,114 @@
         @include('components.footer')
 
         @stack('scripts')
+        
+        <!-- Script Global de Favoritos con LocalStorage -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Cargar favoritos de localStorage
+                let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
+
+                // Función para actualizar el estado visual de los corazones en la página
+                function actualizarBotonesFavoritos() {
+                    document.querySelectorAll('.btn-favorito').forEach(btn => {
+                        const id = btn.getAttribute('data-id');
+                        const icon = btn.querySelector('i');
+                        if (favoritos.some(fav => fav.id === id)) {
+                            btn.style.color = '#ef4444'; // rojo
+                            icon.className = 'fa-solid fa-heart';
+                        } else {
+                            btn.style.color = '#ccc';
+                            icon.className = 'fa-regular fa-heart';
+                        }
+                    });
+                }
+
+                // Gestionar clics en los botones de favoritos
+                document.addEventListener('click', function(e) {
+                    const btn = e.target.closest('.btn-favorito');
+                    if (btn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const id = btn.getAttribute('data-id');
+                        const name = btn.getAttribute('data-name');
+                        const image = btn.getAttribute('data-image');
+                        const url = btn.getAttribute('data-url');
+                        const price = btn.getAttribute('data-price');
+                        const category = btn.getAttribute('data-category');
+
+                        const index = favoritos.findIndex(fav => fav.id === id);
+                        if (index > -1) {
+                            favoritos.splice(index, 1); // eliminar
+                        } else {
+                            favoritos.push({ id, name, image, url, price, category }); // añadir
+                        }
+                        localStorage.setItem('favoritos', JSON.stringify(favoritos));
+                        actualizarBotonesFavoritos();
+                        
+                        // Si estamos en la página de perfil, actualizar la lista en tiempo real
+                        if (document.getElementById('tab-favoritos')) {
+                            renderFavoritosPerfil();
+                        }
+                    }
+                });
+
+                // Inicializar botones en la página actual
+                actualizarBotonesFavoritos();
+
+                // Lógica específica para la pestaña de Favoritos en el Perfil
+                function renderFavoritosPerfil() {
+                    const container = document.getElementById('tab-favoritos');
+                    if (!container) return;
+
+                    if (favoritos.length === 0) {
+                        container.innerHTML = `
+                            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">MIS FAVORITOS</h2>
+                            <p style="opacity: 0.5;">Aún no tienes productos en tu lista de deseos.</p>
+                            <a href="${window.location.origin}/catalogo" class="btn-primary" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 2rem; text-decoration: none; border-radius: 0.5rem;">IR A LA TIENDA</a>
+                        `;
+                    } else {
+                        let html = `
+                            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">MIS FAVORITOS</h2>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem;">
+                        `;
+
+                        favoritos.forEach(prod => {
+                            html += `
+                                <div style="background: white; border-radius: 1rem; border: 1px solid rgba(27, 48, 34, 0.08); overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                                    <button class="btn-favorito" data-id="${prod.id}" style="position: absolute; top: 10px; right: 10px; z-index: 10; background: white; border: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; color: #ef4444; transition: all 0.2s ease;">
+                                        <i class="fa-solid fa-heart" style="font-size: 18px;"></i>
+                                    </button>
+                                    <a href="${prod.url}">
+                                        <div style="width: 100%; padding-top: 100%; position: relative; background: #fafafa;">
+                                            <img src="${prod.image}" alt="${prod.name}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                    </a>
+                                    <div style="padding: 1rem; flex: 1; display: flex; flex-direction: column;">
+                                        <span style="font-size: 10px; font-weight: 600; color: rgba(27, 48, 34, 0.45); text-transform: uppercase; letter-spacing: 0.15em; display: block; margin-bottom: 0.25rem;">
+                                            ${prod.category}
+                                        </span>
+                                        <h4 style="font-size: 1rem; font-weight: bold; margin-bottom: 0.5rem; line-height: 1.3;">
+                                            <a href="${prod.url}" style="color: var(--brand-green); text-decoration: none;">${prod.name}</a>
+                                        </h4>
+                                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.5rem;">
+                                            <span style="font-weight: 700; color: var(--brand-green);">${prod.price}</span>
+                                            <a href="${prod.url}" class="btn-primary" style="padding: 0.4rem 1rem; font-size: 0.75rem; text-decoration: none; border-radius: 0.5rem;">Ver</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        html += `</div>`;
+                        container.innerHTML = html;
+                    }
+                }
+
+                // Ejecutar el render si estamos en la vista de perfil
+                if (document.getElementById('tab-favoritos')) {
+                    renderFavoritosPerfil();
+                }
+            });
+        </script>
     </body>
 </html>

@@ -43,7 +43,7 @@
                         <a href="#" class="profile-nav-link" data-tab="favoritos">
                             <i class="fas fa-heart"></i> Favoritos
                         </a>
-                        <a href="/cerrar-sesion" class="profile-nav-link" style="color: #ff4d4d; margin-top: 2rem;">
+                        <a href="{{ url('cerrar-sesion') }}" class="profile-nav-link" style="color: #ff4d4d; margin-top: 2rem;">
                             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                         </a>
                     </nav>

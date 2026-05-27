@@ -25,15 +25,19 @@
 @else
 <div class="product-grid">
     @foreach($products as $product)
-    <div class="product-card">
-        <a href="{{ route('catalog.show', $product->id) }}">
-            <div class="product-img">
+    <div class="product-card" style="position: relative;">
+        <div class="product-img" style="position: relative;">
+            <a href="{{ route('catalog.show', $product->id) }}">
                 <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" alt="{{ $product->name }}">
                 <div class="product-overlay">
                     <span>Ver Detalle</span>
                 </div>
-            </div>
-        </a>
+            </a>
+            <!-- Botón Favorito en la esquina superior derecha -->
+            <button type="button" class="btn-favorito" data-id="{{ $product->id }}" data-name="{{ $product->name }}" data-image="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" data-url="{{ route('catalog.show', $product->id) }}" data-category="{{ $product->categories->first()->name ?? 'Sin categoría' }}" data-price="{{ number_format($product->price, 2) }}€" style="position: absolute; top: 12px; right: 12px; z-index: 10; background: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.12); cursor: pointer; color: #ccc; transition: all 0.2s ease;">
+                <i class="fa-regular fa-heart" style="font-size: 16px;"></i>
+            </button>
+        </div>
         <div class="product-details">
             <span style="font-size: 10px; font-weight: 600; color: rgba(27, 48, 34, 0.45); text-transform: uppercase; letter-spacing: 0.15em; display: block; margin-bottom: 0.40rem; font-family: var(--fuente-sans);">
                 {{ $product->categories->first()->name ?? 'Sin categoría' }}
