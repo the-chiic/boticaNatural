@@ -189,13 +189,14 @@ class ControladorAutenticacion extends Controller
         $usuario = User::where('email', $solicitud->email)->first();
 
         if ($usuario) {
-            // Generar un token encriptado que contiene el correo, el hash actual de la contraseña y la expiración
-            $payload = [
-                'email' => $usuario->email,
-                'password_hash' => $usuario->pw,
-                'expires_at' => now()->addMinutes(60)->timestamp,
-            ];
-            $token = Crypt::encrypt($payload);
+            // Generar un token único y seguro
+            $token = Str::random(60);
+
+            // Almacenar el token y la expiración en la base de datos (60 minutos)
+            $usuario->update([
+                'password_reset_token' => $token,
+                'password_reset_expires_at' => now()->addMinutes(60),
+            ]);
 
             // Enviar el correo
             try {
@@ -218,26 +219,15 @@ class ControladorAutenticacion extends Controller
             'email' => ['required', 'email']
         ]);
 
-        try {
-            $payload = Crypt::decrypt($token);
-        } catch (DecryptException $e) {
-            return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación es inválido o ha sido alterado.']);
+        $usuario = User::where('email', $request->email)->first();
+
+        if (!$usuario || $usuario->password_reset_token !== $token) {
+            return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación es inválido o ya ha sido utilizado.']);
         }
 
         // Verificar expiración
-        if (now()->timestamp > $payload['expires_at']) {
+        if (now()->gt($usuario->password_reset_expires_at)) {
             return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación ha caducado.']);
-        }
-
-        // Verificar coincidencia de correo
-        if ($payload['email'] !== $request->email) {
-            return redirect()->route('password.request')->withErrors(['email' => 'El enlace no corresponde a este correo electrónico.']);
-        }
-
-        // Buscar el usuario y comprobar que su contraseña no haya cambiado (seguridad de un solo uso)
-        $usuario = User::where('email', $request->email)->first();
-        if (!$usuario || $usuario->pw !== $payload['password_hash']) {
-            return redirect()->route('password.request')->withErrors(['email' => 'Este enlace de recuperación ya ha sido utilizado.']);
         }
 
         return view('auth.reset-password', ['token' => $token, 'email' => $request->email]);
@@ -259,31 +249,22 @@ class ControladorAutenticacion extends Controller
             'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
-        try {
-            $payload = Crypt::decrypt($solicitud->token);
-        } catch (DecryptException $e) {
-            return back()->withErrors(['email' => 'El token de recuperación es inválido o ha sido alterado.']);
+        $usuario = User::where('email', $solicitud->email)->first();
+
+        if (!$usuario || $usuario->password_reset_token !== $solicitud->token) {
+            return redirect()->route('password.request')->withErrors(['email' => 'El token de recuperación es inválido o ya ha sido utilizado.']);
         }
 
         // Verificar expiración
-        if (now()->timestamp > $payload['expires_at']) {
+        if (now()->gt($usuario->password_reset_expires_at)) {
             return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación ha caducado.']);
         }
 
-        // Verificar coincidencia de correo
-        if ($payload['email'] !== $solicitud->email) {
-            return back()->withErrors(['email' => 'El token de recuperación no corresponde a este correo electrónico.']);
-        }
-
-        // Buscar el usuario y comprobar que su contraseña no haya cambiado (seguridad de un solo uso)
-        $usuario = User::where('email', $solicitud->email)->first();
-        if (!$usuario || $usuario->pw !== $payload['password_hash']) {
-            return redirect()->route('password.request')->withErrors(['email' => 'Este enlace de recuperación ya ha sido utilizado.']);
-        }
-
-        // Actualizar la contraseña (campo pw)
+        // Actualizar la contraseña y limpiar el token de recuperación
         $usuario->update([
-            'pw' => Hash::make($solicitud->password)
+            'pw' => Hash::make($solicitud->password),
+            'password_reset_token' => null,
+            'password_reset_expires_at' => null,
         ]);
 
         return redirect()->route('login')->with('status', '¡Tu contraseña ha sido restablecida con éxito! Ya puedes iniciar sesión.');

@@ -41,7 +41,7 @@
                 <div class="grupoFormulario">
                     <div class="cabeceraGrupoFormulario">
                         <label class="etiquetaFormulario" for="password">Contraseña</label>
-                        <!-- <a href="{{ route('password.request') }}" class="enlaceOlvido">¿Olvidaste tu contraseña?</a> (Oculto temporalmente) -->
+                        <a href="{{ route('password.request') }}" class="enlaceOlvido">¿Olvidaste tu contraseña?</a>
                     </div>
                     <input type="password" name="password" id="password" class="controlFormulario" placeholder="........">
                     @error('password')
