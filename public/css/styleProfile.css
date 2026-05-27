@@ -71,3 +71,25 @@
 
 .status-delivered { background: #dcfce7; color: #166534; }
 .status-pending { background: #fef9c3; color: #854d0e; }
+
+/* Reglas responsivas de móvil y tablet */
+@media (max-width: 768px) {
+    .profile-layout {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+    .profile-nav {
+        padding: 1.5rem !important;
+    }
+    .profile-content-section {
+        padding: 1.5rem !important;
+        border-radius: 1.5rem !important;
+    }
+    .order-history-table {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch;
+    }
+}
