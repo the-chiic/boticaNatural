@@ -24,6 +24,22 @@ class AdminController extends Controller
         $customersCount = User::count();
         $activeProducts = Product::where('status', 1)->count();
 
+        // 1b. Métricas del mes anterior para indicadores de variación
+        $lastMonthStart = now()->subMonth()->startOfMonth();
+        $lastMonthEnd   = now()->subMonth()->endOfMonth();
+        $thisMonthStart = now()->startOfMonth();
+
+        $revenueLastMonth   = DB::table('orders')
+            ->where('status', 1)
+            ->whereBetween('order_date', [$lastMonthStart, $lastMonthEnd])
+            ->sum('total_price');
+
+        $ordersLastMonth    = DB::table('orders')
+            ->whereBetween('order_date', [$lastMonthStart, $lastMonthEnd])
+            ->count();
+
+        $customersLastMonth = User::where('created_at', '<', $thisMonthStart)->count();
+
         // 2. Pedidos recientes con nombre de cliente
         $recentOrders = DB::table('orders')
             ->join('user', 'orders.user_id', '=', 'user.id')
@@ -52,8 +68,13 @@ class AdminController extends Controller
                 });
         }
 
-        return view('admin.index', compact('totalRevenue', 'ordersCount', 'customersCount', 'activeProducts', 'recentOrders', 'popularProducts'));
+        return view('admin.index', compact(
+            'totalRevenue', 'ordersCount', 'customersCount', 'activeProducts',
+            'recentOrders', 'popularProducts',
+            'revenueLastMonth', 'ordersLastMonth', 'customersLastMonth'
+        ));
     }
+
 
     /**
      * Gestión y listado de productos con paginación.
@@ -526,6 +547,7 @@ class AdminController extends Controller
             'code' => 'required|string|max:50|unique:promotion,code',
             'discount' => 'required|numeric|min:0|max:100',
             'is_active' => 'required|boolean',
+            'show_on_web' => 'required|boolean',
             'starts_at' => 'nullable|date',
             'ends_at' => 'nullable|date|after_or_equal:starts_at',
         ]);
@@ -535,6 +557,7 @@ class AdminController extends Controller
             'code' => strtoupper($request->code),
             'discount' => $request->discount,
             'is_active' => $request->is_active,
+            'show_on_web' => $request->show_on_web,
             'starts_at' => $request->starts_at,
             'ends_at' => $request->ends_at,
         ]);
@@ -552,19 +575,34 @@ class AdminController extends Controller
             'code' => 'required|string|max:50|unique:promotion,code,' . $id,
             'discount' => 'required|numeric|min:0|max:100',
             'is_active' => 'required|boolean',
+            'show_on_web' => 'required|boolean',
             'starts_at' => 'nullable|date',
             'ends_at' => 'nullable|date|after_or_equal:starts_at',
         ]);
 
         $promotion = Promotion::findOrFail($id);
-        $promotion->update([
+        
+        $promotion->fill([
             'name' => $request->name,
             'code' => strtoupper($request->code),
             'discount' => $request->discount,
             'is_active' => $request->is_active,
+            'show_on_web' => $request->show_on_web,
             'starts_at' => $request->starts_at,
             'ends_at' => $request->ends_at,
         ]);
+        
+        if ($promotion->isDirty()) {
+            $promotion->update([
+                'name' => $request->name,
+                'code' => strtoupper($request->code),
+                'discount' => $request->discount,
+                'is_active' => $request->is_active,
+                'show_on_web' => $request->show_on_web,
+                'starts_at' => $request->starts_at,
+                'ends_at' => $request->ends_at,
+            ]);
+        }
 
         return back()->with('success', '¡El cupón de descuento se ha actualizado correctamente!');
     }
@@ -582,5 +620,159 @@ class AdminController extends Controller
         $promotion->delete();
 
         return back()->with('success', '¡El cupón de descuento ha sido eliminado con éxito!');
+    }
+
+    /**
+     * Búsqueda global interactiva en tiempo real por AJAX.
+     */
+    public function globalSearch(Request $request)
+    {
+        $query = $request->get('q', '');
+        if (strlen($query) < 2) {
+            return response()->json(['products' => [], 'customers' => [], 'orders' => []]);
+        }
+
+        // Consultar productos llamando al modelo Product
+        $products = Product::where('status', 1)
+            ->where('name', 'LIKE', "%{$query}%")
+            ->take(5)
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'stock' => $product->stock,
+                    'price' => number_format($product->price, 2)
+                ];
+            });
+
+        // Consultar clientes llamando al modelo User
+        $customers = User::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('email', 'LIKE', "%{$query}%")
+            ->take(5)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email
+                ];
+            });
+
+        // Consultar pedidos llamando al modelo Order
+        $orders = Order::with('user')
+            ->where('id', 'LIKE', "%{$query}%")
+            ->orWhereHas('user', function ($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%");
+            })
+            ->orderBy('id', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'code' => str_pad($order->id, 3, '0', STR_PAD_LEFT),
+                    'client_name' => $order->user ? $order->user->name : 'Invitado',
+                    'total_price' => number_format($order->total_price, 2),
+                    'status' => $order->status
+                ];
+            });
+
+        return response()->json([
+            'products' => $products,
+            'customers' => $customers,
+            'orders' => $orders
+        ]);
+    }
+
+    /**
+     * Actualización asíncrona parcial de stock mediante PUT.
+     */
+    public function quickStockUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'stock' => 'required|integer|min:0'
+        ]);
+
+        // Consultar existencia llamando al modelo Product
+        $product = Product::findOrFail($id);
+        
+        // Uso de fill() y dirty() conforme a directrices de edición del usuario
+        $product->fill(['stock' => $request->stock]);
+        $isDirty = $product->isDirty('stock');
+        
+        if ($isDirty) {
+            $product->update([
+                'stock' => $request->stock
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'new_stock' => $product->stock,
+            'is_low_stock' => $product->stock <= 5
+        ]);
+    }
+
+    /**
+     * Alternar estado activo de una promoción mediante AJAX.
+     */
+    public function togglePromocion($id)
+    {
+        // Consultar existencia llamando al modelo Promotion
+        $promotion = Promotion::findOrFail($id);
+        
+        $newStatus = $promotion->is_active ? 0 : 1;
+        
+        // Uso de fill() y dirty() conforme a directrices de edición del usuario
+        $promotion->fill(['is_active' => $newStatus]);
+        $isDirty = $promotion->isDirty('is_active');
+        
+        if ($isDirty) {
+            $promotion->update([
+                'is_active' => $newStatus
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'promotion_id' => $promotion->id,
+            'promotion_name' => $promotion->name,
+            'is_active' => $promotion->is_active,
+            'code' => $promotion->code,
+            'discount' => number_format($promotion->discount, 0)
+        ]);
+    }
+
+    /**
+     * Alternar estado de visibilidad en la web de clientes de una promoción mediante AJAX.
+     */
+    public function togglePromocionWeb($id)
+    {
+        // Consultar existencia llamando al modelo Promotion
+        $promotion = Promotion::findOrFail($id);
+        
+        $newStatus = $promotion->show_on_web ? 0 : 1;
+        
+        // Uso de fill() y dirty() conforme a directrices de edición del usuario
+        $promotion->fill(['show_on_web' => $newStatus]);
+        $isDirty = $promotion->isDirty('show_on_web');
+        
+        if ($isDirty) {
+            $promotion->update([
+                'show_on_web' => $newStatus
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'promotion_id' => $promotion->id,
+            'promotion_name' => $promotion->name,
+            'show_on_web' => $promotion->show_on_web,
+            'code' => $promotion->code,
+            'discount' => number_format($promotion->discount, 0)
+        ]);
     }
 }

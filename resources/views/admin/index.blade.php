@@ -7,6 +7,15 @@
             <div class="stat-info">
                 <h3>Ingresos Totales</h3>
                 <p>€{{ number_format($totalRevenue, 2) }}</p>
+                @if($revenueLastMonth > 0)
+                    @php $revDelta = $revenueLastMonth > 0 ? round((($totalRevenue - $revenueLastMonth) / $revenueLastMonth) * 100, 1) : 0; @endphp
+                    <span class="stat-delta {{ $revDelta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        <i class="fa-solid fa-arrow-{{ $revDelta >= 0 ? 'trend-up' : 'trend-down' }}"></i>
+                        {{ $revDelta >= 0 ? '+' : '' }}{{ $revDelta }}% vs mes anterior
+                    </span>
+                @else
+                    <span class="stat-delta delta-neutral"><i class="fa-solid fa-minus"></i> Sin datos previos</span>
+                @endif
             </div>
         </div>
         <div class="stat-card">
@@ -16,6 +25,15 @@
             <div class="stat-info">
                 <h3>Total Pedidos</h3>
                 <p>{{ $ordersCount }}</p>
+                @php $orderDelta = $ordersLastMonth > 0 ? round((($ordersCount - $ordersLastMonth) / $ordersLastMonth) * 100, 1) : 0; @endphp
+                @if($ordersLastMonth > 0)
+                    <span class="stat-delta {{ $orderDelta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        <i class="fa-solid fa-arrow-{{ $orderDelta >= 0 ? 'trend-up' : 'trend-down' }}"></i>
+                        {{ $orderDelta >= 0 ? '+' : '' }}{{ $orderDelta }}% vs mes anterior
+                    </span>
+                @else
+                    <span class="stat-delta delta-neutral"><i class="fa-solid fa-minus"></i> Sin datos previos</span>
+                @endif
             </div>
         </div>
         <div class="stat-card">
@@ -25,6 +43,15 @@
             <div class="stat-info">
                 <h3>Clientes Registrados</h3>
                 <p>{{ $customersCount }}</p>
+                @php $custDelta = $customersLastMonth > 0 ? round((($customersCount - $customersLastMonth) / $customersLastMonth) * 100, 1) : 0; @endphp
+                @if($customersLastMonth > 0)
+                    <span class="stat-delta {{ $custDelta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        <i class="fa-solid fa-arrow-{{ $custDelta >= 0 ? 'trend-up' : 'trend-down' }}"></i>
+                        {{ $custDelta >= 0 ? '+' : '' }}{{ $custDelta }}% vs mes anterior
+                    </span>
+                @else
+                    <span class="stat-delta delta-neutral"><i class="fa-solid fa-minus"></i> Sin datos previos</span>
+                @endif
             </div>
         </div>
         <div class="stat-card">
@@ -34,6 +61,7 @@
             <div class="stat-info">
                 <h3>Productos Activos</h3>
                 <p>{{ $activeProducts }}</p>
+                <span class="stat-delta delta-neutral"><i class="fa-solid fa-circle-check"></i> En catálogo activo</span>
             </div>
         </div>
     </div>
@@ -110,5 +138,48 @@
                 @endforelse
             </div>
         </div>
+
+        <!-- Elegant Notepad / Quick Reminders Widget -->
+        <div class="panel" style="margin-top: 30px;">
+            <div class="panel-header" style="border-bottom: 1px solid rgba(139, 111, 74, 0.1); padding-bottom: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="display: flex; align-items: center; gap: 8px; font-size: 16px;"><i class="fa-solid fa-note-sticky" style="color: var(--olive-green);"></i> Bloc de Notas y Remisiones</h3>
+                <span id="saveStatus" style="font-size: 11px; color: var(--olive-green); opacity: 0; transition: opacity 0.3s;">Guardado</span>
+            </div>
+            <div class="notepad-body" style="display: flex; flex-direction: column; gap: 15px;">
+                <p style="font-size: 12px; color: var(--olive-green); margin: 0; line-height: 1.5;">Usa este bloc para guardar recordatorios, fórmulas botánicas o notas de inventario. Se guardará de manera automática y local en tu navegador.</p>
+                <textarea id="adminNotepad" placeholder="Ej. Encargar frascos goteros de ámbar de 50ml..." style="width: 100%; min-height: 150px; padding: 15px; border: 1px solid var(--beige); border-radius: 12px; background-color: var(--cream); font-size: 13px; line-height: 1.6; color: var(--dark); resize: vertical; outline: none; transition: border-color 0.3s;" oninput="saveAdminNotes()"></textarea>
+            </div>
+        </div>
     </div>
 </x-admin.layout>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load saved notes
+        const notepad = document.getElementById('adminNotepad');
+        if (notepad) {
+            notepad.value = localStorage.getItem('botica_admin_notes') || '';
+        }
+    });
+
+    let autoSaveTimeout;
+    function saveAdminNotes() {
+        const notepad = document.getElementById('adminNotepad');
+        const statusEl = document.getElementById('saveStatus');
+        
+        if (notepad) {
+            localStorage.setItem('botica_admin_notes', notepad.value);
+            
+            // Show "Guardado" status
+            if (statusEl) {
+                statusEl.style.opacity = '1';
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => {
+                    statusEl.style.opacity = '0';
+                }, 1500);
+            }
+        }
+    }
+</script>
+@endpush

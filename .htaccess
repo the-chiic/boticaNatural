@@ -1,0 +1,24 @@
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /FinalTienda/
+
+    # Si el archivo existe directamente en la raíz, sírvelo (ya reescrito antes)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Si el directorio existe en la raíz, sírvelo
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Si el archivo existe dentro de public/ (css, js, img...), reescribir a public/
+    RewriteCond %{DOCUMENT_ROOT}/FinalTienda/public/%{REQUEST_URI} -f
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
+
+    # Redirigir la raiz a index.php (que carga public/index.php)
+    RewriteRule ^$ index.php [L]
+
+    # Todo lo demás (rutas Laravel) va a index.php
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>

@@ -10,6 +10,9 @@
 <section class="seccionHero">
     <div class="capaOscura"></div>
     <div class="contenidoHero">
+        <div class="hero-brand-stamp-container">
+            <img src="{{ asset('img/logo.jpg') }}" alt="Sello La Botica Natural" class="hero-brand-stamp">
+        </div>
         <span class="badge-bienvenida">BIENVENIDO A NUESTRO HERBOLARIO</span>
         <h1 class="tituloHero">Bienestar diario inspirado en la <span class="resaltado-organico">naturaleza</span>.</h1>
         <p class="subtituloHero">Productos artesanales, sostenibles y puros para cultivar una vida consciente y saludable.</p>
@@ -80,7 +83,7 @@
             <div class="product-card">
                 <a href="{{ route('catalog.show', $product->id) }}">
                     <div class="product-img">
-                        <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" alt="{{ $product->name }}">
+                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy" decoding="async">
                         <div class="product-overlay">
                             <span class="badge-detalle">VER DETALLE</span>
                         </div>
@@ -114,6 +117,27 @@
 <!-- Sección Características / Valores -->
 <section id="sobre-nosotros" class="seccionCaracteristicas">
     <div class="contenedorCentrado">
+        
+        <!-- Bloque de Historia y Sello de Calidad -->
+        <div class="historia-wrapper">
+            <div class="historia-sello-container">
+                <div class="sello-decoracion-anillos"></div>
+                <img src="{{ asset('img/logo.jpg') }}" alt="Sello de Calidad La Botica Natural" class="sello-historia-imagen" loading="lazy" decoding="async">
+            </div>
+            <div class="historia-contenido">
+                <span class="subtituloSeccion">DESDE 1994</span>
+                <h2 class="historia-titulo">
+                    Un compromiso inquebrantable con tu <span class="resaltado-organico">bienestar puro</span>.
+                </h2>
+                <p class="historia-parrafo">
+                    Fundada hace más de tres décadas, La Botica Natural nació con un propósito claro: reconectar a las personas con el poder curativo de las plantas y los extractos botánicos más puros. Cada fórmula es elaborada artesanalmente por farmacéuticos expertos, respetando los ciclos de la tierra y los estándares éticos de sostenibilidad.
+                </p>
+                <p class="historia-parrafo">
+                    Nuestro sello es garantía de trazabilidad ecológica, formulación científica de vanguardia y amor por lo natural. Llevamos más de 30 años cultivando la salud holística y el bienestar consciente para toda nuestra comunidad.
+                </p>
+            </div>
+        </div>
+
         <div class="cuadriculaCaracteristicas">
             <div class="itemCaracteristica">
                 <div class="iconoContenedor">

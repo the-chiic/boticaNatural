@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('payment', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('order_id')->unique('uni_order_id');
+            $table->unsignedInteger('order_id')->nullable(false);
             $table->string('payment_details', 255)->nullable();
-            $table->boolean('payment_status')->default(1);
+            $table->boolean('payment_status')->nullable(false)->default(1);
             $table->string('reference', 100)->nullable()->unique('uni_reference');
-            $table->decimal('amount', 10, 2);
+            $table->decimal('amount', 10, 2)->nullable(false);
             $table->timestamps();
 
             $table->foreign('order_id')

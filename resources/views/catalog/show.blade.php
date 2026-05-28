@@ -6,6 +6,156 @@
 @endpush
 
 @section('main_content')
+    <style>
+        /* Force CSS carousel overrides directly inline in the body */
+        .main-image-carousel-container {
+            position: relative !important;
+            overflow: hidden !important;
+            border-radius: 2rem !important;
+            box-shadow: 0 20px 40px rgba(27, 48, 34, 0.08) !important;
+            background-color: #f7f6f2 !important;
+            width: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+        }
+
+        .main-image-slider {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .main-image-slide {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            height: 100% !important;
+            flex-shrink: 0 !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+
+        .gallery-carousel-btn {
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 10 !important;
+            width: 2.75rem !important;
+            height: 2.75rem !important;
+            border-radius: 50% !important;
+            border: none !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+            color: var(--brand-green, #1b3022) !important;
+            font-size: 0.85rem !important;
+            box-shadow: 0 4px 12px rgba(27, 48, 34, 0.12) !important;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        .gallery-carousel-btn:hover {
+            background: #ffffff !important;
+            box-shadow: 0 6px 20px rgba(27, 48, 34, 0.2) !important;
+            transform: translateY(-50%) scale(1.08) !important;
+        }
+
+        .gallery-carousel-btn.prev {
+            left: 1rem !important;
+        }
+
+        .gallery-carousel-btn.next {
+            right: 1rem !important;
+        }
+
+        .thumbnails-container {
+            display: flex !important;
+            gap: 1rem !important;
+            margin-top: 1.25rem !important;
+            justify-content: flex-start !important;
+            flex-wrap: wrap !important;
+        }
+
+        .thumbnail-item {
+            width: 5.5rem !important;
+            height: 5.5rem !important;
+            border-radius: 1rem !important;
+            overflow: hidden !important;
+            cursor: pointer !important;
+            border: 2px solid transparent !important;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            background-color: #f7f6f2 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02) !important;
+        }
+
+        .thumbnail-item img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            display: block !important;
+        }
+
+        .thumbnail-item:hover img {
+            transform: scale(1.08) !important;
+        }
+
+        .thumbnail-item.active {
+            border-color: #6b7f5a !important;
+            box-shadow: 0 6px 16px rgba(107, 127, 90, 0.15) !important;
+            transform: translateY(-2px) !important;
+        }
+    </style>
+
+    <script>
+        // Force slide active logic to override cached functions
+        var currentSlideIndex = 0;
+
+        function slideGallery(direction) {
+            const slides = document.querySelectorAll('.main-image-slide');
+            if (slides.length <= 1) return;
+
+            currentSlideIndex += direction;
+            if (currentSlideIndex >= slides.length) {
+                currentSlideIndex = 0;
+            } else if (currentSlideIndex < 0) {
+                currentSlideIndex = slides.length - 1;
+            }
+
+            updateActiveSlide();
+        }
+
+        function jumpToGalleryImage(index, thumbnailEl) {
+            currentSlideIndex = index;
+            updateActiveSlide();
+        }
+
+        function updateActiveSlide() {
+            const slider = document.getElementById('imageSlider');
+            const slides = document.querySelectorAll('.main-image-slide');
+            const thumbnails = document.querySelectorAll('.thumbnail-item');
+
+            if (slider && slides.length > 0) {
+                slider.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+            }
+
+            thumbnails.forEach((thumb, idx) => {
+                thumb.classList.toggle('active', idx === currentSlideIndex);
+            });
+        }
+
+        // Initialize active state on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateActiveSlide();
+        });
+    </script>
     <div class="section-padding" style="background: white; padding-top: 4rem;">
         <div class="container">
             <!-- Breadcrumbs -->
@@ -13,15 +163,58 @@
                 <a href="{{ url('/') }}">Inicio</a> / <a href="{{ route('catalog.index') }}">Catálogo</a> / <span style="color: var(--brand-green); font-weight: 500;">{{ $product->name }}</span>
             </div>
 
+            @if(session('success'))
+                <div class="alert alert-success mb-4" style="background: rgba(76, 175, 80, 0.12); color: var(--brand-green); padding: 0.75rem 1rem; border-radius: 0.5rem; font-family: var(--fuente-sans);">
+                    <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+                </div>
+            @endif
+
             <div class="product-show-layout">
-                <!-- Image Gallery -->
+                <!-- Image Gallery Carousel -->
                 <div class="product-gallery">
-                    <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" class="main-image" alt="{{ $product->name }}">
+                    <div class="main-image-carousel-container">
+                        @if(count($product->gallery_images) > 1)
+                            <button type="button" class="gallery-carousel-btn prev" onclick="slideGallery(-1)" aria-label="Anterior">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                        @endif
+                        
+                        <div class="main-image-slider" id="imageSlider">
+                            @foreach($product->gallery_images as $index => $imgUrl)
+                                <img src="{{ $imgUrl }}" class="main-image-slide {{ $index === 0 ? 'active' : '' }}" alt="{{ $product->name }} {{ $index + 1 }}">
+                            @endforeach
+                        </div>
+                        
+                        @if(count($product->gallery_images) > 1)
+                            <button type="button" class="gallery-carousel-btn next" onclick="slideGallery(1)" aria-label="Siguiente">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        @endif
+                    </div>
+                    
+                    @if(count($product->gallery_images) > 1)
+                        <div class="thumbnails-container">
+                            @foreach($product->gallery_images as $index => $imgUrl)
+                                <div class="thumbnail-item {{ $index === 0 ? 'active' : '' }}" onclick="jumpToGalleryImage({{ $index }}, this)">
+                                    <img src="{{ $imgUrl }}" alt="{{ $product->name }} {{ $index + 1 }}" loading="lazy" decoding="async">
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Info -->
                 <div class="product-info-panel">
-                    <span class="product-category-tag" style="font-family: var(--fuente-sans);">{{ $product->categories->first()->name ?? 'Sin categoría' }}</span>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 0.8rem; border-bottom: 1px solid rgba(27,48,34,0.05); padding-bottom: 0.5rem;">
+                        <span class="product-category-tag" style="font-family: var(--fuente-sans); margin-bottom: 0;">{{ $product->categories->first()->name ?? 'Sin categoría' }}</span>
+                        @if($product->stock > 10)
+                            <span class="stock-badge stock-in-stock" style="font-family: var(--fuente-sans);"><span class="dot"></span> EN STOCK - Listo para envío</span>
+                        @elseif($product->stock > 0)
+                            <span class="stock-badge stock-low" style="font-family: var(--fuente-sans);"><span class="dot"></span> ÚLTIMAS UNIDADES - Quedan {{ $product->stock }}</span>
+                        @else
+                            <span class="stock-badge stock-out" style="font-family: var(--fuente-sans);"><span class="dot"></span> TEMPORALMENTE AGOTADO</span>
+                        @endif
+                    </div>
                     <h1 class="product-title-large" style="font-family: var(--fuente-serif); font-weight: 500;">{{ mb_strtoupper($product->name) }}</h1>
                     <span class="product-price-large" style="font-family: var(--fuente-sans);">{{ number_format($product->price, 2) }}€</span>
 
@@ -64,6 +257,39 @@
                             <span>Devolución fácil</span>
                         </div>
                     </div>
+
+                    <!-- Accordion FAQ Widget -->
+                    <div class="faq-accordion" style="margin-top: 3.5rem; font-family: var(--fuente-sans);">
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                <span><i class="fa-solid fa-truck-fast" style="margin-right: 8px; color: var(--brand-green);"></i> Envío y Entregas</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Nuestros preparados botánicos y elixires se embalan de forma individual y cuidadosa en envases biodegradables y paja protectora natural. Realizamos envíos urgentes a toda España con entrega garantizada en 24/48 horas laborables.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                <span><i class="fa-solid fa-circle-question" style="margin-right: 8px; color: var(--brand-green);"></i> Conservación Botánica</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Al estar elaborados de forma artesanal y con ingredientes 100% ecológicos sin conservantes químicos sintéticos, aconsejamos mantener los productos en un sitio fresco y protegidos de la luz solar directa para preservar todas sus propiedades y frescura.</p>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                <span><i class="fa-solid fa-shield-halved" style="margin-right: 8px; color: var(--brand-green);"></i> Garantía de Pureza Orgánica</span>
+                                <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Colaboramos directamente con agricultores y destiladores de comercio justo que cuentan con sellos de agricultura ecológica certificada. Todos nuestros aceites y preparados se formulan de forma consciente y respetuosa con el medio ambiente.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -80,7 +306,7 @@
                 <div class="product-card">
                     <a href="{{ route('catalog.show', $related->id) }}">
                         <div class="product-img">
-                            <img src="{{ $related->image ? asset('storage/' . $related->image) : asset('img/imgPrueba.png') }}" alt="{{ $related->name }}">
+                            <img src="{{ $related->image_url }}" alt="{{ $related->name }}" loading="lazy" decoding="async">
                             <div class="product-overlay">
                                 <span>Ver Detalle</span>
                             </div>

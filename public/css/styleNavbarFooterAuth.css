@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 :root {
     --color-principal: #1E3A2E;
@@ -17,6 +17,7 @@
     --color-blanco: #FAF9F6;
     --color-capa-oscura: rgba(17, 22, 18, 0.4);
     --fuente-base: 'Inter', sans-serif;
+    --fuente-serif: 'Playfair Display', Georgia, serif;
 }
 
 /* Reset and Base Styles */
@@ -72,25 +73,43 @@ input {
     gap: 3.5em;
 }
 
-.marca {
+.marca-premium {
     display: flex;
     align-items: center;
-    gap: 0.625em;
-    font-weight: 700;
-    font-size: 1.125em;
-    color: var(--color-principal);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    gap: 0.75rem;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .iconoMarca {
-    width: 1.5em;
-    height: 1.5em;
-    transition: transform 0.5s ease;
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--color-acento);
+    box-shadow: 0 4px 12px rgba(139, 111, 74, 0.18);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.7s ease, border-color 0.4s ease;
+    background-color: var(--color-blanco);
 }
 
-.marca:hover .iconoMarca {
-    transform: rotate(15deg) scale(1.1);
+.nombreMarca {
+    font-family: var(--fuente-serif), 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-principal);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+.marca-premium:hover .iconoMarca {
+    transform: rotate(360deg) scale(1.08);
+    border-color: var(--color-principal);
+    box-shadow: 0 6px 16px rgba(30, 58, 46, 0.25);
+}
+
+.marca-premium:hover .nombreMarca {
+    color: var(--color-acento);
 }
 
 .enlacesNavegacion {
@@ -208,48 +227,174 @@ input {
     color: var(--color-principal);
 }
 
-/* Menu Usuario Desplegable */
+/* Iconos derecha (perfil + carrito) */
+.nav-acciones-iconos {
+    display: flex;
+    align-items: center;
+    gap: 0.625em;
+}
+
+.nav-icono-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75em;
+    height: 2.75em;
+    border-radius: 50%;
+    border: 1px solid rgba(27, 48, 34, 0.12);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--color-principal);
+    font-size: 1.05em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.nav-icono-btn:hover {
+    background: rgba(27, 48, 34, 0.06);
+    border-color: rgba(27, 48, 34, 0.22);
+    color: var(--color-acento);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(27, 48, 34, 0.08);
+}
+
+.btn-hamburger {
+    display: none !important;
+}
+
+.menu-movil-overlay {
+    display: none !important;
+}
+
+.menu-movil-drawer {
+    display: none !important;
+}
+
+.nav-icono-perfil--activo {
+    background: rgba(27, 48, 34, 0.08);
+    border-color: var(--color-principal);
+    color: var(--color-principal);
+}
+
+.nav-icono-perfil[aria-expanded="true"] {
+    background: var(--color-principal);
+    border-color: var(--color-principal);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(27, 48, 34, 0.2);
+}
+
+.nav-badge-carrito {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    background-color: var(--color-acento, #8b6f4a);
+    color: #ffffff !important;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--fuente-base), sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 5px rgba(27, 48, 34, 0.15);
+    z-index: 2;
+}
+
+/* Menú usuario */
 .menuUsuarioContenedor {
     position: relative;
 }
 
 .menuUsuarioDesplegable {
     position: absolute;
-    top: 2.125em;
+    top: calc(100% + 0.5em);
     right: 0;
     background-color: var(--color-blanco);
-    min-width: 12.5em;
-    border-radius: 0.75em;
-    box-shadow: 0 0.625em 1.875em rgba(0, 0, 0, 0.1);
-    border: 0.0625em solid var(--color-borde-claro);
+    min-width: 13.5em;
+    border-radius: 0.875em;
+    box-shadow: 0 12px 40px rgba(27, 48, 34, 0.12);
+    border: 1px solid var(--color-borde-claro);
     padding: 0.5em;
     z-index: 1000;
     display: none;
+    animation: menuUsuarioEntrada 0.2s ease;
+}
+
+@keyframes menuUsuarioEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .menuUsuarioDesplegable.activo {
     display: block;
 }
 
-.menuUsuarioDesplegable a {
-    display: block;
-    padding: 0.75em 1em;
-    font-size: 0.875em;
-    color: var(--color-texto);
-    border-radius: 0.5em;
-    transition: background-color 0.2s;
-    text-align: left;
+.menuUsuarioTitulo {
+    margin: 0.35em 0.75em 0.5em;
+    font-size: 0.65em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(27, 48, 34, 0.45);
 }
 
-.menuUsuarioDesplegable a:hover {
+.menuUsuarioEnlace {
+    display: flex;
+    align-items: center;
+    gap: 0.65em;
+    padding: 0.7em 0.85em;
+    font-size: 0.875em;
+    font-weight: 500;
+    color: var(--color-texto);
+    border-radius: 0.5em;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.menuUsuarioEnlace i {
+    width: 1.1em;
+    text-align: center;
+    opacity: 0.75;
+}
+
+.menuUsuarioEnlace:hover {
     background-color: var(--color-fondo-oscuro);
     color: var(--color-principal);
 }
 
+.menuUsuarioEnlace--principal {
+    color: var(--color-principal);
+    font-weight: 600;
+}
+
+.menuUsuarioEnlace--principal:hover {
+    background: rgba(27, 48, 34, 0.08);
+}
+
+.menuUsuarioEnlace--salir {
+    color: #c0392b;
+}
+
+.menuUsuarioEnlace--salir:hover {
+    background: rgba(192, 57, 43, 0.08);
+    color: #a93226;
+}
+
 .divisorMenu {
-    height: 0.0625em;
+    height: 1px;
     background-color: var(--color-borde-claro);
-    margin: 0.3125em 0.5em;
+    margin: 0.35em 0.5em;
 }
 
 /* Auth Layout (Split View) */
@@ -936,4 +1081,464 @@ input {
 .itemCaracteristica p {
     font-size: 0.875em;
     color: var(--color-texto-claro);
+}
+
+/* =========================================================================
+   ESTILOS PREMIUM PARA BOTÓN DE GOOGLE Y VALIDACIÓN DE FORMULARIOS
+   ========================================================================= */
+
+.botonGoogleOriginal {
+    background-color: var(--color-blanco) !important;
+    color: #3c4043 !important;
+    border: 0.0625em solid #dadce0 !important;
+    border-radius: 1.5em !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.8125em !important;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+    text-decoration: none !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+    font-size: 0.875em !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    gap: 0.625em !important;
+}
+
+.botonGoogleOriginal:hover {
+    background-color: #f8fafd !important;
+    border-color: #d2e3fc !important;
+    box-shadow: 0 2px 5px rgba(60,64,67,0.15) !important;
+    color: #1a73e8 !important;
+}
+
+.botonGoogleOriginal svg {
+    flex-shrink: 0;
+}
+
+/* Form Validation Styles */
+.controlFormulario.invalido {
+    border-color: #ef4444 !important;
+    background-color: #fffafb !important;
+}
+
+.controlFormulario.invalido:focus {
+    box-shadow: 0 0 0 0.1875em rgba(239, 68, 68, 0.15) !important;
+    border-color: #ef4444 !important;
+}
+
+.errorFeedback {
+    color: #ef4444 !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    margin-top: 0.375em !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.3125em !important;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Indicador de fuerza de contraseña opcional (Premium touch) */
+.passwordStrengthMeter {
+    margin-top: 0.5em;
+    display: flex;
+    gap: 0.25em;
+    height: 0.25em;
+    width: 100%;
+}
+
+.passwordStrengthBar {
+    flex: 1;
+    background-color: #eee;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.passwordRequirementsInfo {
+    font-size: 0.75rem;
+    color: var(--color-texto-claro);
+    margin-top: 0.5em;
+    line-height: 1.4;
+}
+
+.passwordRequirementsInfo ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.passwordRequirementsInfo li {
+    display: flex;
+    align-items: center;
+    gap: 0.375em;
+    margin-bottom: 0.25em;
+}
+
+.passwordRequirementsInfo li.cumplido {
+    color: #10b981;
+}
+
+.passwordRequirementsInfo li.incumplido {
+    color: #ef4444;
+}
+
+/* Luxury Announcement Promo Bar */
+.promo-announcement-bar {
+    background: linear-gradient(135deg, #1E3A2E 0%, #111612 100%);
+    color: #FAF9F6;
+    text-align: center;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(237, 231, 219, 0.12);
+    z-index: 101;
+    position: relative;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    text-transform: uppercase;
+}
+
+.promo-announcement-bar strong {
+    color: #EDE7DB;
+    font-weight: 700;
+}
+
+.promo-announcement-bar .promo-code {
+    background: rgba(237, 231, 219, 0.15);
+    color: #ffffff;
+    padding: 0.2rem 0.65rem;
+    border-radius: 4px;
+    border: 1px solid rgba(237, 231, 219, 0.25);
+    letter-spacing: 0.12em;
+    margin: 0 0.35rem;
+    font-size: 0.8rem;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.promo-announcement-bar .promo-icon {
+    font-size: 0.85rem;
+    color: #EDE7DB;
+    animation: pulsePromo 2.2s infinite ease-in-out;
+}
+
+@keyframes pulsePromo {
+    0% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.18); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.85; }
+}
+
+@media (max-width: 768px) {
+    .promo-announcement-bar {
+        font-size: 0.72rem !important;
+        padding: 0.75rem 1rem !important;
+        letter-spacing: 0.04em !important;
+        line-height: 1.6 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.65rem !important;
+        text-align: center !important;
+    }
+    .promo-announcement-bar .promo-code {
+        font-size: 0.75rem !important;
+        padding: 0.2rem 0.75rem !important;
+        border-radius: 9999px !important; /* Pill style */
+        background: #8B6F4A !important; /* Gold accent color for high luxury contrast */
+        border: none !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+        letter-spacing: 0.08em !important;
+        margin: 0.15rem 0.35rem !important;
+        display: inline-block !important;
+    }
+    .promo-announcement-bar .promo-icon {
+        font-size: 1.05rem !important;
+        color: #8B6F4A !important; /* Matching luxury gold icon */
+        margin-right: 0.15rem !important;
+        flex-shrink: 0 !important;
+    }
+}
+
+/* Reglas responsivas para pantallas de Autenticación */
+@media (max-width: 992px) {
+    .contenedorAutenticacion {
+        flex-direction: column !important;
+        min-height: auto !important;
+    }
+    .autenticacionIzquierda {
+        width: 100% !important;
+        padding: 3rem 1.5rem !important;
+    }
+    .autenticacionDerecha {
+        display: none !important;
+    }
+}
+
+/* Reglas responsivas para la Barra de Navegación (Navbar) en móvil/tablet */
+/* Reglas responsivas para la Barra de Navegación (Navbar) en móvil/tablet */
+@media (max-width: 768px) {
+    .barraNavegacion {
+        padding: 0 1.25rem !important;
+        height: 5em !important;
+    }
+    .navegacionIzquierda {
+        gap: 1rem !important;
+    }
+    .marca {
+        font-size: 0.95em !important;
+    }
+    .barraBusqueda {
+        display: none !important; /* Ocultar barra de búsqueda en móvil para evitar solapamientos */
+    }
+    .nav-acciones-iconos {
+        gap: 0.65em !important;
+    }
+    .nav-icono-btn {
+        width: 2.5em !important;
+        height: 2.5em !important;
+        font-size: 0.95em !important;
+    }
+    .menuUsuarioContenedor {
+        display: none !important; /* Ocultar ícono de usuario del navbar en móvil, pasa al drawer */
+    }
+    .btn-hamburger {
+        display: flex !important; /* Mostrar botón hamburguesa */
+    }
+
+    /* ── Mobile Menu Overlay ────────────────────────────── */
+    .menu-movil-overlay {
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(17, 22, 18, 0.45) !important;
+        backdrop-filter: blur(5px) !important;
+        -webkit-backdrop-filter: blur(5px) !important;
+        z-index: 9999 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: opacity 0.3s ease !important;
+    }
+    .menu-movil-overlay.activo {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    /* ── Mobile Menu Drawer ─────────────────────────────── */
+    .menu-movil-drawer {
+        position: fixed !important;
+        top: 0 !important;
+        right: -320px !important;
+        width: 320px !important;
+        height: 100vh !important;
+        background-color: #FAF9F6 !important; /* Var color fondo */
+        box-shadow: -8px 0 30px rgba(17, 22, 18, 0.08) !important;
+        z-index: 10000 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .menu-movil-drawer.activo {
+        right: 0 !important;
+    }
+
+    .menu-movil-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 1.5rem !important;
+        border-bottom: 1px solid #EDE7DB !important; /* Var color borde */
+    }
+    .menu-movil-header .marca {
+        font-size: 0.95em !important;
+        font-weight: 700 !important;
+        color: #1E3A2E !important;
+    }
+    .btn-cerrar-drawer {
+        font-size: 1.25rem !important;
+        color: #1E3A2E !important;
+        cursor: pointer !important;
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        transition: background-color 0.2s !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    .btn-cerrar-drawer:hover {
+        background-color: rgba(237, 231, 219, 0.6) !important;
+    }
+
+    .menu-movil-contenido {
+        flex: 1 !important;
+        padding: 1.75rem 1.5rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow-y: auto !important;
+    }
+
+    .barraBusqueda-movil {
+        position: relative !important;
+        margin-bottom: 2.25rem !important;
+        display: flex !important;
+        width: 100% !important;
+    }
+    .barraBusqueda-movil input {
+        width: 100% !important;
+        padding: 0.75rem 2.75rem 0.75rem 1.25rem !important;
+        border-radius: 9999px !important;
+        border: 1px solid #EDE7DB !important;
+        background-color: rgba(237, 231, 219, 0.4) !important;
+        font-size: 0.85rem !important;
+        outline: none !important;
+        color: #1E3A2E !important;
+    }
+    .barraBusqueda-movil button {
+        position: absolute !important;
+        right: 1.15rem !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        color: #1E3A2E !important;
+        font-size: 0.95rem !important;
+        border: none !important;
+        background: transparent !important;
+        cursor: pointer !important;
+    }
+
+    .menu-movil-enlaces {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    .menu-movil-enlaces a {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.85rem !important;
+        padding: 0.85rem 1.15rem !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        color: #1E3A2E !important;
+        border-radius: 0.75rem !important;
+        transition: background-color 0.2s, color 0.2s !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+    }
+    .menu-movil-enlaces a i {
+        width: 1.25rem !important;
+        font-size: 1.05rem !important;
+        opacity: 0.8 !important;
+        color: #8B6F4A !important; /* Color acento */
+    }
+    .menu-movil-enlaces a:hover {
+        background-color: #EDE7DB !important;
+        color: #8B6F4A !important;
+    }
+
+    .menu-movil-usuario {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.35rem !important;
+        padding-top: 1rem !important;
+    }
+    .menu-movil-enlace-user {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.85rem !important;
+        padding: 0.85rem 1.15rem !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        color: #1E3A2E !important;
+        border-radius: 0.75rem !important;
+        transition: background-color 0.2s !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+    }
+    .menu-movil-enlace-user i {
+        width: 1.25rem !important;
+        font-size: 1.05rem !important;
+        opacity: 0.75 !important;
+        color: #8B6F4A !important;
+    }
+    .menu-movil-enlace-user:hover {
+        background-color: #EDE7DB !important;
+    }
+    .menu-movil-enlace-user--salir {
+        color: #c0392b !important;
+    }
+    .menu-movil-enlace-user--salir i {
+        color: #c0392b !important;
+    }
+    .menu-movil-enlace-user--salir:hover {
+        background-color: rgba(192, 57, 43, 0.08) !important;
+    }
+
+    /* ── Adaptación del Cupón y Carrito Móvil ──────────────── */
+    .cart-container-layout {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+    .coupon-section form {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+    .coupon-section button {
+        width: 100% !important;
+        padding: 0.8rem 1.5rem !important;
+    }
+}
+
+/* Reglas responsivas para el Pie de Página (Footer) en móvil/tablet */
+@media (max-width: 768px) {
+    .piePagina {
+        padding: 2.5rem 1rem 1.5rem !important;
+        text-align: center !important;
+    }
+    .pieSuperior {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 2rem !important;
+        margin-bottom: 2.5rem !important;
+    }
+    .columnaPie {
+        width: 100% !important;
+    }
+    .redesSociales {
+        justify-content: center !important;
+        margin-top: 1rem !important;
+    }
+    .listaContacto li {
+        justify-content: center !important;
+    }
+    .pieInferior {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 1rem !important;
+        text-align: center !important;
+    }
+    .enlacesLegales {
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
+    .metodosPago {
+        justify-content: center !important;
+    }
 }

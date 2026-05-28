@@ -12,8 +12,8 @@
 }
 
 .product-gallery {
-    position: sticky;
-    top: 8rem;
+    position: relative;
+    top: 0;
 }
 
 .main-image {
@@ -175,3 +175,180 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
+
+/* Premium Image Gallery and Thumbnails Styling */
+.main-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 2rem;
+    box-shadow: 0 15px 35px rgba(27, 48, 34, 0.06);
+    background-color: #f7f6f2;
+}
+
+.main-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    transition: opacity 0.25s ease-in-out;
+    display: block;
+}
+
+.thumbnails-container {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.thumbnail-item {
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 1rem;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: #f7f6f2;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+.thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.thumbnail-item:hover img {
+    transform: scale(1.08);
+}
+
+.thumbnail-item.active {
+    border-color: #6B7F5A; /* Olive green theme color */
+    box-shadow: 0 6px 16px rgba(107, 127, 90, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Premium Stock Badge Styling */
+.stock-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.45rem 1rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.stock-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.stock-in-stock {
+    background-color: rgba(16, 185, 129, 0.08);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.16);
+}
+.stock-in-stock .dot {
+    background-color: #10b981;
+    box-shadow: 0 0 8px #10b981;
+}
+
+.stock-low {
+    background-color: rgba(217, 119, 6, 0.08);
+    color: #d97706;
+    border: 1px solid rgba(217, 119, 6, 0.16);
+}
+.stock-low .dot {
+    background-color: #f59e0b;
+    box-shadow: 0 0 8px #f59e0b;
+    animation: flashStockDot 1.5s infinite;
+}
+
+.stock-out {
+    background-color: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.16);
+}
+.stock-out .dot {
+    background-color: #ef4444;
+}
+
+@keyframes flashStockDot {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
+/* Premium FAQ Accordion Widget Styling */
+.faq-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-top: 1px solid rgba(27, 48, 34, 0.05);
+    padding-top: 2rem;
+}
+
+.accordion-item {
+    background-color: #FAF9F6; /* cream background */
+    border: 1px solid #EDE7DB; /* beige border */
+    border-radius: 1.25rem;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accordion-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #1E3A2E; /* dark green */
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    text-align: left;
+    outline: none;
+    transition: background-color 0.3s;
+}
+
+.accordion-header:hover {
+    background-color: rgba(107, 127, 90, 0.04);
+}
+
+.accordion-arrow {
+    font-size: 0.8rem;
+    color: #6B7F5A;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: #ffffff;
+}
+
+.accordion-content p {
+    padding: 0 1.5rem 1.5rem;
+    font-size: 0.86rem;
+    line-height: 1.65;
+    color: rgba(27, 48, 34, 0.7);
+    margin: 0;
+}
+
+.accordion-item.active {
+    box-shadow: 0 8px 25px rgba(27, 48, 34, 0.04);
+    border-color: rgba(107, 127, 90, 0.25);
+}
+
+

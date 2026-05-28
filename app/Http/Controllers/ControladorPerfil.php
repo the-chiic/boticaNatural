@@ -83,4 +83,45 @@ class ControladorPerfil extends Controller
         // Volver atrás con alerta verde de éxito
         return back()->with('success', '¡La nueva dirección ha sido añadida con éxito!');
     }
+
+    // Eliminar una dirección de forma segura
+    public function eliminarDireccion($id)
+    {
+        $idUsuario = Auth::id();
+        
+        DB::table('address')
+            ->where('id', $id)
+            ->where('user_id', $idUsuario)
+            ->delete();
+
+        return back()->with('success', '¡La dirección ha sido eliminada con éxito!');
+    }
+
+    // Obtener detalles de un pedido de forma segura en JSON
+    public function detallesPedido($id)
+    {
+        $idUsuario = Auth::id();
+
+        // Validar propiedad del pedido
+        $pedido = DB::table('orders')
+            ->where('id', $id)
+            ->where('user_id', $idUsuario)
+            ->first();
+
+        if (!$pedido) {
+            return response()->json(['error' => 'Pedido no encontrado o no autorizado'], 403);
+        }
+
+        // Obtener líneas del pedido
+        $lineas = DB::table('order_line')
+            ->join('product', 'order_line.product_id', '=', 'product.id')
+            ->where('order_line.order_id', $id)
+            ->select('order_line.*', 'product.name as product_name', 'product.image as product_image')
+            ->get();
+
+        return response()->json([
+            'order' => $pedido,
+            'lines' => $lineas
+        ]);
+    }
 }

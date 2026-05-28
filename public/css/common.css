@@ -54,16 +54,21 @@ body {
     border-bottom: 1px solid rgba(237, 231, 219, 0.08);
 }
 
-.sidebar-logo {
-    font-size: 28px;
-    color: var(--cream);
+.sidebar-logo-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.25);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     margin: 0 auto 12px;
     display: block;
-    transition: transform 0.6s var(--curva-premium);
+    transition: transform 0.6s var(--curva-premium), box-shadow 0.4s;
 }
 
-.sidebar-header:hover .sidebar-logo {
-    transform: rotate(15deg) scale(1.1);
+.sidebar-header:hover .sidebar-logo-img {
+    transform: rotate(12deg) scale(1.08);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
 }
 
 .sidebar-header h2 {
@@ -323,6 +328,33 @@ body {
     font-size: 24px;
     font-weight: 400;
     color: var(--dark-green);
+}
+
+.stat-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-top: 6px;
+    padding: 3px 8px;
+    border-radius: 30px;
+}
+.delta-up {
+    color: var(--olive-green);
+    background: rgba(107, 127, 90, 0.08);
+    border: 1px solid rgba(107, 127, 90, 0.15);
+}
+.delta-down {
+    color: #d93025;
+    background: rgba(217, 48, 37, 0.06);
+    border: 1px solid rgba(217, 48, 37, 0.12);
+}
+.delta-neutral {
+    color: var(--sage-green);
+    background: rgba(163, 180, 154, 0.08);
+    border: 1px solid rgba(163, 180, 154, 0.2);
 }
 
 .panels-grid {

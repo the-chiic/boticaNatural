@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('admin', function (Blueprint $table) {
             $table->tinyIncrements('id');
-            $table->string('name', 50);
-            $table->string('email', 100)->unique('uni_email_admin');
-            $table->string('pw', 255);
+            $table->string('name', 50)->nullable(false);
+            $table->string('email', 100)->nullable(false)->unique('uni_email_admin');
+            $table->string('pw', 255)->nullable(false);
             $table->string('google_auth', 255)->nullable();
             $table->string('phone', 25)->nullable();
-            $table->enum('rol', ['admin'])->default('admin');
+            $table->enum('rol', ['admin'])->nullable(false)->default('admin');
             $table->timestamps();
         });
     }

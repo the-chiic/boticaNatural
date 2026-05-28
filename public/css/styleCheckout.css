@@ -280,3 +280,148 @@ select.input-field {
     transform: translateY(0);
 }
 
+/* ==========================================================================
+   RESPONSIVIDAD: TABLETS Y MÓVILES
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    .checkout-layout {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+    
+    .order-review-card {
+        position: static !important;
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .checkout-form-section {
+        padding: 1.5rem !important;
+        border-radius: 1.25rem !important;
+    }
+    
+    .form-group-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+    }
+    
+    /* Forzar que todos los campos del grid de formulario ocupen el ancho completo */
+    .form-group-grid > div {
+        grid-column: span 1 !important;
+    }
+    
+    .order-review-card {
+        padding: 1.5rem !important;
+        border-radius: 1.25rem !important;
+    }
+    
+    .checkout-title {
+        font-size: 1.25rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .checkout-form-section {
+        padding: 1.25rem 1rem !important;
+    }
+    
+    .payment-method-card {
+        padding: 1rem !important;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .payment-method-card > span {
+        align-self: flex-end;
+    }
+    
+    .order-review-card {
+        padding: 1.25rem 1rem !important;
+    }
+}
+
+/* ==========================================================================
+   STRIPE SECURE CARD INTEGRATION PREMIUM
+   ========================================================================== */
+#stripe-card-wrapper {
+    background: #FCFBF9 !important;
+    padding: 1.75rem !important;
+    border-radius: 1.25rem !important;
+    border: 1px solid rgba(30, 58, 46, 0.1) !important;
+    margin-top: 1.5rem;
+    transition: all 0.4s var(--curva-premium);
+}
+
+#stripe-card-wrapper label {
+    font-weight: 600;
+    font-size: 0.72rem;
+    color: var(--brand-green);
+    letter-spacing: 0.08em;
+    display: block;
+    margin-bottom: 0.85rem;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+#card-element {
+    background: #FFFFFF !important;
+    padding: 1.15rem 1.35rem !important;
+    border-radius: 0.85rem !important;
+    border: 1px solid rgba(30, 58, 46, 0.12) !important;
+    box-shadow: inset 0 2px 4px rgba(30, 58, 46, 0.01) !important;
+    transition: all 0.4s var(--curva-premium);
+}
+
+#card-element.StripeElement--focus {
+    border-color: var(--brand-accent) !important;
+    box-shadow: 0 0 0 4px rgba(107, 127, 90, 0.08) !important;
+}
+
+#card-errors {
+    color: #d94141;
+    font-size: 0.85rem;
+    margin-top: 0.85rem;
+    font-family: var(--fuente-sans, 'Instrument Sans', sans-serif);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* ==========================================================================
+   MONEDERO EXPRESS (APPLE PAY / GOOGLE PAY)
+   ========================================================================== */
+#payment-request-button-container {
+    margin-bottom: 2.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.express-checkout-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1.75rem 0;
+    opacity: 0.6;
+}
+
+.express-checkout-divider hr {
+    flex-grow: 1;
+    border: none;
+    border-top: 1px solid rgba(30, 58, 46, 0.12);
+    margin: 0;
+}
+
+.express-checkout-divider span {
+    font-family: var(--fuente-serif, 'Playfair Display', Georgia, serif);
+    font-size: 0.95rem;
+    color: var(--brand-green);
+    font-style: italic;
+    padding: 0 1.25rem;
+    white-space: nowrap;
+}
+
+
