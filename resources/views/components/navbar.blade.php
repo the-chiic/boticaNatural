@@ -2,7 +2,7 @@
     <div class="navegacionIzquierda">
         <a href="{{ url('/') }}" class="marca marca-premium">
             <img src="{{ asset('img/logo.jpg') }}" alt="Logo La Botica Natural" class="iconoMarca">
-            <span class="nombreMarca">La Botica Natural</span>
+            <span class="nombreMarca">{{ \Illuminate\Support\Facades\Cache::get('shop_name', 'La Botica Natural') }}</span>
         </a>
         <div class="enlacesNavegacion">
             <a href="{{ route('catalog.index') }}">Catálogo</a>
@@ -67,7 +67,6 @@
                     <span class="nav-badge-carrito">{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
                 @endif
             </a>
-
             <!-- Hamburger Button for Mobile -->
             <button type="button" class="nav-icono-btn btn-hamburger" id="btnHamburger" aria-label="Abrir menú">
                 <i class="fa-solid fa-bars"></i>
