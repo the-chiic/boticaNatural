@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 define('LARAVEL_START', microtime(true));
 
 // Hosting en subcarpeta sin /public en la URL (lee APP_URL del .env)
+// Comentado si el document root apunta a public/
 $envFile = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env';
 if (is_readable($envFile)) {
     $envContents = file_get_contents($envFile);
