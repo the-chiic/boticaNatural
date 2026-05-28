@@ -18,6 +18,25 @@ class Product extends Model
         'stock'
     ];
 
+    protected static $productImagesCache = null;
+
+    protected static function booted()
+    {
+        static::saved(function ($product) {
+            self::clearProductCaches();
+        });
+
+        static::deleted(function ($product) {
+            self::clearProductCaches();
+        });
+    }
+
+    public static function clearProductCaches()
+    {
+        \Cache::forget('featured_products_4');
+        \Cache::forget('latest_products_4');
+    }
+
     /**
      * Las categorías a las que pertenece el producto.
      */
@@ -79,11 +98,13 @@ class Product extends Model
      */
     public static function getFeatured($limit = 4)
     {
-        return self::with('categories')
-            ->where('status', 1)
-            ->inRandomOrder()
-            ->take($limit)
-            ->get();
+        return \Cache::remember('featured_products_' . $limit, 600, function() use ($limit) {
+            return self::with('categories')
+                ->where('status', 1)
+                ->inRandomOrder()
+                ->take($limit)
+                ->get();
+        });
     }
 
     /**
@@ -112,11 +133,13 @@ class Product extends Model
      */
     public static function getLatest($limit = 4)
     {
-        return self::with('categories')
-            ->where('status', 1)
-            ->orderBy('id', 'desc')
-            ->take($limit)
-            ->get();
+        return \Cache::remember('latest_products_' . $limit, 600, function() use ($limit) {
+            return self::with('categories')
+                ->where('status', 1)
+                ->orderBy('id', 'desc')
+                ->take($limit)
+                ->get();
+        });
     }
 
     /**
@@ -124,7 +147,11 @@ class Product extends Model
      */
     public function getImageUrlAttribute()
     {
-        $imgName = \DB::table('product_img')->where('id', $this->img_id)->value('name');
+        if (self::$productImagesCache === null) {
+            self::$productImagesCache = \DB::table('product_img')->pluck('name', 'id')->all();
+        }
+        
+        $imgName = self::$productImagesCache[$this->img_id] ?? null;
         
         if ($imgName) {
             if (str_starts_with($imgName, 'http://') || str_starts_with($imgName, 'https://')) {

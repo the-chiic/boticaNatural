@@ -1,11 +1,11 @@
 <footer class="piePagina">
     <div class="pieSuperior">
         <div class="columnaPie columnaMarca">
-            <div class="marca">
-                <i class="fa-solid fa-leaf iconoMarca"></i>
-                {{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}
-            </div>
-            <p>Bienestar diario inspirado en la naturaleza. Ofrecemos los mejores productos botánicos artesanales para cuidar tu cuerpo y mente de forma sostenible.</p>
+            <a href="{{ url('/') }}" class="marca-premium" style="margin-bottom: 1.25rem;">
+                <img src="{{ asset('img/logo.jpg') }}" alt="Logo La Botica Natural" class="iconoMarca" loading="lazy" decoding="async">
+                <span class="nombreMarca">{{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}</span>
+            </a>
+            <p style="margin-top: 0.5rem;">Bienestar diario inspirado en la naturaleza. Ofrecemos los mejores productos botánicos artesanales para cuidar tu cuerpo y mente de forma sostenible.</p>
             <div class="redesSociales">
                 <a href="#"><i class="fa-brands fa-instagram"></i></a>
                 <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
@@ -47,9 +47,9 @@
             &copy; 2026 {{ \Illuminate\Support\Facades\Cache::get('shop_name', 'La Botica Natural') }}. Todos los derechos reservados.
         </div>
         <div class="enlacesLegales">
-            <a href="#">Aviso Legal</a>
-            <a href="#">Privacidad</a>
-            <a href="#">Cookies</a>
+            <a href="{{ route('legal.aviso') }}">Aviso Legal</a>
+            <a href="{{ route('legal.privacidad') }}">Privacidad</a>
+            <a href="{{ route('legal.cookies') }}">Cookies</a>
         </div>
         <div class="metodosPago">
             <span class="iconoPago">VISA</span>

@@ -6,6 +6,156 @@
 @endpush
 
 @section('main_content')
+    <style>
+        /* Force CSS carousel overrides directly inline in the body */
+        .main-image-carousel-container {
+            position: relative !important;
+            overflow: hidden !important;
+            border-radius: 2rem !important;
+            box-shadow: 0 20px 40px rgba(27, 48, 34, 0.08) !important;
+            background-color: #f7f6f2 !important;
+            width: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+        }
+
+        .main-image-slider {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .main-image-slide {
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            height: 100% !important;
+            flex-shrink: 0 !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+
+        .gallery-carousel-btn {
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 10 !important;
+            width: 2.75rem !important;
+            height: 2.75rem !important;
+            border-radius: 50% !important;
+            border: none !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+            color: var(--brand-green, #1b3022) !important;
+            font-size: 0.85rem !important;
+            box-shadow: 0 4px 12px rgba(27, 48, 34, 0.12) !important;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        .gallery-carousel-btn:hover {
+            background: #ffffff !important;
+            box-shadow: 0 6px 20px rgba(27, 48, 34, 0.2) !important;
+            transform: translateY(-50%) scale(1.08) !important;
+        }
+
+        .gallery-carousel-btn.prev {
+            left: 1rem !important;
+        }
+
+        .gallery-carousel-btn.next {
+            right: 1rem !important;
+        }
+
+        .thumbnails-container {
+            display: flex !important;
+            gap: 1rem !important;
+            margin-top: 1.25rem !important;
+            justify-content: flex-start !important;
+            flex-wrap: wrap !important;
+        }
+
+        .thumbnail-item {
+            width: 5.5rem !important;
+            height: 5.5rem !important;
+            border-radius: 1rem !important;
+            overflow: hidden !important;
+            cursor: pointer !important;
+            border: 2px solid transparent !important;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            background-color: #f7f6f2 !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02) !important;
+        }
+
+        .thumbnail-item img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            display: block !important;
+        }
+
+        .thumbnail-item:hover img {
+            transform: scale(1.08) !important;
+        }
+
+        .thumbnail-item.active {
+            border-color: #6b7f5a !important;
+            box-shadow: 0 6px 16px rgba(107, 127, 90, 0.15) !important;
+            transform: translateY(-2px) !important;
+        }
+    </style>
+
+    <script>
+        // Force slide active logic to override cached functions
+        var currentSlideIndex = 0;
+
+        function slideGallery(direction) {
+            const slides = document.querySelectorAll('.main-image-slide');
+            if (slides.length <= 1) return;
+
+            currentSlideIndex += direction;
+            if (currentSlideIndex >= slides.length) {
+                currentSlideIndex = 0;
+            } else if (currentSlideIndex < 0) {
+                currentSlideIndex = slides.length - 1;
+            }
+
+            updateActiveSlide();
+        }
+
+        function jumpToGalleryImage(index, thumbnailEl) {
+            currentSlideIndex = index;
+            updateActiveSlide();
+        }
+
+        function updateActiveSlide() {
+            const slider = document.getElementById('imageSlider');
+            const slides = document.querySelectorAll('.main-image-slide');
+            const thumbnails = document.querySelectorAll('.thumbnail-item');
+
+            if (slider && slides.length > 0) {
+                slider.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+            }
+
+            thumbnails.forEach((thumb, idx) => {
+                thumb.classList.toggle('active', idx === currentSlideIndex);
+            });
+        }
+
+        // Initialize active state on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateActiveSlide();
+        });
+    </script>
     <div class="section-padding" style="background: white; padding-top: 4rem;">
         <div class="container">
             <!-- Breadcrumbs -->
@@ -46,7 +196,7 @@
                         <div class="thumbnails-container">
                             @foreach($product->gallery_images as $index => $imgUrl)
                                 <div class="thumbnail-item {{ $index === 0 ? 'active' : '' }}" onclick="jumpToGalleryImage({{ $index }}, this)">
-                                    <img src="{{ $imgUrl }}" alt="{{ $product->name }} {{ $index + 1 }}">
+                                    <img src="{{ $imgUrl }}" alt="{{ $product->name }} {{ $index + 1 }}" loading="lazy" decoding="async">
                                 </div>
                             @endforeach
                         </div>
@@ -156,7 +306,7 @@
                 <div class="product-card">
                     <a href="{{ route('catalog.show', $related->id) }}">
                         <div class="product-img">
-                            <img src="{{ $related->image_url }}" alt="{{ $related->name }}">
+                            <img src="{{ $related->image_url }}" alt="{{ $related->name }}" loading="lazy" decoding="async">
                             <div class="product-overlay">
                                 <span>Ver Detalle</span>
                             </div>

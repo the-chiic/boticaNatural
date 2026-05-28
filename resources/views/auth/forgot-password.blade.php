@@ -11,9 +11,8 @@
         <div class="envolturaFormulario">
             
             <div class="cabeceraAutenticacion">
-                <div class="marca">
-                    <i class="fa-solid fa-leaf iconoMarca"></i>
-                    LA BOTICA NATURAL
+                <div class="marca marca-premium" style="justify-content: center; margin-bottom: 1rem;">
+                    <img src="{{ asset('img/logo.jpg') }}" alt="Sello La Botica Natural" class="iconoMarca" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(27,48,34,0.12); box-shadow: 0 4px 15px rgba(27,48,34,0.1);">
                 </div>
                 <h1>RECUPERAR CONTRASEÑA</h1>
                 <p>Te enviaremos un enlace de recuperación a tu bandeja de entrada.</p>

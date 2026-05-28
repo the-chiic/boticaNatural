@@ -396,6 +396,90 @@
     padding: 0 !important;
 }
 
+/* Active Coupon Badge Premium Style */
+.coupon-active-badge {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.85rem !important;
+    background: rgba(139, 111, 74, 0.08) !important;
+    border: 1px solid rgba(139, 111, 74, 0.25) !important;
+    padding: 0.65rem 1.25rem !important;
+    border-radius: 9999px !important; /* Elegant pill style */
+    font-size: 0.85rem !important;
+    color: #FAF9F6 !important;
+    font-family: var(--fuente-sans);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.3s ease;
+    margin-bottom: 1.25rem;
+    width: 100%;
+    line-height: 1 !important;
+}
+
+.coupon-active-badge:hover {
+    background: rgba(139, 111, 74, 0.12) !important;
+    border-color: rgba(139, 111, 74, 0.4) !important;
+}
+
+.coupon-active-details {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    flex-direction: row !important;
+    line-height: 1 !important;
+}
+
+.coupon-active-details .coupon-icon-tag {
+    color: #FAF9F6 !important;
+    opacity: 0.6;
+    font-size: 0.9rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1 !important;
+}
+
+.coupon-active-details .coupon-code-text {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+    line-height: 1 !important;
+}
+
+.coupon-active-details .coupon-discount-text {
+    color: #FAF9F6 !important;
+    opacity: 0.75;
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+    line-height: 1 !important;
+}
+
+.coupon-active-badge form {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+.coupon-remove-btn {
+    background: transparent !important;
+    border: none !important;
+    color: rgba(250, 249, 246, 0.5) !important;
+    cursor: pointer !important;
+    padding: 0.2rem !important;
+    font-size: 1.15rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1 !important;
+    transition: all 0.25s var(--curva-premium) !important;
+}
+
+.coupon-remove-btn:hover {
+    color: #ff6b6b !important;
+    transform: scale(1.15) rotate(90deg);
+}
+
 /* Responsivo Carrito */
 @media (max-width: 768px) {
     .cart-item {
@@ -415,5 +499,45 @@
     .cart-item-img {
         width: 70px;
         height: 70px;
+    }
+
+    .cart-summary-panel {
+        padding: 1.75rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .cart-summary-panel {
+        padding: 1.25rem !important;
+    }
+
+    .coupon-apply-form {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+
+    .coupon-apply-form input[type="text"] {
+        width: 100% !important;
+        text-align: center;
+    }
+
+    .coupon-apply-form button[type="submit"] {
+        width: 100% !important;
+        justify-content: center;
+        padding: 0.75rem 1.25rem !important;
+    }
+
+    .coupon-active-badge {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.75rem !important;
+        padding: 0.55rem 0.85rem !important;
+        border-radius: 9999px !important;
+    }
+
+    .coupon-active-details {
+        justify-content: center !important;
+        width: auto !important;
     }
 }

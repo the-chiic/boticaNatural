@@ -9,28 +9,48 @@
 @endpush
 
 @section('main_content')
-    <div class="section-padding" style="background: var(--brand-cream); min-height: 80vh;">
+    <div class="section-padding" style="background: var(--color-fondo, #FAF9F6); min-height: 85vh; padding: 4rem 0;">
         <div class="container">
-            <h1 class="section-title mb-8">MI CUENTA</h1>
+            <h1 class="section-title mb-8" style="font-family: var(--fuente-base); font-weight: 700; color: var(--color-principal, #1E3A2E); letter-spacing: -0.01em; margin-bottom: 2.5rem; text-transform: uppercase;">Mi Cuenta</h1>
 
             @if (session('success'))
-                <div style="background-color: #dcfce7; color: #166534; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem; font-size: 0.875rem; border: 1px solid #bbf7d0; text-align: center; font-weight: bold;">
-                    {{ session('success') }}
+                <div style="background-color: #e6f7ed; color: #1b8a5a; padding: 1.25rem; border-radius: 1rem; margin-bottom: 2.5rem; font-size: 0.9rem; border: 1px solid rgba(27, 88, 58, 0.08); text-align: center; font-weight: 700; box-shadow: 0 4px 12px rgba(27, 48, 34, 0.02); animation: fadeInSlide 0.4s ease-out;">
+                    <i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i> {{ session('success') }}
                 </div>
             @endif
 
             <div class="profile-layout">
                 <!-- Sidebar -->
                 <aside class="profile-nav">
-                    <div class="text-center mb-8">
-                        <div style="width: 5rem; height: 5rem; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; color: var(--brand-green); box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <div class="profile-avatar-wrapper">
+                        <div class="profile-avatar-ring"></div>
+                        <div class="profile-avatar-circle">
                             <i class="far fa-user"></i>
                         </div>
-                        <h3 style="font-weight: bold; font-size: 1rem;">{{ Auth::user()->name }}</h3>
-                        <p style="font-size: 0.75rem; opacity: 0.5;">{{ Auth::user()->email }}</p>
+                    </div>
+                    
+                    <div class="profile-user-info">
+                        <h3 class="profile-user-name">{{ Auth::user()->name }}</h3>
+                        <p class="profile-user-email">{{ Auth::user()->email }}</p>
                     </div>
 
-                    <nav id="profile-tabs">
+                    <!-- Estadísticas Rápidas de Perfil -->
+                    <div class="profile-stats-grid">
+                        <div class="profile-stat-card">
+                            <span class="profile-stat-num">{{ count($pedidos) }}</span>
+                            <span class="profile-stat-lbl">Pedidos</span>
+                        </div>
+                        <div class="profile-stat-card">
+                            <span class="profile-stat-num">{{ count($direcciones) }}</span>
+                            <span class="profile-stat-lbl">Dir.</span>
+                        </div>
+                        <div class="profile-stat-card">
+                            <span class="profile-stat-num" id="stats-favoritos-count">0</span>
+                            <span class="profile-stat-lbl">Fav.</span>
+                        </div>
+                    </div>
+
+                    <nav class="profile-menu">
                         <a href="#" class="profile-nav-link active" data-tab="pedidos">
                             <i class="fas fa-shopping-bag"></i> Mis Pedidos
                         </a>
@@ -43,7 +63,7 @@
                         <a href="#" class="profile-nav-link" data-tab="favoritos">
                             <i class="fas fa-heart"></i> Favoritos
                         </a>
-                        <a href="{{ url('cerrar-sesion') }}" class="profile-nav-link" style="color: #ff4d4d; margin-top: 2rem;">
+                        <a href="{{ url('cerrar-sesion') }}" class="profile-nav-link logout-btn">
                             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                         </a>
                     </nav>
@@ -54,137 +74,215 @@
                     
                     <!-- Tab: Pedidos -->
                     <div id="tab-pedidos" class="profile-tab-content active">
-                        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">HISTORIAL DE PEDIDOS</h2>
-                        <table class="order-history-table">
-                            <thead>
-                                <tr>
-                                    <th>PEDIDO</th>
-                                    <th>FECHA</th>
-                                    <th>TOTAL</th>
-                                    <th>ESTADO</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($pedidos as $pedido)
-                                    <tr>
-                                        <td style="font-weight: bold;">#BN-{{ $pedido->id }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($pedido->order_date)->format('d M Y') }}</td>
-                                        <td>{{ number_format($pedido->total_price, 2) }}€</td>
-                                        <td>
-                                            @if($pedido->status == 'completed' || $pedido->status == 'entregado')
+                        <h2 class="tab-title"><i class="fas fa-shopping-bag" style="color: var(--color-acento, #8B6F4A); margin-right: 0.25rem;"></i> Historial de Pedidos</h2>
+                        
+                        <div class="orders-list">
+                            @forelse($pedidos as $pedido)
+                                <div class="order-card">
+                                    <div class="order-header">
+                                        <div class="order-meta-info">
+                                            <div class="order-meta-block">
+                                                <span class="order-meta-lbl">Pedido</span>
+                                                <span class="order-meta-val order-id">#BN-{{ $pedido->id }}</span>
+                                            </div>
+                                            <div class="order-meta-block">
+                                                <span class="order-meta-lbl">Fecha</span>
+                                                <span class="order-meta-val">{{ \Carbon\Carbon::parse($pedido->order_date)->format('d M Y') }}</span>
+                                            </div>
+                                            <div class="order-meta-block">
+                                                <span class="order-meta-lbl">Total</span>
+                                                <span class="order-meta-val">{{ number_format($pedido->total_price, 2) }}€</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            @if($pedido->status == 'completed' || $pedido->status == 'entregado' || $pedido->status == '1')
                                                 <span class="status-badge status-delivered">Entregado</span>
-                                            @elseif($pedido->status == 'pending')
-                                                <span class="status-badge status-pending" style="background: #fef3c7; color: #d97706; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;">Pendiente</span>
+                                            @elseif($pedido->status == 'pending' || $pedido->status == '0')
+                                                <span class="status-badge status-pending">Pendiente</span>
                                             @else
-                                                <span class="status-badge" style="background: #e5e7eb; color: #4b5563; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;">{{ ucfirst($pedido->status) }}</span>
+                                                <span class="status-badge status-cancelled">Cancelado</span>
                                             @endif
-                                        </td>
-                                        <td style="text-align: right;"><a href="#" style="font-weight: bold; color: var(--brand-green); text-decoration: underline;">Ver detalle</a></td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" style="text-align: center; opacity: 0.5; padding: 2rem;">Aún no tienes ningún pedido registrado.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Timeline Tracker Visual -->
+                                    @php
+                                        $isDelivered = ($pedido->status == 'completed' || $pedido->status == 'entregado' || $pedido->status == '1');
+                                        $isPending = ($pedido->status == 'pending' || $pedido->status == '0');
+                                        $isCancelled = ($pedido->status == 'cancelled' || $pedido->status == '2');
+                                    @endphp
+                                    
+                                    @if(!$isCancelled)
+                                        <div class="order-timeline-container">
+                                            <div class="order-timeline">
+                                                <div class="order-timeline-progress" style="width: {{ $isDelivered ? '100%' : '50%' }};"></div>
+                                                
+                                                <div class="timeline-step completed">
+                                                    <div class="timeline-dot"></div>
+                                                    <span class="timeline-label">Recibido</span>
+                                                </div>
+                                                <div class="timeline-step {{ $isDelivered ? 'completed' : 'active' }}">
+                                                    <div class="timeline-dot"></div>
+                                                    <span class="timeline-label">Preparación</span>
+                                                </div>
+                                                <div class="timeline-step {{ $isDelivered ? 'completed' : '' }}">
+                                                    <div class="timeline-dot"></div>
+                                                    <span class="timeline-label">Entregado</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div style="background: #fdf2f2; color: #df1b1b; padding: 0.75rem 1.25rem; border-radius: 0.75rem; font-size: 0.8rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center; border: 1px solid rgba(223, 27, 27, 0.08);">
+                                            Este pedido ha sido cancelado. Si tienes dudas, por favor contáctanos.
+                                        </div>
+                                    @endif
+
+                                    <div class="order-footer">
+                                        <div class="order-total-price">
+                                            Total Pagado: <span>{{ number_format($pedido->total_price, 2) }}€</span>
+                                        </div>
+                                        <button class="btn-detail-trigger" data-order-id="{{ $pedido->id }}">
+                                            <i class="fas fa-eye"></i> Ver Detalle
+                                        </button>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="empty-tab-state">
+                                    <i class="fas fa-shopping-bag"></i>
+                                    <p>Aún no tienes ningún pedido registrado en tu cuenta.</p>
+                                    <a href="/catalogo" class="btn-submit-premium" style="display: inline-block; text-decoration: none;">IR A LA TIENDA</a>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
 
                     <!-- Tab: Datos Personales -->
                     <div id="tab-datos" class="profile-tab-content">
-                        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">DATOS PERSONALES</h2>
-                        <form action="{{ route('profile.update') }}" method="POST" style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 500px;">
+                        <h2 class="tab-title"><i class="fas fa-user-edit" style="color: var(--color-acento, #8B6F4A); margin-right: 0.25rem;"></i> Datos Personales</h2>
+                        
+                        <form action="{{ route('profile.update') }}" method="POST" class="luxury-form">
                             @csrf
                             @method('PUT')
-                            <div>
-                                <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem;">NOMBRE COMPLETO</label>
-                                <input type="text" name="name" value="{{ Auth::user()->name }}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem;" required>
+                            
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Nombre Completo</label>
+                                    <input type="text" name="name" value="{{ Auth::user()->name }}" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Teléfono Móvil</label>
+                                    <input type="text" name="phone" value="{{ Auth::user()->phone }}" placeholder="Escribe tu teléfono" class="form-input">
+                                </div>
                             </div>
-                            <div>
-                                <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem;">EMAIL</label>
-                                <input type="email" value="{{ Auth::user()->email }}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; background-color: #f3f4f6;" readonly>
-                                <span style="font-size: 0.75rem; opacity: 0.5; margin-top: 0.25rem; display: block;">El correo electrónico no se puede modificar.</span>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Correo Electrónico</label>
+                                <input type="email" value="{{ Auth::user()->email }}" class="form-input" readonly>
+                                <span class="form-tip">El correo electrónico está vinculado a tu cuenta y no se puede modificar por motivos de seguridad.</span>
                             </div>
-                            <div>
-                                <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem;">TELÉFONO</label>
-                                <input type="text" name="phone" value="{{ Auth::user()->phone }}" placeholder="Escribe tu teléfono" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem;">
-                            </div>
-                            <button type="submit" class="btn-primary" style="align-self: flex-start; padding: 0.75rem 2rem; cursor: pointer;">GUARDAR CAMBIOS</button>
+                            
+                            <button type="submit" class="btn-submit-premium">GUARDAR CAMBIOS</button>
                         </form>
                     </div>
 
                     <!-- Tab: Direcciones -->
                     <div id="tab-direcciones" class="profile-tab-content">
-                        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">MIS DIRECCIONES</h2>
+                        <h2 class="tab-title"><i class="fas fa-map-marker-alt" style="color: var(--color-acento, #8B6F4A); margin-right: 0.25rem;"></i> Mis Direcciones</h2>
                         
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        <div class="address-grid">
                             @foreach($direcciones as $direccion)
-                                <div style="padding: 1.5rem; background: white; border-radius: 1rem; border: 1px solid rgba(27, 48, 34, 0.1); position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                                    @if($loop->first)
-                                        <span style="font-size: 0.7rem; font-weight: bold; color: var(--brand-green); background: rgba(27, 48, 34, 0.05); padding: 0.25rem 0.5rem; border-radius: 0.25rem;">PREDETERMINADA</span>
-                                    @endif
-                                    <p style="margin-top: 1rem; font-weight: bold; color: var(--brand-green); font-size: 1rem;">{{ $direccion->address }}</p>
-                                    <p style="font-size: 0.875rem; opacity: 0.8; margin-top: 0.5rem; line-height: 1.4;">{{ $direccion->post_code }} {{ $direccion->city }}, {{ $direccion->province ?? '' }} ({{ $direccion->country }})</p>
-                                    <div style="border-top: 1px solid #f0f0f0; margin-top: 1rem; padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem;">
-                                        <p style="font-size: 0.75rem; opacity: 0.6;"><i class="far fa-user" style="margin-right: 0.25rem;"></i> {{ $direccion->name_destination ?? Auth::user()->name }}</p>
-                                        @if($direccion->phone)
-                                            <p style="font-size: 0.75rem; opacity: 0.6;"><i class="fas fa-phone" style="margin-right: 0.25rem;"></i> {{ $direccion->phone }}</p>
+                                <div class="address-card">
+                                    <div>
+                                        @if($loop->first)
+                                            <span class="address-default-badge">Predeterminada</span>
                                         @endif
+                                        
+                                        <div class="address-body">
+                                            <p class="address-street">{{ $direccion->address }}</p>
+                                            <p class="address-city">{{ $direccion->post_code }} {{ $direccion->city }}{{ $direccion->province ? ', ' . $direccion->province : '' }} ({{ $direccion->country }})</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <div class="address-footer-info">
+                                            <span style="font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem; color: var(--color-principal);"><i class="far fa-user"></i> {{ $direccion->name_destination ?? Auth::user()->name }}</span>
+                                            @if($direccion->phone)
+                                                <span style="display: inline-flex; align-items: center; gap: 0.3rem;"><i class="fas fa-phone"></i> {{ $direccion->phone }}</span>
+                                            @endif
+                                        </div>
+                                        
+                                        <div class="address-actions">
+                                            <form action="{{ route('profile.address.delete', $direccion->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta dirección?');" style="margin: 0; display: inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn-address-delete">
+                                                    <i class="far fa-trash-alt"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
                             
                             <!-- Botón para abrir el formulario -->
-                            <div id="btn-nueva-direccion" style="padding: 1.5rem; background: white; border-radius: 1rem; border: 1px dashed rgba(27, 48, 34, 0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; min-height: 160px; transition: all 0.3s ease; text-align: center; box-sizing: border-box;" onmouseover="this.style.borderColor='var(--brand-green)'; this.style.backgroundColor='rgba(27, 48, 34, 0.02)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(27, 48, 34, 0.3)'; this.style.backgroundColor='white'; this.style.transform='translateY(0)';">
-                                <i class="fas fa-plus-circle" style="font-size: 2rem; color: var(--brand-green); margin-bottom: 0.5rem;"></i>
-                                <span style="font-size: 0.875rem; font-weight: bold; color: var(--brand-green);">Añadir Dirección</span>
+                            <div id="btn-nueva-direccion" class="btn-add-address-card">
+                                <i class="fas fa-plus"></i>
+                                <span>Añadir Dirección</span>
                             </div>
                         </div>
 
-                        <!-- Formulario para Añadir Dirección (Oculto por defecto con transición elegante) -->
-                        <div id="form-nueva-direccion" style="display: none; margin-top: 2rem; padding: 2rem; background: white; border-radius: 1rem; border: 1px solid rgba(27, 48, 34, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.05); animation: fadeIn 0.3s ease-out;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 1rem;">
-                                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--brand-green);">NUEVA DIRECCIÓN</h3>
-                                <button type="button" id="btn-cancelar-direccion" style="background: none; border: none; font-size: 0.875rem; cursor: pointer; color: #ff4d4d; font-weight: bold; display: flex; align-items: center; gap: 0.25rem; padding: 0.5rem; border-radius: 0.25rem;">
+                        <!-- Formulario para Añadir Dirección (Oculto por defecto) -->
+                        <div id="form-nueva-direccion" class="form-address-wrapper">
+                            <div class="form-address-header">
+                                <h3 class="form-address-title">NUEVA DIRECCIÓN DE ENVÍO</h3>
+                                <button type="button" id="btn-cancelar-direccion" class="btn-close-form">
                                     <i class="fas fa-times"></i> Cancelar
                                 </button>
                             </div>
                             
-                            <form action="{{ route('profile.address.add') }}" method="POST">
+                            <form action="{{ route('profile.address.add') }}" method="POST" class="luxury-form">
                                 @csrf
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
-                                    <div style="grid-column: 1 / -1;">
-                                        <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--brand-green);">DIRECCIÓN (Calle, número, piso, puerta)*</label>
-                                        <input type="text" name="address" placeholder="Ej: Calle Gran Vía 45, 3ºB" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; box-sizing: border-box;" required>
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="form-label">Dirección Completa (Calle, número, piso, puerta)*</label>
+                                    <input type="text" name="address" placeholder="Ej: Calle Gran Vía 45, 3ºB" class="form-input" required>
+                                </div>
+                                
+                                <div class="form-grid-2" style="margin-bottom: 1.25rem;">
+                                    <div class="form-group">
+                                        <label class="form-label">Ciudad*</label>
+                                        <input type="text" name="city" placeholder="Ej: Madrid" class="form-input" required>
                                     </div>
-                                    <div>
-                                        <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--brand-green);">CIUDAD*</label>
-                                        <input type="text" name="city" placeholder="Ej: Madrid" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; box-sizing: border-box;" required>
-                                    </div>
-                                    <div>
-                                        <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--brand-green);">PROVINCIA</label>
-                                        <input type="text" name="province" placeholder="Ej: Madrid" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; box-sizing: border-box;">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--brand-green);">CÓDIGO POSTAL*</label>
-                                        <input type="text" name="post_code" placeholder="Ej: 28013" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; box-sizing: border-box;" required>
-                                    </div>
-                                    <div>
-                                        <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--brand-green);">PAÍS*</label>
-                                        <input type="text" name="country" value="España" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; box-sizing: border-box;" required>
-                                    </div>
-                                    <div>
-                                        <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--brand-green);">DESTINATARIO (Nombre completo)</label>
-                                        <input type="text" name="name_destination" placeholder="Ej: Juan Pérez" value="{{ Auth::user()->name }}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; box-sizing: border-box;">
-                                    </div>
-                                    <div>
-                                        <label style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--brand-green);">TELÉFONO DE CONTACTO</label>
-                                        <input type="text" name="phone" placeholder="Ej: +34 600112233" value="{{ Auth::user()->phone }}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; box-sizing: border-box;">
+                                    <div class="form-group">
+                                        <label class="form-label">Provincia</label>
+                                        <input type="text" name="province" placeholder="Ej: Madrid" class="form-input">
                                     </div>
                                 </div>
-                                <button type="submit" class="btn-primary" style="padding: 0.75rem 2rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; border-radius: 0.5rem; font-weight: bold;">
-                                    <i class="fas fa-save"></i> GUARDAR DIRECCIÓN
+                                
+                                <div class="form-grid-2" style="margin-bottom: 1.25rem;">
+                                    <div class="form-group">
+                                        <label class="form-label">Código Postal*</label>
+                                        <input type="text" name="post_code" placeholder="Ej: 28013" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">País*</label>
+                                        <input type="text" name="country" value="España" class="form-input" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-grid-2" style="margin-bottom: 1.75rem;">
+                                    <div class="form-group">
+                                        <label class="form-label">Destinatario (Nombre Completo)</label>
+                                        <input type="text" name="name_destination" value="{{ Auth::user()->name }}" placeholder="Nombre de quien recibe" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Teléfono de Contacto</label>
+                                        <input type="text" name="phone" value="{{ Auth::user()->phone }}" placeholder="Teléfono para el repartidor" class="form-input">
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn-submit-premium">
+                                    <i class="fas fa-save" style="margin-right: 0.25rem;"></i> GUARDAR DIRECCIÓN
                                 </button>
                             </form>
                         </div>
@@ -192,12 +290,52 @@
 
                     <!-- Tab: Favoritos -->
                     <div id="tab-favoritos" class="profile-tab-content">
-                        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">MIS FAVORITOS</h2>
-                        <p style="opacity: 0.5;">Aún no tienes productos en tu lista de deseos.</p>
-                        <a href="/catalogo" class="btn-primary" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 2rem;">IR A LA TIENDA</a>
+                        <!-- El script global se encarga de renderizar esto si hay elementos -->
                     </div>
 
                 </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalle de Pedido -->
+    <div id="order-detail-modal" class="luxury-modal-overlay">
+        <div class="luxury-modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modal-order-title">DETALLE DE PEDIDO</span>
+                <button type="button" class="modal-close-icon" id="btn-close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Loader -->
+                <div id="modal-loader" class="modal-loader">
+                    <div class="spinner-luxury"></div>
+                    <p>Cargando información del pedido...</p>
+                </div>
+                
+                <!-- Contenido -->
+                <div id="modal-content" style="display: none;">
+                    <div class="modal-items-list" id="modal-items-container">
+                        <!-- Cargado dinámicamente con JS -->
+                    </div>
+                    
+                    <div class="modal-summary-card">
+                        <h4 class="modal-summary-title">Resumen de Pago</h4>
+                        <div class="modal-summary-row">
+                            <span>Subtotal de Artículos</span>
+                            <span id="modal-summary-subtotal">0.00€</span>
+                        </div>
+                        <div class="modal-summary-row">
+                            <span>Gastos de Envío</span>
+                            <span id="modal-summary-shipping">0.00€</span>
+                        </div>
+                        <div class="modal-summary-row modal-total">
+                            <span>Total del Pedido</span>
+                            <strong id="modal-summary-total">0.00€</strong>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -206,6 +344,7 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- GESTIÓN DE PESTAÑAS (TABS) ---
             const tabs = document.querySelectorAll('.profile-nav-link[data-tab]');
             const contents = document.querySelectorAll('.profile-tab-content');
 
@@ -214,17 +353,27 @@
                     e.preventDefault();
                     const target = this.getAttribute('data-tab');
 
-                    // Remove active classes
+                    // Desactivar todas las pestañas y contenidos
                     tabs.forEach(t => t.classList.remove('active'));
                     contents.forEach(c => c.classList.remove('active'));
 
-                    // Add active classes
+                    // Activar la seleccionada
                     this.classList.add('active');
-                    document.getElementById('tab-' + target).classList.add('active');
+                    const targetEl = document.getElementById('tab-' + target);
+                    if (targetEl) {
+                        targetEl.classList.add('active');
+                    }
                 });
             });
 
-            // Lógica para mostrar y ocultar el formulario de añadir dirección
+            // --- SINCRONIZAR ESTADÍSTICAS RÁPIDAS (FAVORITOS DE LOCALSTORAGE) ---
+            const favs = JSON.parse(localStorage.getItem('favoritos')) || [];
+            const favsCountEl = document.getElementById('stats-favoritos-count');
+            if (favsCountEl) {
+                favsCountEl.textContent = favs.length;
+            }
+
+            // --- GESTIÓN DE NUEVA DIRECCIÓN ---
             const btnNuevaDireccion = document.getElementById('btn-nueva-direccion');
             const formNuevaDireccion = document.getElementById('form-nueva-direccion');
             const btnCancelarDireccion = document.getElementById('btn-cancelar-direccion');
@@ -239,6 +388,115 @@
                     formNuevaDireccion.style.display = 'none';
                 });
             }
+
+            // --- DETALLES DE PEDIDO POR AJAX + MODAL PREMIUM ---
+            const modal = document.getElementById('order-detail-modal');
+            const modalTitle = document.getElementById('modal-order-title');
+            const modalLoader = document.getElementById('modal-loader');
+            const modalContent = document.getElementById('modal-content');
+            const itemsContainer = document.getElementById('modal-items-container');
+            
+            const subtotalEl = document.getElementById('modal-summary-subtotal');
+            const shippingEl = document.getElementById('modal-summary-shipping');
+            const totalEl = document.getElementById('modal-summary-total');
+
+            const btnCloseModal = document.getElementById('btn-close-modal');
+            
+            // Abrir modal y cargar datos por AJAX
+            document.querySelectorAll('.btn-detail-trigger').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const orderId = this.getAttribute('data-order-id');
+                    
+                    // Mostrar modal vacío con Loader
+                    modalTitle.textContent = `DETALLE DE PEDIDO #BN-${orderId}`;
+                    modalLoader.style.display = 'flex';
+                    modalContent.style.display = 'none';
+                    modal.classList.add('active');
+
+                    // Petición AJAX segura
+                    fetch(`${window.location.origin}/perfil/pedido/${orderId}/detalles`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Error al recuperar detalles');
+                            return response.json();
+                        })
+                        .then(data => {
+                            const order = data.order;
+                            const lines = data.lines;
+
+                            // Limpiar contenedor de artículos
+                            itemsContainer.innerHTML = '';
+                            
+                            let subtotalCalculado = 0;
+
+                            // Iterar e insertar las líneas
+                            lines.forEach(line => {
+                                const price = parseFloat(line.price || line.total_price);
+                                const unitPrice = price / line.unit;
+                                subtotalCalculado += price;
+
+                                const imgUrl = line.product_image 
+                                    ? `${window.location.origin}/storage/${line.product_image}` 
+                                    : `${window.location.origin}/img/imgPrueba.png`;
+
+                                itemsContainer.innerHTML += `
+                                    <div class="modal-item-row">
+                                        <div class="modal-item-img-wrapper">
+                                            <img src="${imgUrl}" alt="${line.product_name}" onerror="this.src='${window.location.origin}/img/imgPrueba.png';">
+                                        </div>
+                                        <div class="modal-item-details">
+                                            <h5 class="modal-item-name">${line.product_name}</h5>
+                                            <span class="modal-item-qty">Cantidad: ${line.unit} × ${unitPrice.toFixed(2)}€</span>
+                                        </div>
+                                        <div class="modal-item-price">${price.toFixed(2)}€</div>
+                                    </div>
+                                `;
+                            });
+
+                            // Actualizar Resumen de Precios
+                            const orderTotal = parseFloat(order.total_price);
+                            const shippingCost = orderTotal - subtotalCalculado;
+
+                            subtotalEl.textContent = `${subtotalCalculado.toFixed(2)}€`;
+                            shippingEl.textContent = shippingCost > 0 ? `${shippingCost.toFixed(2)}€` : 'Gratis';
+                            totalEl.textContent = `${orderTotal.toFixed(2)}€`;
+
+                            // Ocultar Loader y Mostrar Contenido
+                            modalLoader.style.display = 'none';
+                            modalContent.style.display = 'block';
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            itemsContainer.innerHTML = `<div style="text-align: center; color: #cc2d2d; font-weight: 700; padding: 2rem 0;">Error al cargar los detalles del pedido. Inténtalo de nuevo.</div>`;
+                            modalLoader.style.display = 'none';
+                            modalContent.style.display = 'block';
+                        });
+                });
+            });
+
+            // Cerrar Modal
+            function cerrarModal() {
+                modal.classList.remove('active');
+            }
+
+            if (btnCloseModal) {
+                btnCloseModal.addEventListener('click', cerrarModal);
+            }
+
+            // Cerrar modal al hacer clic en el overlay exterior
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    cerrarModal();
+                }
+            });
+
+            // Cerrar modal con la tecla Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    cerrarModal();
+                }
+            });
         });
     </script>
 @endpush
+

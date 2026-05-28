@@ -17,6 +17,14 @@ Route::get('/catalogo', [App\Http\Controllers\CatalogController::class, 'index']
 Route::get('/producto/{id}', [App\Http\Controllers\CatalogController::class, 'show'])->name('catalog.show');
 
 // ==========================================
+// PÁGINAS LEGALES
+// ==========================================
+Route::get('/aviso-legal', fn() => view('legal.aviso'))->name('legal.aviso');
+Route::get('/privacidad', fn() => view('legal.privacidad'))->name('legal.privacidad');
+Route::get('/cookies', fn() => view('legal.cookies'))->name('legal.cookies');
+
+
+// ==========================================
 // RUTAS DE CARRITO Y PERFIL
 // ==========================================
 
@@ -25,6 +33,8 @@ Route::post('/carrito/anadir/{id}', [CartController::class, 'add'])->name('cart.
 Route::post('/carrito/actualizar/{id}', [CartController::class, 'update'])->name('cart.update');
 Route::post('/carrito/eliminar/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/carrito/vaciar', [CartController::class, 'clear'])->name('cart.clear');
+Route::post('/carrito/cupon/aplicar', [CartController::class, 'applyCoupon'])->name('cart.coupon.apply');
+Route::post('/carrito/cupon/eliminar', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 
 Route::get('/checkout', [ViewController::class, 'checkout'])->name('cart.checkout');
 Route::post('/checkout/prepare', [CartController::class, 'preparePayment'])->name('cart.preparePayment');
@@ -68,6 +78,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [ControladorPerfil::class, 'verPerfil'])->name('profile');
     Route::put('/perfil/actualizar', [ControladorPerfil::class, 'actualizarDatos'])->name('profile.update');
     Route::post('/perfil/direccion', [ControladorPerfil::class, 'agregarDireccion'])->name('profile.address.add');
+    Route::delete('/perfil/direccion/{id}', [ControladorPerfil::class, 'eliminarDireccion'])->name('profile.address.delete');
+    Route::get('/perfil/pedido/{id}/detalles', [ControladorPerfil::class, 'detallesPedido'])->name('profile.order.details');
 });
 
 // Admin Routes (Organized)

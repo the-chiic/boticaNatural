@@ -242,6 +242,39 @@
                             <strong>Fecha de Compra</strong>
                             {{ \Carbon\Carbon::parse($order->order_date)->translatedFormat('d \d\e F \d\e Y, H:i') }}
                         </div>
+                        <div>
+                            <strong>Método de Pago</strong>
+                            @if($order->payment_method === 'store')
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;">
+                                    <i class="fa-solid fa-store" style="color:var(--brand-accent);font-size:0.85rem;"></i>
+                                    Pago en Tienda
+                                </span>
+                            @else
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;">
+                                    <i class="fa-solid fa-credit-card" style="color:var(--brand-accent);font-size:0.85rem;"></i>
+                                    Tarjeta Bancaria
+                                </span>
+                            @endif
+                        </div>
+                        <div>
+                            <strong>Tipo de Envío</strong>
+                            @if($order->shipping_method === 'express')
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;">
+                                    <i class="fa-solid fa-bolt" style="color:#f59e0b;font-size:0.85rem;"></i>
+                                    Exprés 24h
+                                </span>
+                            @elseif($order->shipping_method === 'store')
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;">
+                                    <i class="fa-solid fa-shop" style="color:var(--brand-accent);font-size:0.85rem;"></i>
+                                    Recogida en Tienda
+                                </span>
+                            @else
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;">
+                                    <i class="fa-solid fa-truck" style="color:var(--brand-green);font-size:0.85rem;"></i>
+                                    Envío Estándar
+                                </span>
+                            @endif
+                        </div>
                         <div style="grid-column: span 2;">
                             <strong>Dirección de Envío</strong>
                             {{ $order->shipping_name }}<br>

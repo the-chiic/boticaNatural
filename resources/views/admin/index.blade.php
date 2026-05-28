@@ -7,6 +7,15 @@
             <div class="stat-info">
                 <h3>Ingresos Totales</h3>
                 <p>€{{ number_format($totalRevenue, 2) }}</p>
+                @if($revenueLastMonth > 0)
+                    @php $revDelta = $revenueLastMonth > 0 ? round((($totalRevenue - $revenueLastMonth) / $revenueLastMonth) * 100, 1) : 0; @endphp
+                    <span class="stat-delta {{ $revDelta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        <i class="fa-solid fa-arrow-{{ $revDelta >= 0 ? 'trend-up' : 'trend-down' }}"></i>
+                        {{ $revDelta >= 0 ? '+' : '' }}{{ $revDelta }}% vs mes anterior
+                    </span>
+                @else
+                    <span class="stat-delta delta-neutral"><i class="fa-solid fa-minus"></i> Sin datos previos</span>
+                @endif
             </div>
         </div>
         <div class="stat-card">
@@ -16,6 +25,15 @@
             <div class="stat-info">
                 <h3>Total Pedidos</h3>
                 <p>{{ $ordersCount }}</p>
+                @php $orderDelta = $ordersLastMonth > 0 ? round((($ordersCount - $ordersLastMonth) / $ordersLastMonth) * 100, 1) : 0; @endphp
+                @if($ordersLastMonth > 0)
+                    <span class="stat-delta {{ $orderDelta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        <i class="fa-solid fa-arrow-{{ $orderDelta >= 0 ? 'trend-up' : 'trend-down' }}"></i>
+                        {{ $orderDelta >= 0 ? '+' : '' }}{{ $orderDelta }}% vs mes anterior
+                    </span>
+                @else
+                    <span class="stat-delta delta-neutral"><i class="fa-solid fa-minus"></i> Sin datos previos</span>
+                @endif
             </div>
         </div>
         <div class="stat-card">
@@ -25,6 +43,15 @@
             <div class="stat-info">
                 <h3>Clientes Registrados</h3>
                 <p>{{ $customersCount }}</p>
+                @php $custDelta = $customersLastMonth > 0 ? round((($customersCount - $customersLastMonth) / $customersLastMonth) * 100, 1) : 0; @endphp
+                @if($customersLastMonth > 0)
+                    <span class="stat-delta {{ $custDelta >= 0 ? 'delta-up' : 'delta-down' }}">
+                        <i class="fa-solid fa-arrow-{{ $custDelta >= 0 ? 'trend-up' : 'trend-down' }}"></i>
+                        {{ $custDelta >= 0 ? '+' : '' }}{{ $custDelta }}% vs mes anterior
+                    </span>
+                @else
+                    <span class="stat-delta delta-neutral"><i class="fa-solid fa-minus"></i> Sin datos previos</span>
+                @endif
             </div>
         </div>
         <div class="stat-card">
@@ -34,6 +61,7 @@
             <div class="stat-info">
                 <h3>Productos Activos</h3>
                 <p>{{ $activeProducts }}</p>
+                <span class="stat-delta delta-neutral"><i class="fa-solid fa-circle-check"></i> En catálogo activo</span>
             </div>
         </div>
     </div>

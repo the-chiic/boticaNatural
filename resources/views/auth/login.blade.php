@@ -11,10 +11,10 @@
         <div class="envolturaFormulario">
             
             <div class="cabeceraAutenticacion">
-                <div class="marca">
-                    <i class="fa-solid fa-leaf iconoMarca"></i>
-                    {{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}
-                </div>
+                <a href="{{ url('/') }}" class="marca-premium" style="justify-content: center; margin-bottom: 2rem;">
+                    <img src="{{ asset('img/logo.jpg') }}" alt="Logo La Botica Natural" class="iconoMarca">
+                    <span class="nombreMarca">{{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}</span>
+                </a>
                 <h1>BIENVENIDO DE NUEVO</h1>
                 <p>Tu camino hacia el bienestar natural continúa aquí.</p>
             </div>

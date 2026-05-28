@@ -28,13 +28,13 @@
     <div class="product-card" style="position: relative;">
         <div class="product-img" style="position: relative;">
             <a href="{{ route('catalog.show', $product->id) }}">
-                <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" alt="{{ $product->name }}">
+                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" loading="lazy" decoding="async">
                 <div class="product-overlay">
                     <span>Ver Detalle</span>
                 </div>
             </a>
             <!-- Botón Favorito en la esquina superior derecha -->
-            <button type="button" class="btn-favorito" data-id="{{ $product->id }}" data-name="{{ $product->name }}" data-image="{{ $product->image ? asset('storage/' . $product->image) : asset('img/imgPrueba.png') }}" data-url="{{ route('catalog.show', $product->id) }}" data-category="{{ $product->categories->first()->name ?? 'Sin categoría' }}" data-price="{{ number_format($product->price, 2) }}€" style="position: absolute; top: 12px; right: 12px; z-index: 10; background: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.12); cursor: pointer; color: #ccc; transition: all 0.2s ease;">
+            <button type="button" class="btn-favorito" data-id="{{ $product->id }}" data-name="{{ $product->name }}" data-image="{{ $product->image_url }}" data-url="{{ route('catalog.show', $product->id) }}" data-category="{{ $product->categories->first()->name ?? 'Sin categoría' }}" data-price="{{ number_format($product->price, 2) }}€" style="position: absolute; top: 12px; right: 12px; z-index: 10; background: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.12); cursor: pointer; color: #ccc; transition: all 0.2s ease;">
                 <i class="fa-regular fa-heart" style="font-size: 16px;"></i>
             </button>
         </div>

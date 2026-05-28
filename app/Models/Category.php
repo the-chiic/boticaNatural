@@ -14,6 +14,23 @@ class Category extends Model
         'description'
     ];
 
+    protected static function booted()
+    {
+        static::saved(function ($category) {
+            self::clearCategoryCaches();
+        });
+
+        static::deleted(function ($category) {
+            self::clearCategoryCaches();
+        });
+    }
+
+    public static function clearCategoryCaches()
+    {
+        \Cache::forget('categories_ordered');
+        \Cache::forget('categories_all');
+    }
+
     /**
      * Los productos que pertenecen a esta categoría.
      */
@@ -43,7 +60,9 @@ class Category extends Model
      */
     public static function getAllOrdered()
     {
-        return self::orderBy('name')->get();
+        return \Cache::remember('categories_ordered', 3600, function() {
+            return self::orderBy('name')->get();
+        });
     }
 
     /**
@@ -51,6 +70,8 @@ class Category extends Model
      */
     public static function getAll()
     {
-        return self::all();
+        return \Cache::remember('categories_all', 3600, function() {
+            return self::all();
+        });
     }
 }

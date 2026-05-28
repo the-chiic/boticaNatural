@@ -33,12 +33,19 @@ class ViewController extends Controller
             $subtotal += $item['price'] * $item['qty'];
         }
         
-        $total = $subtotal; // El JS y backend agregarán el envío posteriormente
+        $discount = 0;
+        if (session()->has('coupon')) {
+            $promoDiscount = session()->get('coupon.discount');
+            $discount = round($subtotal * ($promoDiscount / 100), 2);
+        }
+
+        $subtotalAfterDiscount = max(0, $subtotal - $discount);
+        $total = $subtotalAfterDiscount; // El JS y backend agregarán el envío posteriormente
 
         // Obtener la clave pública de Stripe
         $stripeKey = config('services.stripe.key', env('STRIPE_KEY'));
 
-        return view('cart.checkout', compact('cart', 'direcciones', 'user', 'subtotal', 'total', 'stripeKey'));
+        return view('cart.checkout', compact('cart', 'direcciones', 'user', 'subtotal', 'total', 'stripeKey', 'discount', 'subtotalAfterDiscount'));
     }
 
     /**

@@ -27,10 +27,16 @@ class CartController extends Controller
             $subtotal += $item['price'] * $item['qty'];
         }
         
-        $iva = round($subtotal * 0.21, 2); // 21% IVA incluido
-        $total = $subtotal; // Envío gratis en nuestra botica
+        $discount = 0;
+        if (session()->has('coupon')) {
+            $promoDiscount = session()->get('coupon.discount');
+            $discount = round($subtotal * ($promoDiscount / 100), 2);
+        }
 
-        return view('cart.index', compact('cart', 'subtotal', 'iva', 'total'));
+        $iva = round(($subtotal - $discount) * 0.21, 2); // 21% IVA incluido
+        $total = max(0, $subtotal - $discount); // Envío gratis en nuestra botica
+
+        return view('cart.index', compact('cart', 'subtotal', 'iva', 'total', 'discount'));
     }
 
     /**
@@ -51,7 +57,7 @@ class CartController extends Controller
                 'name' => $product->name,
                 'price' => (float) $product->price,
                 'qty' => $qty,
-                'image' => $product->image
+                'image' => $product->image_url
             ];
         }
 
@@ -117,6 +123,11 @@ class CartController extends Controller
             return response()->json(['error' => 'No autorizado'], 401);
         }
 
+        // Asegurar valor por defecto para payment_method si viene vacío o nulo
+        if (!$request->has('payment_method') || empty($request->input('payment_method'))) {
+            $request->merge(['payment_method' => 'credit_card']);
+        }
+
         $request->validate([
             'name_destination' => 'required|string|max:100',
             'address' => 'required|string|max:255',
@@ -124,7 +135,8 @@ class CartController extends Controller
             'post_code' => 'required|string|max:20',
             'country' => 'required|string|max:100',
             'phone' => 'nullable|string|max:30',
-            'shipping_method' => 'required|string|in:standard,express',
+            'shipping_method' => 'required|string|in:standard,express,store_pickup',
+            'payment_method' => 'required|string|in:credit_card,store_payment',
         ]);
 
         $cart = session()->get('cart', []);
@@ -137,15 +149,26 @@ class CartController extends Controller
             $subtotal += $item['price'] * $item['qty'];
         }
 
+        // Apply discount from session coupon if any
+        $discount = 0;
+        if (session()->has('coupon')) {
+            $promoDiscount = session()->get('coupon.discount');
+            $discount = round($subtotal * ($promoDiscount / 100), 2);
+        }
+
+        $subtotalAfterDiscount = max(0, $subtotal - $discount);
+
         // Calcular costo de envío
         $shippingCost = 0.00;
         if ($request->shipping_method === 'standard') {
-            $shippingCost = $subtotal >= 50.00 ? 0.00 : 4.99;
+            $shippingCost = $subtotalAfterDiscount >= 50.00 ? 0.00 : 4.99;
         } elseif ($request->shipping_method === 'express') {
             $shippingCost = 9.99;
+        } elseif ($request->shipping_method === 'store_pickup') {
+            $shippingCost = 0.00;
         }
 
-        $total = $subtotal + $shippingCost;
+        $total = $subtotalAfterDiscount + $shippingCost;
         $userId = Auth::id();
 
         DB::beginTransaction();
@@ -179,7 +202,36 @@ class CartController extends Controller
                 ]);
             }
 
-            // 3. Crear el PaymentIntent en Stripe
+            // Si es Pago en Tienda
+            if ($request->payment_method === 'store_payment') {
+                // Registrar Pago Pendiente en Tienda
+                Payment::create([
+                    'order_id' => $order->id,
+                    'payment_details' => 'Pago en tienda (Efectivo/Tarjeta al recoger)',
+                    'payment_status' => 0, // 0 = Pendiente
+                    'reference' => 'STORE_PAYMENT_#BN-' . $order->id,
+                    'amount' => $total,
+                ]);
+
+                // Descontar stock directamente de una vez
+                foreach ($cart as $productId => $item) {
+                    $product = Product::findOrFail($productId);
+                    $product->decrement('stock', $item['qty']);
+                }
+
+                DB::commit();
+
+                // Vaciar el carrito en la sesión
+                session()->forget('cart');
+
+                return response()->json([
+                    'is_store_payment' => true,
+                    'order_id' => $order->id,
+                    'redirect' => route('cart.success', ['order_id' => $order->id])
+                ]);
+            }
+
+            // 3. Crear el PaymentIntent en Stripe si es pago online
             Stripe::setApiKey(config('services.stripe.secret', env('STRIPE_SECRET')));
             
             $paymentIntent = PaymentIntent::create([
@@ -203,6 +255,7 @@ class CartController extends Controller
             DB::commit();
 
             return response()->json([
+                'is_store_payment' => false,
                 'client_secret' => $paymentIntent->client_secret,
                 'payment_intent_id' => $paymentIntent->id,
                 'order_id' => $order->id,
@@ -285,5 +338,47 @@ class CartController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error de confirmación de pago: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Aplica un cupón de descuento al carrito de compras.
+     */
+    public function applyCoupon(Request $request)
+    {
+        $code = strtoupper($request->input('coupon_code'));
+        if (empty($code)) {
+            return redirect()->back()->withErrors(['coupon' => 'El código de cupón no puede estar vacío.']);
+        }
+
+        // Buscar promoción activa por su código
+        $promo = \App\Models\Promotion::where('code', $code)
+            ->where('is_active', true)
+            ->where(function($q) {
+                $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+            })
+            ->where(function($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+            })
+            ->first();
+
+        if (!$promo) {
+            return redirect()->back()->with('error', 'El código de cupón no es válido o ha expirado.');
+        }
+
+        session()->put('coupon', [
+            'code' => $promo->code,
+            'discount' => (float) $promo->discount
+        ]);
+
+        return redirect()->route('cart.index')->with('success', '¡Cupón de descuento aplicado con éxito!');
+    }
+
+    /**
+     * Elimina el cupón de descuento activo en la sesión.
+     */
+    public function removeCoupon()
+    {
+        session()->forget('coupon');
+        return redirect()->route('cart.index')->with('success', 'Cupón de descuento eliminado.');
     }
 }

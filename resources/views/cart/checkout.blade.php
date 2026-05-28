@@ -91,7 +91,8 @@
                                 <i class="fa-solid fa-truck" style="opacity: 0.8;"></i> 2. Método de Envío
                             </h2>
                             
-                            <div class="payment-methods-list">
+                            <div class="payment-methods-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                                <!-- Envío Estándar -->
                                 <label class="payment-method-card selected" id="label_shipping_standard">
                                     <div style="display: flex; align-items: center; gap: 1rem;">
                                         <input type="radio" name="shipping_method" value="standard" checked onchange="toggleShippingMethod(this)">
@@ -105,6 +106,7 @@
                                     </span>
                                 </label>
                                 
+                                <!-- Envío Exprés -->
                                 <label class="payment-method-card" id="label_shipping_express">
                                     <div style="display: flex; align-items: center; gap: 1rem;">
                                         <input type="radio" name="shipping_method" value="express" onchange="toggleShippingMethod(this)">
@@ -117,13 +119,27 @@
                                         9.99€
                                     </span>
                                 </label>
+
+                                <!-- Recogida en Tienda -->
+                                <label class="payment-method-card" id="label_shipping_pickup">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <input type="radio" name="shipping_method" value="store_pickup" onchange="toggleShippingMethod(this)">
+                                        <div>
+                                            <span style="font-size: 0.95rem; font-weight: 600; color: var(--brand-green); display: block; margin-bottom: 0.15rem;">Recogida en Tienda (Gratuito)</span>
+                                            <span style="font-size: 0.8rem; color: rgba(27, 48, 34, 0.6);">Recoge tu pedido directamente en nuestra farmacia/botica local.</span>
+                                        </div>
+                                    </div>
+                                    <span style="font-family: var(--fuente-sans); font-weight: 700; color: var(--brand-accent, #8B6F4A); font-size: 1.05rem; text-transform: uppercase;">
+                                        Gratis
+                                    </span>
+                                </label>
                             </div>
                         </div>
 
                         <!-- Payment Method -->
                         <div class="checkout-form-section" style="margin-bottom: 2rem;">
                             <h2 class="checkout-title">
-                                <i class="fa-solid fa-credit-card" style="opacity: 0.8;"></i> 3. Pago Seguro
+                                <i class="fa-solid fa-credit-card" style="opacity: 0.8;"></i> 3. Pago y Facturación
                             </h2>
                             
                             <!-- Express Checkout (Apple Pay & Google Pay) -->
@@ -138,10 +154,11 @@
                                 </div>
                             </div>
                             
-                            <div style="margin-bottom: 1.5rem;">
-                                <div class="payment-method-card selected">
+                            <div style="margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                                <!-- Pago Seguro por Tarjeta -->
+                                <label class="payment-method-card selected" id="label_payment_card">
                                     <div style="display: flex; align-items: center; gap: 1rem;">
-                                        <input type="radio" name="payment_method" value="credit_card" checked readonly>
+                                        <input type="radio" name="payment_method" value="credit_card" checked onchange="togglePaymentMethod(this)">
                                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                                             <i class="fa-solid fa-credit-card" style="color: var(--brand-green); font-size: 1.2rem;"></i>
                                             <span style="font-size: 0.95rem; font-weight: 600; color: var(--brand-green);">Tarjeta de Crédito o Débito</span>
@@ -152,17 +169,30 @@
                                         <i class="fa-brands fa-cc-mastercard" style="color: #eb001b;"></i>
                                         <i class="fa-brands fa-cc-amex" style="color: #016fd0;"></i>
                                     </div>
+                                </label>
+
+                                <!-- Pago en Tienda -->
+                                <label class="payment-method-card" id="label_payment_store">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <input type="radio" name="payment_method" value="store_payment" onchange="togglePaymentMethod(this)">
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="fa-solid fa-shop" style="color: var(--brand-green); font-size: 1.2rem;"></i>
+                                            <span style="font-size: 0.95rem; font-weight: 600; color: var(--brand-green);">Pago en Tienda (Efectivo / Tarjeta al recoger)</span>
+                                        </div>
+                                    </div>
+                                    <span style="font-size: 0.8rem; color: var(--brand-accent, #8B6F4A); font-weight: 700; text-transform: uppercase;">Sin recargo</span>
+                                </label>
+
+                                <!-- Stripe Credit Card Form -->
+                                <div id="stripe-card-wrapper" style="margin-top: 1rem; transition: all 0.3s ease;">
+                                    <label style="font-family: var(--font-sans); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem; display: block; opacity: 0.8;">
+                                        Detalles de la Tarjeta
+                                    </label>
+                                    <div id="card-element">
+                                        <!-- Stripe Card Element will mount here -->
+                                    </div>
+                                    <div id="card-errors" role="alert"></div>
                                 </div>
-                                    <!-- Stripe Credit Card Form -->
-                             <div id="stripe-card-wrapper">
-                                 <label>
-                                     Detalles de la Tarjeta
-                                 </label>
-                                 <div id="card-element">
-                                     <!-- Stripe Card Element will mount here -->
-                                 </div>
-                                 <div id="card-errors" role="alert"></div>
-                             </div>
                             </div>
                         </div>
                     </div>
@@ -185,15 +215,23 @@
                                 <span>Subtotal</span>
                                 <span>{{ number_format($subtotal, 2) }}€</span>
                             </div>
+
+                            @if(isset($discount) && $discount > 0)
+                            <div class="order-review-row" style="color: #0d9488; font-weight: 700; background: rgba(13, 148, 136, 0.05); padding: 0.65rem 0.85rem; border-radius: 0.75rem; border: 1px dashed rgba(13, 148, 136, 0.2); display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <span style="display: inline-flex; align-items: center; gap: 0.4rem; color: #0f766e;"><i class="fa-solid fa-gift" style="color: var(--brand-accent, #8B6F4A); font-size: 0.95rem;"></i> Descuento (Cupón)</span>
+                                <span>-{{ number_format($discount, 2) }}€</span>
+                            </div>
+                            @endif
+
                             <div class="order-review-row">
                                 <span>Gastos de Envío</span>
-                                <span id="shipping-cost-value" style="font-weight: 600; color: {{ $subtotal >= 50 ? 'var(--brand-accent)' : 'var(--brand-green)' }}">
-                                    {{ $subtotal >= 50 ? 'Gratis' : number_format(4.99, 2) . '€' }}
+                                <span id="shipping-cost-value" style="font-weight: 600; color: {{ $subtotalAfterDiscount >= 50 ? 'var(--brand-accent)' : 'var(--brand-green)' }}">
+                                    {{ $subtotalAfterDiscount >= 50 ? 'Gratis' : number_format(4.99, 2) . '€' }}
                                 </span>
                             </div>
                             <div class="order-review-row total-row">
                                 <span>TOTAL</span>
-                                <span id="grand-total-value">{{ number_format($subtotal >= 50 ? $subtotal : $subtotal + 4.99, 2) }}€</span>
+                                <span id="grand-total-value">{{ number_format($subtotalAfterDiscount >= 50 ? $subtotalAfterDiscount : $subtotalAfterDiscount + 4.99, 2) }}€</span>
                             </div>
                         </div>
 
@@ -248,7 +286,7 @@
     });
 
     // A. Configurar Stripe Payment Request (Apple Pay / Google Pay)
-    let finalAmountCents = Math.round({{ $subtotal >= 50 ? $subtotal : $subtotal + 4.99 }} * 100);
+    let finalAmountCents = Math.round({{ $subtotalAfterDiscount >= 50 ? $subtotalAfterDiscount : $subtotalAfterDiscount + 4.99 }} * 100);
     
     const paymentRequest = stripe.paymentRequest({
         country: 'ES',
@@ -404,17 +442,37 @@
     }
 
     // 3. Selección y Recálculo de Envío Dinámico
-    const baseSubtotal = parseFloat("{{ $subtotal }}");
+    const baseSubtotal = parseFloat("{{ $subtotalAfterDiscount }}");
     
     function toggleShippingMethod(radio) {
-        document.querySelectorAll('.payment-methods-list .payment-method-card').forEach(card => {
-            card.classList.remove('selected');
+        document.querySelectorAll('input[name="shipping_method"]').forEach(input => {
+            const card = input.closest('.payment-method-card');
+            if (card) card.classList.remove('selected');
         });
         
         const selectedCard = radio.closest('.payment-method-card');
-        selectedCard.classList.add('selected');
+        if (selectedCard) selectedCard.classList.add('selected');
         
         recalculateTotals();
+    }
+
+    function togglePaymentMethod(radio) {
+        document.querySelectorAll('input[name="payment_method"]').forEach(input => {
+            const card = input.closest('.payment-method-card');
+            if (card) card.classList.remove('selected');
+        });
+        
+        const selectedCard = radio.closest('.payment-method-card');
+        if (selectedCard) selectedCard.classList.add('selected');
+        
+        const stripeWrapper = document.getElementById('stripe-card-wrapper');
+        if (radio.value === 'store_payment') {
+            stripeWrapper.style.opacity = '0';
+            setTimeout(() => { stripeWrapper.style.display = 'none'; }, 300);
+        } else {
+            stripeWrapper.style.display = 'block';
+            setTimeout(() => { stripeWrapper.style.opacity = '1'; }, 50);
+        }
     }
     
     function recalculateTotals() {
@@ -425,6 +483,8 @@
             shippingCost = baseSubtotal >= 50.00 ? 0.00 : 4.99;
         } else if (shippingMethod === 'express') {
             shippingCost = 9.99;
+        } else if (shippingMethod === 'store_pickup') {
+            shippingCost = 0.00;
         }
         
         // Actualizar el costo de envío en el DOM
@@ -459,9 +519,15 @@
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
         
+        const paymentRadio = document.querySelector('input[name="payment_method"]:checked');
+        const payment_method = paymentRadio ? paymentRadio.value : 'credit_card';
+        const isStorePayment = (payment_method === 'store_payment');
+        
         // Bloquear botón e indicar cargando
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO PAGO...';
+        submitBtn.innerHTML = isStorePayment 
+            ? '<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO PEDIDO...'
+            : '<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO PAGO...';
         
         const name = document.getElementById('name_destination').value;
         const address = document.getElementById('address').value;
@@ -472,7 +538,7 @@
         const shipping_method = document.querySelector('input[name="shipping_method"]:checked').value;
         
         try {
-            // Fase 1: Pre-registrar el pedido y obtener el client_secret de Stripe
+            // Fase 1: Pre-registrar el pedido
             const prepareResponse = await fetch("{{ route('cart.preparePayment') }}", {
                 method: "POST",
                 headers: {
@@ -487,7 +553,8 @@
                     post_code: postcode,
                     country: country,
                     phone: phone,
-                    shipping_method: shipping_method
+                    shipping_method: shipping_method,
+                    payment_method: payment_method
                 })
             });
             
@@ -495,6 +562,12 @@
             
             if (!prepareResponse.ok || prepareData.error) {
                 throw new Error(prepareData.error || prepareData.message || "Error al preparar tu pedido.");
+            }
+            
+            // Si es Pago en Tienda, redirigir directamente
+            if (prepareData.is_store_payment) {
+                window.location.href = prepareData.redirect;
+                return;
             }
             
             const clientSecret = prepareData.client_secret;
@@ -556,7 +629,9 @@
             
             // Reactivar el botón para reintentos
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Confirmar y Pagar';
+            submitBtn.innerHTML = isStorePayment 
+                ? '<i class="fa-solid fa-check-circle"></i> Confirmar Pedido'
+                : '<i class="fa-solid fa-lock"></i> Confirmar y Pagar';
         }
     });
 </script>

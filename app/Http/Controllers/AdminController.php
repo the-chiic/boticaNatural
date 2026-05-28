@@ -24,6 +24,22 @@ class AdminController extends Controller
         $customersCount = User::count();
         $activeProducts = Product::where('status', 1)->count();
 
+        // 1b. Métricas del mes anterior para indicadores de variación
+        $lastMonthStart = now()->subMonth()->startOfMonth();
+        $lastMonthEnd   = now()->subMonth()->endOfMonth();
+        $thisMonthStart = now()->startOfMonth();
+
+        $revenueLastMonth   = DB::table('orders')
+            ->where('status', 1)
+            ->whereBetween('order_date', [$lastMonthStart, $lastMonthEnd])
+            ->sum('total_price');
+
+        $ordersLastMonth    = DB::table('orders')
+            ->whereBetween('order_date', [$lastMonthStart, $lastMonthEnd])
+            ->count();
+
+        $customersLastMonth = User::where('created_at', '<', $thisMonthStart)->count();
+
         // 2. Pedidos recientes con nombre de cliente
         $recentOrders = DB::table('orders')
             ->join('user', 'orders.user_id', '=', 'user.id')
@@ -52,8 +68,13 @@ class AdminController extends Controller
                 });
         }
 
-        return view('admin.index', compact('totalRevenue', 'ordersCount', 'customersCount', 'activeProducts', 'recentOrders', 'popularProducts'));
+        return view('admin.index', compact(
+            'totalRevenue', 'ordersCount', 'customersCount', 'activeProducts',
+            'recentOrders', 'popularProducts',
+            'revenueLastMonth', 'ordersLastMonth', 'customersLastMonth'
+        ));
     }
+
 
     /**
      * Gestión y listado de productos con paginación.

@@ -3,6 +3,147 @@
     <head>
         @include('head')
         @stack('style')
+        
+        <!-- Estilos Responsivos Globales (Móvil y Tablet) -->
+        <style>
+            /* Tablet y pantallas medianas (menores a 992px) */
+            @media (max-width: 992px) {
+                .contenedorAutenticacion {
+                    flex-direction: column !important;
+                    min-height: auto !important;
+                }
+                .autenticacionIzquierda {
+                    width: 100% !important;
+                    padding: 3rem 1.5rem !important;
+                }
+                .autenticacionDerecha {
+                    display: none !important; /* Oculta la imagen lateral para dar prioridad al formulario de login/recuperación */
+                }
+            }
+
+            /* Móvil y Tablet (menores a 768px) */
+            @media (max-width: 768px) {
+                /* Perfil */
+                .profile-layout {
+                    flex-direction: column !important;
+                    gap: 2rem !important;
+                }
+                .profile-nav {
+                    width: 100% !important;
+                    margin-bottom: 0 !important;
+                    padding: 1.5rem !important;
+                    border-radius: 1rem !important;
+                }
+                .profile-nav-link {
+                    padding: 0.75rem 1rem !important;
+                    border-radius: 0.5rem !important;
+                }
+                .order-history-table {
+                    display: block !important;
+                    width: 100% !important;
+                    overflow-x: auto !important; /* Scroll horizontal elegante para tablas en móvil */
+                    white-space: nowrap !important;
+                    -webkit-overflow-scrolling: touch;
+                }
+                
+                /* Catálogo */
+                .catalog-layout {
+                    flex-direction: column !important;
+                    gap: 2rem !important;
+                }
+                .filters-sidebar {
+                    width: 100% !important;
+                    position: static !important;
+                    padding: 1.5rem !important;
+                    border-radius: 1rem !important;
+                }
+                .product-grid {
+                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; /* Cuadrícula optimizada de 2 columnas en móvil */
+                    gap: 1rem !important;
+                }
+                .product-card {
+                    border-radius: 0.75rem !important;
+                }
+                .product-details {
+                    padding: 0.75rem !important;
+                }
+                .product-details h4 {
+                    font-size: 0.9rem !important;
+                }
+                .price-label {
+                    font-size: 1rem !important;
+                }
+            }
+        /* Responsive promo bar */
+        .promo-announcement-bar {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .promo-announcement-bar .promo-text {
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .promo-text-mobile {
+            display: none !important;
+        }
+        .promo-dismiss-btn {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: inherit;
+            opacity: 0.65;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0.25rem;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+        .promo-dismiss-btn:hover { opacity: 1; }
+
+        @media (max-width: 768px) {
+            .promo-announcement-bar {
+                justify-content: center !important;
+                padding: 0.6rem 3rem 0.6rem 1.5rem !important;
+                height: auto !important;
+            }
+            .promo-text-desktop {
+                display: none !important;
+            }
+            .promo-text-mobile {
+                display: inline-block !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                font-size: 0.74rem !important;
+                text-align: center !important;
+                width: 100% !important;
+                letter-spacing: 0.05em !important;
+            }
+            .promo-icon { display: none !important; }
+            .promo-dismiss-btn {
+                position: absolute !important;
+                right: 1rem !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                width: auto !important;
+                padding: 0.25rem !important;
+            }
+        }
+    </style>
     </head>
     <body>
         @php
@@ -19,12 +160,40 @@
         @endphp
 
         @if($activePromo)
-            <div class="promo-announcement-bar">
+            <div class="promo-announcement-bar" id="promoBar" data-promo-code="{{ $activePromo->code }}">
                 <span class="promo-icon"><i class="fa-solid fa-gift"></i></span>
-                <span>
+                <span class="promo-text promo-text-desktop">
                     ¡PROMO ACTIVA! <strong>{{ $activePromo->name }}</strong>: Usa el cupón <strong class="promo-code">{{ $activePromo->code }}</strong> y obtén un <strong>{{ number_format($activePromo->discount, 0) }}% de descuento</strong> en tu compra.
                 </span>
+                <span class="promo-text promo-text-mobile">
+                    ¡PROMO! <strong>{{ number_format($activePromo->discount, 0) }}% DTO.</strong> con cupón <strong class="promo-code">{{ $activePromo->code }}</strong>
+                </span>
+                <button class="promo-dismiss-btn" id="promoClose" aria-label="Cerrar anuncio" title="Cerrar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
+            <script>
+                (function() {
+                    var code = '{{ $activePromo->code }}';
+                    var key = 'promoBarDismissed_' + code;
+                    var bar = document.getElementById('promoBar');
+                    if (localStorage.getItem(key) === '1' && bar) {
+                        bar.style.display = 'none';
+                    }
+                    var btn = document.getElementById('promoClose');
+                    if (btn && bar) {
+                        btn.addEventListener('click', function() {
+                            bar.style.transition = 'opacity 0.3s, max-height 0.4s';
+                            bar.style.opacity = '0';
+                            bar.style.maxHeight = '0';
+                            bar.style.overflow = 'hidden';
+                            bar.style.padding = '0';
+                            setTimeout(function() { bar.style.display = 'none'; }, 400);
+                            localStorage.setItem(key, '1');
+                        });
+                    }
+                })();
+            </script>
         @endif
 
         @yield('navbar')
@@ -145,5 +314,7 @@
                 }
             });
         </script>
+    </body>
+</html>
     </body>
 </html>

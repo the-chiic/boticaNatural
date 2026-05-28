@@ -72,10 +72,30 @@
                     <aside class="cart-summary-panel">
                         <h3 class="summary-title">Resumen de Compra</h3>
                         
+                        @if(session('error'))
+                            <div style="background: rgba(239, 68, 68, 0.1); color: #dc2626; padding: 0.65rem 1rem; border-radius: 0.5rem; font-size: 0.8rem; margin-bottom: 1rem; font-family: var(--fuente-sans); border: 1px solid rgba(239,68,68,0.2);">
+                                <i class="fa-solid fa-circle-xmark"></i> {{ session('error') }}
+                            </div>
+                        @endif
+
+                        @if(session('success'))
+                            <div style="background: rgba(16, 185, 129, 0.1); color: #059669; padding: 0.65rem 1rem; border-radius: 0.5rem; font-size: 0.8rem; margin-bottom: 1rem; font-family: var(--fuente-sans); border: 1px solid rgba(16,185,129,0.2);">
+                                <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+                            </div>
+                        @endif
+
                         <div class="summary-row">
                             <span>Subtotal</span>
                             <span>{{ number_format($subtotal, 2) }}€</span>
                         </div>
+
+                        @if(isset($discount) && $discount > 0)
+                        <div class="summary-row" style="color: #a7f3d0; font-weight: 700; background: rgba(166, 243, 208, 0.08); padding: 0.65rem 0.85rem; border-radius: 0.75rem; border: 1px dashed rgba(166, 243, 208, 0.25); margin-bottom: 1.25rem;">
+                            <span style="display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-gift" style="color: #8B6F4A; font-size: 1rem;"></i> Descuento (Cupón)</span>
+                            <span>-{{ number_format($discount, 2) }}€</span>
+                        </div>
+                        @endif
+
                         <div class="summary-row">
                             <span>Envío</span>
                             <span class="text-free">Gratis</span>
@@ -88,6 +108,33 @@
                         <div class="summary-row summary-total">
                             <span>TOTAL</span>
                             <span>{{ number_format($total, 2) }}€</span>
+                        </div>
+
+                        <!-- Coupon application form -->
+                        <div class="coupon-section" style="margin-top: 1.5rem; border-top: 1px solid rgba(250, 249, 246, 0.12); padding-top: 1.25rem; margin-bottom: 1.5rem;">
+                            @if(session()->has('coupon'))
+                                <div class="coupon-active-badge">
+                                    <span class="coupon-active-details">
+                                        <i class="fa-solid fa-tag coupon-icon-tag"></i> 
+                                        Cupón: <strong class="coupon-code-text">{{ session('coupon.code') }}</strong> 
+                                        <span class="coupon-discount-text">(-{{ session('coupon.discount') }}%)</span>
+                                    </span>
+                                    <form action="{{ route('cart.coupon.remove') }}" method="POST" style="margin: 0; padding: 0; display: inline;">
+                                        @csrf
+                                        <button type="submit" title="Eliminar cupón" class="coupon-remove-btn">
+                                            <i class="fa-solid fa-circle-xmark"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <form action="{{ route('cart.coupon.apply') }}" method="POST" class="coupon-apply-form" style="display: flex; gap: 0.5rem; width: 100%;">
+                                    @csrf
+                                    <input type="text" name="coupon_code" placeholder="Código de cupón" required style="flex: 1; min-width: 0; padding: 0.65rem 1rem; border-radius: 9999px; border: 1px solid rgba(250,249,246,0.15); font-size: 0.85rem; font-family: var(--fuente-sans); outline: none; background: rgba(250,249,246,0.06); color: #ffffff;">
+                                    <button type="submit" class="btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.8rem; border-radius: 9999px; width: auto; font-family: var(--fuente-sans); background: #FAF9F6; color: var(--brand-green); border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s;" onmouseover="this.style.background='var(--brand-accent)'; this.style.color='#ffffff';" onmouseout="this.style.background='#FAF9F6'; this.style.color='var(--brand-green)';">
+                                        Aplicar
+                                    </button>
+                                </form>
+                            @endif
                         </div>
 
                         <a href="{{ route('cart.checkout') }}" class="btn-checkout">
