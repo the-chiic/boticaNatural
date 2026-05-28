@@ -1,48 +1,39 @@
 // Botica Natural - Product Show JS
-document.addEventListener('DOMContentLoaded', () => {
+function initQuantitySelector() {
     const qtyInput = document.getElementById('qty');
     const plusBtn = document.getElementById('plus');
     const minusBtn = document.getElementById('minus');
 
     if (plusBtn && minusBtn && qtyInput) {
-        plusBtn.addEventListener('click', () => {
-            let val = parseInt(qtyInput.value);
-            if (isNaN(val) || val < 1) {
-                qtyInput.value = 1;
-            } else {
-                qtyInput.value = val + 1;
-            }
-        });
+        plusBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let val = parseInt(qtyInput.value) || 0;
+            qtyInput.value = val + 1;
+        };
 
-        minusBtn.addEventListener('click', () => {
-            let val = parseInt(qtyInput.value);
-            if (isNaN(val) || val <= 1) {
-                qtyInput.value = 1;
-            } else {
+        minusBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let val = parseInt(qtyInput.value) || 0;
+            if (val > 1) {
                 qtyInput.value = val - 1;
             }
-        });
+        };
 
-        qtyInput.addEventListener('change', () => {
-            let val = parseInt(qtyInput.value);
-            if (isNaN(val) || val < 1) {
-                qtyInput.value = 1;
-            } else {
-                qtyInput.value = val;
-            }
-        });
-
-        qtyInput.addEventListener('input', () => {
-            let val = parseInt(qtyInput.value);
-            if (!isNaN(val) && val < 1) {
-                qtyInput.value = 1;
+        qtyInput.addEventListener('change', function() {
+            let val = parseInt(this.value) || 0;
+            if (val < 1) {
+                this.value = 1;
             }
         });
     }
-});
+}
 
-// Gallery sliding carousel active index
-let currentSlideIndex = 0;
+document.addEventListener('DOMContentLoaded', initQuantitySelector);
+
+// Also try to initialize after a short delay in case DOM is not fully ready
+setTimeout(initQuantitySelector, 500);
 
 function slideGallery(direction) {
     const slides = document.querySelectorAll('.main-image-slide');

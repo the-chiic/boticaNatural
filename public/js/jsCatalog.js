@@ -23,6 +23,12 @@ window.submitFilterForm = function(e) {
     const formData = new FormData(form);
     const params = new URLSearchParams(formData);
 
+    // Include sort parameter from the select outside the form
+    const sortSelect = document.querySelector('.sort-select');
+    if (sortSelect) {
+        params.set('sort', sortSelect.value);
+    }
+
     url.search = params.toString();
 
     fetch(url, {
@@ -75,7 +81,7 @@ window.resetCatalogFilters = function(e) {
         maxRange.dispatchEvent(new Event('input'));
     }
 
-    // 4. Enviar formulario por AJAX
+    // 5. Enviar formulario por AJAX
     window.submitFilterForm();
 };
 
