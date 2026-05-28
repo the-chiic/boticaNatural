@@ -55,8 +55,13 @@ function jumpToGalleryImage(index, thumbnailEl) {
 }
 
 function updateActiveSlide() {
+    const slider = document.getElementById('imageSlider');
     const slides = document.querySelectorAll('.main-image-slide');
     const thumbnails = document.querySelectorAll('.thumbnail-item');
+
+    if (slider && slides.length > 0) {
+        slider.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+    }
 
     slides.forEach((slide, idx) => {
         slide.classList.toggle('active', idx === currentSlideIndex);

@@ -99,7 +99,45 @@ class AdminController extends Controller
             'stock' => 'required|integer|min:0',
             'status' => 'required|boolean',
             'category_id' => 'required|exists:category,id',
+            'image_url' => 'nullable|url|max:2048',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'gallery_urls' => 'nullable|array',
+            'gallery_urls.*' => 'nullable|url|max:2048',
+            'gallery_files' => 'nullable|array',
+            'gallery_files.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
+
+        $imageUrl = $request->input('image_url');
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img'), $filename);
+            $imageUrl = 'img/' . $filename;
+        }
+
+        // Procesar galería de imágenes
+        $galleryImages = [];
+
+        // 1. Agregar URLs ingresadas
+        if ($request->has('gallery_urls') && is_array($request->gallery_urls)) {
+            foreach ($request->gallery_urls as $url) {
+                if (!empty($url)) {
+                    $galleryImages[] = $url;
+                }
+            }
+        }
+
+        // 2. Agregar archivos locales subidos
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $file) {
+                if ($file->isValid()) {
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('img'), $filename);
+                    $galleryImages[] = 'img/' . $filename;
+                }
+            }
+        }
 
         $product = Product::create([
             'name' => $request->name,
@@ -107,6 +145,8 @@ class AdminController extends Controller
             'price' => $request->price,
             'stock' => $request->stock,
             'status' => $request->status,
+            'image_url' => $imageUrl,
+            'gallery_images' => count($galleryImages) > 0 ? $galleryImages : null,
         ]);
 
         // Guardar la categoría en la tabla pivot
@@ -127,15 +167,79 @@ class AdminController extends Controller
             'stock' => 'required|integer|min:0',
             'status' => 'required|boolean',
             'category_id' => 'required|exists:category,id',
+            'image_url' => 'nullable|url|max:2048',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'existing_gallery' => 'nullable|array',
+            'gallery_urls' => 'nullable|array',
+            'gallery_urls.*' => 'nullable|url|max:2048',
+            'gallery_files' => 'nullable|array',
+            'gallery_files.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $product = Product::findOrFail($id);
+        $imageUrl = $product->image_url;
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img'), $filename);
+            $imageUrl = 'img/' . $filename;
+        } elseif ($request->filled('image_url')) {
+            $imageUrl = $request->image_url;
+        } elseif ($request->has('image_url') && empty($request->input('image_url'))) {
+            $imageUrl = null;
+        }
+
+        // Procesar imágenes adicionales de galería
+        $galleryImages = [];
+
+        // 1. Conservar imágenes existentes que no fueron eliminadas
+        if ($request->has('existing_gallery') && is_array($request->existing_gallery)) {
+            foreach ($request->existing_gallery as $img) {
+                if (!empty($img)) {
+                    $parsedUrl = parse_url($img);
+                    $path = $parsedUrl['path'] ?? '';
+                    $relativePath = ltrim($path, '/');
+                    
+                    if (str_starts_with($relativePath, 'img/')) {
+                        $galleryImages[] = $relativePath;
+                    } elseif (str_starts_with($relativePath, 'storage/')) {
+                        $galleryImages[] = $relativePath;
+                    } else {
+                        $galleryImages[] = $img;
+                    }
+                }
+            }
+        }
+
+        // 2. Agregar nuevas URLs
+        if ($request->has('gallery_urls') && is_array($request->gallery_urls)) {
+            foreach ($request->gallery_urls as $url) {
+                if (!empty($url)) {
+                    $galleryImages[] = $url;
+                }
+            }
+        }
+
+        // 3. Agregar nuevos archivos subidos
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $file) {
+                if ($file->isValid()) {
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('img'), $filename);
+                    $galleryImages[] = 'img/' . $filename;
+                }
+            }
+        }
+
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
             'stock' => $request->stock,
             'status' => $request->status,
+            'image_url' => $imageUrl,
+            'gallery_images' => count($galleryImages) > 0 ? $galleryImages : null,
         ]);
 
         // Sincronizar la categoría en la tabla pivot
@@ -463,7 +567,6 @@ class AdminController extends Controller
         ]);
     }
 
-
     /**
      * Gestión y listado de categorías.
      */
@@ -481,11 +584,23 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:category,name',
             'description' => 'nullable|string|max:255',
+            'img_url' => 'nullable|url|max:2048',
+            'img_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
+
+        $img = $request->input('img_url');
+
+        if ($request->hasFile('img_file')) {
+            $file = $request->file('img_file');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img'), $filename);
+            $img = 'img/' . $filename;
+        }
 
         Category::create([
             'name' => $request->name,
             'description' => $request->description,
+            'img' => $img,
         ]);
 
         return back()->with('success', '¡La categoría se ha creado correctamente!');
@@ -499,12 +614,28 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:category,name,' . $id,
             'description' => 'nullable|string|max:255',
+            'img_url' => 'nullable|url|max:2048',
+            'img_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $category = Category::findOrFail($id);
+        $img = $category->img;
+
+        if ($request->hasFile('img_file')) {
+            $file = $request->file('img_file');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img'), $filename);
+            $img = 'img/' . $filename;
+        } elseif ($request->filled('img_url')) {
+            $img = $request->img_url;
+        } elseif ($request->has('img_url') && empty($request->input('img_url'))) {
+            $img = null;
+        }
+
         $category->update([
             'name' => $request->name,
             'description' => $request->description,
+            'img' => $img,
         ]);
 
         return back()->with('success', '¡La categoría se ha actualizado correctamente!');

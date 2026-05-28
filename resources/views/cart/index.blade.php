@@ -38,7 +38,7 @@
                     <div class="cart-items-list" style="box-shadow: var(--sombra-suave); border: 1px solid rgba(27, 48, 34, 0.05);">
                         @foreach($cart as $id => $item)
                         <div class="cart-item">
-                            <img src="{{ $item['image'] ? asset('storage/' . $item['image']) : asset('img/imgPrueba.png') }}" class="cart-item-img" alt="{{ $item['name'] }}">
+                            <img src="{{ $item['image'] ? (str_starts_with($item['image'], 'http') ? $item['image'] : (str_starts_with($item['image'], 'img/') ? asset($item['image']) : asset('storage/' . $item['image']))) : asset('img/imgPrueba.png') }}" class="cart-item-img" alt="{{ $item['name'] }}">
                             
                             <div class="cart-item-info">
                                 <h4 style="font-family: var(--fuente-serif); font-size: 1.15rem; font-weight: 500; color: var(--brand-green); margin-bottom: 0.25rem;">{{ $item['name'] }}</h4>

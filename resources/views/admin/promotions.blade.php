@@ -107,16 +107,17 @@
                         </td>
                         <td style="text-align: right;">
                             <button class="btn-icon-link edit" title="Editar" 
-                                onclick="openEditModal({
-                                    id: '{{ $promotion->id }}',
-                                    name: '{{ addslashes($promotion->name) }}',
-                                    code: '{{ addslashes($promotion->code) }}',
-                                    discount: '{{ $promotion->discount }}',
-                                    is_active: '{{ $promotion->is_active ? 1 : 0 }}',
-                                    show_on_web: '{{ $promotion->show_on_web ? 1 : 0 }}',
-                                    starts_at: '{{ $promotion->starts_at ? $promotion->starts_at->format('Y-m-d') : '' }}',
-                                    ends_at: '{{ $promotion->ends_at ? $promotion->ends_at->format('Y-m-d') : '' }}'
-                                })">
+                                onclick="openEditModal(JSON.parse(this.getAttribute('data-promotion')))"
+                                data-promotion="{{ json_encode([
+                                    'id' => $promotion->id,
+                                    'name' => $promotion->name,
+                                    'code' => $promotion->code,
+                                    'discount' => $promotion->discount,
+                                    'is_active' => $promotion->is_active ? 1 : 0,
+                                    'show_on_web' => $promotion->show_on_web ? 1 : 0,
+                                    'starts_at' => $promotion->starts_at ? $promotion->starts_at->format('Y-m-d') : '',
+                                    'ends_at' => $promotion->ends_at ? $promotion->ends_at->format('Y-m-d') : ''
+                                ]) }}">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
                             <form action="{{ route('admin.promociones.delete', $promotion->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este cupón permanentemente? Se desvinculará de todos los productos.')">

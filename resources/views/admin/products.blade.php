@@ -49,8 +49,8 @@
                 @forelse($products as $product)
                     <tr class="product-row" data-name="{{ strtolower($product->name) }}" data-category="{{ $product->categories->first()->name ?? '' }}">
                         <td>
-                            <div class="thumb {{ $colors[$loop->index % 4] }}">
-                                {{ strtoupper(substr($product->name, 0, 1)) }}
+                            <div class="thumb" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: var(--beige);">
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.parentElement.innerText='{{ strtoupper(substr($product->name, 0, 1)) }}';">
                             </div>
                         </td>
                         <td style="font-weight: 600; color: var(--dark-green);">{{ $product->name }}</td>
@@ -71,16 +71,33 @@
                             @endif
                         </td>
                         <td style="text-align: right;">
+                            @php
+                                $rawGallery = [];
+                                if (!empty($product->getRawOriginal('gallery_images'))) {
+                                    $rawGallery = json_decode($product->getRawOriginal('gallery_images'), true) ?: [];
+                                }
+                                $resolvedGallery = array_map(function($img) {
+                                    if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
+                                        return $img;
+                                    }
+                                    return asset($img);
+                                }, $rawGallery);
+                            @endphp
                             <button class="btn-icon-link edit" title="Editar" 
-                                onclick="openEditModal({
-                                    id: '{{ $product->id }}',
-                                    name: '{{ addslashes($product->name) }}',
-                                    description: '{{ addslashes($product->description) }}',
-                                    price: '{{ $product->price }}',
-                                    stock: '{{ $product->stock }}',
-                                    status: '{{ $product->status }}',
-                                    category_id: '{{ $product->categories->first()->id ?? '' }}'
-                                })">
+                                onclick="openEditModal(JSON.parse(this.getAttribute('data-product')))"
+                                data-product="{{ json_encode([
+                                    'id' => $product->id,
+                                    'name' => $product->name,
+                                    'description' => $product->description,
+                                    'price' => $product->price,
+                                    'stock' => $product->stock,
+                                    'status' => $product->status,
+                                    'category_id' => $product->categories->first()->id ?? '',
+                                    'image_url' => $product->getRawOriginal('image_url') ?? '',
+                                    'display_image' => $product->image_url,
+                                    'gallery' => $rawGallery,
+                                    'resolved_gallery' => $resolvedGallery
+                                ]) }}">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
                             <form action="{{ route('admin.productos.delete', $product->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este producto permanentemente?')">
@@ -132,7 +149,7 @@
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="productForm" action="{{ route('admin.productos.store') }}" method="POST">
+                <form id="productForm" action="{{ route('admin.productos.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" id="product_id" name="id">
                     
@@ -175,6 +192,51 @@
                             </select>
                         </div>
                     </div>
+
+                    <div class="form-row" style="margin-top: 10px;">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="image_file">Subir Imagen del Producto (Local)</label>
+                            <input type="file" id="image_file" name="image_file" accept="image/*" onchange="previewImage(this, 'product_img_preview')">
+                        </div>
+                        <div class="form-group" style="flex: 1; display: flex; align-items: flex-end; justify-content: center;">
+                            <div style="width: 80px; height: 80px; border: 1px solid var(--beige); border-radius: 8px; overflow: hidden; background-color: var(--white); display: flex; align-items: center; justify-content: center;">
+                                <img id="product_img_preview" src="{{ asset('img/imgPrueba.png') }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="image_url">O pegar URL de Imagen Externa</label>
+                        <input type="text" id="image_url" name="image_url" placeholder="https://ejemplo.com/imagen.jpg" oninput="previewImageUrl(this.value, 'product_img_preview')">
+                    </div>
+
+                    <!-- Galería de imágenes adicionales -->
+                    <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--beige); padding-top: 15px;">
+                        <label style="font-weight: 700; color: var(--dark-green); display: block; margin-bottom: 10px;">
+                            Galería de Imágenes Adicionales
+                        </label>
+                        
+                        <!-- Contenedor para imágenes de la galería existentes -->
+                        <div id="existing_gallery_container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                            <!-- Cargadas por Javascript en modo Edición -->
+                        </div>
+                        
+                        <!-- Inputs para añadir más imágenes -->
+                        <div class="form-group">
+                            <label for="gallery_files">Subir Múltiples Imágenes (Local)</label>
+                            <input type="file" id="gallery_files" name="gallery_files[]" multiple accept="image/*">
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label>Pegar URLs de Imágenes Externas Adicionales</label>
+                            <div id="gallery_urls_container" style="display: flex; flex-direction: column; gap: 8px;">
+                                <!-- Inputs dinámicos para URLs de galería -->
+                            </div>
+                            <button type="button" class="btn btn-sm" style="background-color: var(--sage-green); margin-top: 8px; padding: 6px 12px; font-size: 12px;" onclick="addGalleryUrlField()">
+                                <i class="fa-solid fa-plus btn-icon"></i> Añadir URL de Galería
+                            </button>
+                        </div>
+                    </div>
                     
                     <div class="form-actions" style="margin-top: 15px;">
                         <button type="button" class="btn" style="background-color: var(--sage-green); margin-right: 10px;" onclick="closeModal()">Cancelar</button>
@@ -197,6 +259,10 @@
             form.action = storeUrl;
             form.reset();
             document.getElementById('product_id').value = "";
+            document.getElementById('product_img_preview').src = "{{ asset('img/imgPrueba.png') }}";
+            
+            document.getElementById('existing_gallery_container').innerHTML = '';
+            document.getElementById('gallery_urls_container').innerHTML = '';
             
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('active'), 10);
@@ -205,6 +271,7 @@
         function openEditModal(product) {
             modalTitle.innerText = "Editar Producto";
             form.action = `/admin/productos/${product.id}`;
+            form.reset();
             
             document.getElementById('product_id').value = product.id;
             document.getElementById('name').value = product.name;
@@ -213,9 +280,75 @@
             document.getElementById('stock').value = product.stock;
             document.getElementById('category_id').value = product.category_id;
             document.getElementById('status').value = product.status;
+            document.getElementById('image_url').value = product.image_url || '';
+            document.getElementById('product_img_preview').src = product.display_image || "{{ asset('img/imgPrueba.png') }}";
+            
+            // Cargar imágenes de la galería existentes
+            const existingContainer = document.getElementById('existing_gallery_container');
+            const urlsContainer = document.getElementById('gallery_urls_container');
+            existingContainer.innerHTML = '';
+            urlsContainer.innerHTML = '';
+            
+            if (product.gallery && product.gallery.length > 0) {
+                product.gallery.forEach((rawImg, index) => {
+                    const resolvedImg = product.resolved_gallery[index];
+                    
+                    const itemDiv = document.createElement('div');
+                    itemDiv.style.position = 'relative';
+                    itemDiv.style.width = '70px';
+                    itemDiv.style.height = '70px';
+                    itemDiv.style.borderRadius = '6px';
+                    itemDiv.style.overflow = 'hidden';
+                    itemDiv.style.border = '1px solid var(--beige)';
+                    
+                    itemDiv.innerHTML = `
+                        <img src="${resolvedImg}" style="width:100%; height:100%; object-fit:cover;">
+                        <input type="hidden" name="existing_gallery[]" value="${rawImg}">
+                        <button type="button" onclick="this.parentElement.remove()" style="position:absolute; top:2px; right:2px; background:rgba(239, 68, 68, 0.85); color:#fff; border:none; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:10px; font-weight:bold; padding:0; line-height:1;" title="Eliminar">×</button>
+                    `;
+                    existingContainer.appendChild(itemDiv);
+                });
+            }
             
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function addGalleryUrlField() {
+            const container = document.getElementById('gallery_urls_container');
+            const fieldId = 'gurl_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+            
+            const rowDiv = document.createElement('div');
+            rowDiv.id = fieldId;
+            rowDiv.style.display = 'flex';
+            rowDiv.style.gap = '8px';
+            rowDiv.style.marginTop = '6px';
+            
+            rowDiv.innerHTML = `
+                <input type="text" name="gallery_urls[]" placeholder="https://ejemplo.com/imagen-adicional.jpg" style="flex:1; padding:8px 12px; border:1px solid var(--beige); border-radius:6px; outline:none; font-size:13px;">
+                <button type="button" class="btn" style="background-color:#ef4444; color:#fff; padding:6px 12px; border-radius:6px; border:none; cursor:pointer;" onclick="document.getElementById('${fieldId}').remove()"><i class="fa-solid fa-trash-can"></i></button>
+            `;
+            container.appendChild(rowDiv);
+        }
+
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewImageUrl(url, previewId) {
+            const preview = document.getElementById(previewId);
+            if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/img/') || url.startsWith('img/'))) {
+                preview.src = url;
+            } else {
+                preview.src = "{{ asset('img/imgPrueba.png') }}";
+            }
         }
 
         function closeModal() {

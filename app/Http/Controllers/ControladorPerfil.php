@@ -116,8 +116,13 @@ class ControladorPerfil extends Controller
         $lineas = DB::table('order_line')
             ->join('product', 'order_line.product_id', '=', 'product.id')
             ->where('order_line.order_id', $id)
-            ->select('order_line.*', 'product.name as product_name', 'product.image as product_image')
+            ->select('order_line.*', 'product.name as product_name')
             ->get();
+
+        foreach ($lineas as $linea) {
+            $product = \App\Models\Product::find($linea->product_id);
+            $linea->product_image = $product ? $product->image_url : null;
+        }
 
         return response()->json([
             'order' => $pedido,

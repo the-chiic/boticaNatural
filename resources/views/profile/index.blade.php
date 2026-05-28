@@ -436,7 +436,7 @@
                                 subtotalCalculado += price;
 
                                 const imgUrl = line.product_image 
-                                    ? `${window.location.origin}/storage/${line.product_image}` 
+                                    ? (line.product_image.startsWith('http') ? line.product_image : `${window.location.origin}/${line.product_image.startsWith('/') ? '' : '/'}${line.product_image}`)
                                     : `${window.location.origin}/img/imgPrueba.png`;
 
                                 itemsContainer.innerHTML += `

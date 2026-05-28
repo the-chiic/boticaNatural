@@ -15,7 +15,13 @@ class Product extends Model
         'description',
         'status', 
         'price', 
-        'stock'
+        'stock',
+        'image_url',
+        'gallery_images'
+    ];
+
+    protected $casts = [
+        'gallery_images' => 'array',
     ];
 
     protected static $productImagesCache = null;
@@ -147,6 +153,14 @@ class Product extends Model
      */
     public function getImageUrlAttribute()
     {
+        $rawImage = $this->attributes['image_url'] ?? null;
+        if (!empty($rawImage)) {
+            if (str_starts_with($rawImage, 'http://') || str_starts_with($rawImage, 'https://')) {
+                return $rawImage;
+            }
+            return asset($rawImage);
+        }
+
         if (self::$productImagesCache === null) {
             self::$productImagesCache = \DB::table('product_img')->pluck('name', 'id')->all();
         }
@@ -279,7 +293,47 @@ class Product extends Model
     {
         $mainImage = $this->image_url;
         
-        // Generar un conjunto de 3 imágenes premium adicionales para el carrusel de forma inteligente
+        $gallery = [];
+        if (!empty($mainImage)) {
+            $gallery[] = $mainImage;
+        }
+
+        $rawGallery = $this->attributes['gallery_images'] ?? null;
+        if (is_string($rawGallery)) {
+            $rawGallery = json_decode($rawGallery, true);
+        }
+
+        $additionalImages = [];
+        if (!empty($rawGallery) && is_array($rawGallery)) {
+            foreach ($rawGallery as $img) {
+                if (!empty($img)) {
+                    if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
+                        $additionalImages[] = $img;
+                    } else {
+                        $additionalImages[] = asset($img);
+                    }
+                }
+            }
+        }
+
+        if (count($additionalImages) > 0) {
+            return array_merge($gallery, $additionalImages);
+        }
+
+        $unsplashGallery = $this->getUnsplashFallbackGallery();
+        if (!empty($mainImage)) {
+            return array_merge([$mainImage], array_slice($unsplashGallery, 1));
+        }
+
+        return $unsplashGallery;
+    }
+
+    /**
+     * Obtiene el listado de imágenes de fallback de Unsplash para el carrusel.
+     */
+    public function getUnsplashFallbackGallery()
+    {
+        $mainImage = $this->image_url;
         $name = mb_strtolower($this->name);
         $additional = [];
         
