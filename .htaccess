@@ -2,24 +2,18 @@ DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /boticaNatural/
+    RewriteBase /BoticaNatural/
 
-    # 1. Si piden la raíz exacta, ir al index.php de la raíz para inicializar Laravel correctamente
     RewriteRule ^$ index.php [L]
 
-    # 2. Si la petición es para un archivo o carpeta real dentro de "public", reescribir a public/
-    # Esto asegura que CSS, JS e imágenes se sirvan directamente
     RewriteCond %{REQUEST_URI} !index\.php$
-    RewriteCond %{DOCUMENT_ROOT}/boticaNatural/public/$1 -f [OR]
-    RewriteCond %{DOCUMENT_ROOT}/boticaNatural/public/$1 -d
+    RewriteCond %{DOCUMENT_ROOT}/BoticaNatural/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/BoticaNatural/public/$1 -d
     RewriteRule ^(.+)$ public/$1 [L]
 
-    # 3. Si el archivo o carpeta existe directamente en la raíz física, sírvelo directamente
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # 4. Todo lo demás (rutas de Laravel) se envía al index.php de la raíz
-    # Esto soluciona los errores 404 al navegar ya que mantiene la URL base como /boticaNatural
     RewriteRule ^(.*)$ index.php [L,QSA]
 </IfModule>

@@ -21,7 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($rootUrl = config('app.url')) {
-            URL::forceRootUrl(rtrim($rootUrl, '/'));
+            $rootUrl = preg_replace('#/public/?$#', '', rtrim($rootUrl, '/'));
+            URL::forceRootUrl($rootUrl);
         }
 
         // Auto-creación de columnas de verificación para evitar errores en el servidor
