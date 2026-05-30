@@ -126,8 +126,13 @@ Route::prefix('admin')->middleware(['auth.admin'])->group(function () {
 
     // Configuración general y seguridad
     Route::get('/configuracion', [AdminController::class, 'configuracion'])->name('admin.configuracion');
-    Route::post('/configuracion', [AdminController::class, 'guardarConfiguracion'])->name('admin.configuracion.save');
+    Route::post('/configuracion/info-tienda', [AdminController::class, 'guardarInfoTienda'])->name('admin.configuracion.save.info');
+    Route::post('/configuracion/preferencias', [AdminController::class, 'guardarPreferencias'])->name('admin.configuracion.save.preferences');
     Route::post('/configuracion/seguridad', [AdminController::class, 'guardarSeguridad'])->name('admin.configuracion.security');
+
+    // Notas del dashboard
+    Route::get('/notas', [AdminController::class, 'obtenerNotas'])->name('admin.notas.get');
+    Route::post('/notas', [AdminController::class, 'guardarNotas'])->name('admin.notas.save');
 });
 
 // Ruta de mantenimiento pública

@@ -17,10 +17,10 @@
     @endif
 
     <div class="settings-container">
-        <!-- Formulario de Configuración General de la Tienda y Preferencias -->
-        <form action="{{ route('admin.configuracion.save') }}" method="POST">
+        <!-- Formulario de Información de la Tienda -->
+        <form action="{{ route('admin.configuracion.save.info') }}" method="POST">
             @csrf
-            
+
             <div class="settings-section">
                 <div class="settings-info">
                     <h3>Información de la Tienda</h3>
@@ -43,7 +43,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="shop_email">Correo de Contacto</label>
@@ -68,8 +68,17 @@
                             <textarea id="shop_address" name="shop_address" rows="3" required>{{ old('shop_address', $shopAddress) }}</textarea>
                         </div>
                     </div>
+
+                    <div style="text-align: right; margin-top: 25px;">
+                        <button type="submit" class="btn">Guardar Información de la Tienda</button>
+                    </div>
                 </div>
             </div>
+        </form>
+
+        <!-- Formulario de Preferencias y Alertas -->
+        <form action="{{ route('admin.configuracion.save.preferences') }}" method="POST">
+            @csrf
 
             <div class="settings-section">
                 <div class="settings-info">
@@ -104,7 +113,7 @@
                             <input type="checkbox" name="stock_alert" value="1" @if(old('stock_alert', $stockAlert)) checked @endif>
                         </label>
                     </div>
-                    
+
                     <div class="form-row" style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #eee;">
                         <div class="form-group" style="margin-bottom: 0;">
                             <label>Moneda Principal</label>
@@ -122,9 +131,9 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div style="text-align: right; margin-top: 25px;">
-                        <button type="submit" class="btn">Guardar Preferencias e Información</button>
+                        <button type="submit" class="btn">Guardar Preferencias</button>
                     </div>
                 </div>
             </div>

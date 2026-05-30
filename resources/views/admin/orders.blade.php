@@ -289,7 +289,7 @@
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('active'), 10);
             
-            fetch(`/admin/pedidos/${id}/detalles`, {
+            fetch("{{ route('admin.pedidos.details', ':id') }}".replace(':id', id), {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'

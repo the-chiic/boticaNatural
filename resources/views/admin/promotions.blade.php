@@ -224,8 +224,8 @@
 
         function openEditModal(promotion) {
             modalTitle.innerText = "Editar Cupón de Descuento";
-            form.action = `/admin/promociones/${promotion.id}`;
-            
+            form.action = "{{ url('/admin/promociones') }}/" + promotion.id;
+
             document.getElementById('promotion_id').value = promotion.id;
             document.getElementById('name').value = promotion.name;
             document.getElementById('code').value = promotion.code;
@@ -234,7 +234,7 @@
             document.getElementById('show_on_web').value = promotion.show_on_web;
             document.getElementById('starts_at').value = promotion.starts_at;
             document.getElementById('ends_at').value = promotion.ends_at;
-            
+
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('active'), 10);
         }
@@ -273,7 +273,7 @@
             buttonEl.style.opacity = '0.5';
             buttonEl.style.pointerEvents = 'none';
 
-            fetch(`/admin/promociones/${id}/toggle`, {
+            fetch("{{ url('/admin/promociones') }}/" + id + "/toggle", {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -350,7 +350,7 @@
             buttonEl.style.opacity = '0.5';
             buttonEl.style.pointerEvents = 'none';
 
-            fetch(`/admin/promociones/${id}/toggle-web`, {
+            fetch("{{ url('/admin/promociones') }}/" + id + "/toggle-web", {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

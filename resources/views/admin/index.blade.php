@@ -146,7 +146,7 @@
                 <span id="saveStatus" style="font-size: 11px; color: var(--olive-green); opacity: 0; transition: opacity 0.3s;">Guardado</span>
             </div>
             <div class="notepad-body" style="display: flex; flex-direction: column; gap: 15px;">
-                <p style="font-size: 12px; color: var(--olive-green); margin: 0; line-height: 1.5;">Usa este bloc para guardar recordatorios, fórmulas botánicas o notas de inventario. Se guardará de manera automática y local en tu navegador.</p>
+                <p style="font-size: 12px; color: var(--olive-green); margin: 0; line-height: 1.5;">Usa este bloc para guardar recordatorios, fórmulas botánicas o notas de inventario. Se guardará automáticamente y persistirá entre sesiones.</p>
                 <textarea id="adminNotepad" placeholder="Ej. Encargar frascos goteros de ámbar de 50ml..." style="width: 100%; min-height: 150px; padding: 15px; border: 1px solid var(--beige); border-radius: 12px; background-color: var(--cream); font-size: 13px; line-height: 1.6; color: var(--dark); resize: vertical; outline: none; transition: border-color 0.3s;" oninput="saveAdminNotes()"></textarea>
             </div>
         </div>
@@ -156,10 +156,21 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Load saved notes
+        // Load saved notes from server
         const notepad = document.getElementById('adminNotepad');
         if (notepad) {
-            notepad.value = localStorage.getItem('botica_admin_notes') || '';
+            fetch("{{ route('admin.notas.get') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        notepad.value = data.notes || '';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading notes:', err);
+                    // Fallback to localStorage
+                    notepad.value = localStorage.getItem('botica_admin_notes') || '';
+                });
         }
     });
 
@@ -167,18 +178,38 @@
     function saveAdminNotes() {
         const notepad = document.getElementById('adminNotepad');
         const statusEl = document.getElementById('saveStatus');
-        
+
         if (notepad) {
-            localStorage.setItem('botica_admin_notes', notepad.value);
-            
-            // Show "Guardado" status
-            if (statusEl) {
-                statusEl.style.opacity = '1';
-                clearTimeout(autoSaveTimeout);
-                autoSaveTimeout = setTimeout(() => {
-                    statusEl.style.opacity = '0';
-                }, 1500);
-            }
+            // Save to server
+            fetch("{{ route('admin.notas.save') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ notes: notepad.value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Also save to localStorage as backup
+                    localStorage.setItem('botica_admin_notes', notepad.value);
+
+                    // Show "Guardado" status
+                    if (statusEl) {
+                        statusEl.style.opacity = '1';
+                        clearTimeout(autoSaveTimeout);
+                        autoSaveTimeout = setTimeout(() => {
+                            statusEl.style.opacity = '0';
+                        }, 1500);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Error saving notes:', err);
+                // Fallback to localStorage
+                localStorage.setItem('botica_admin_notes', notepad.value);
+            });
         }
     }
 </script>

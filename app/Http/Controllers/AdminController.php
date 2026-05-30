@@ -79,9 +79,19 @@ class AdminController extends Controller
     /**
      * Gestión y listado de productos con paginación.
      */
-    public function productos()
+    public function productos(Request $request)
     {
-        $products = Product::with('categories')->orderBy('id', 'desc')->paginate(10);
+        $query = Product::with('categories')->orderBy('id', 'desc');
+
+        // Filtrar por categoría si se selecciona
+        if ($request->has('category') && !empty($request->category)) {
+            $categoryName = $request->category;
+            $query->whereHas('categories', function ($q) use ($categoryName) {
+                $q->where('name', $categoryName);
+            });
+        }
+
+        $products = $query->paginate(10);
         $categories = Category::getAllOrdered();
 
         return view('admin.products', compact('products', 'categories'));
@@ -516,9 +526,9 @@ class AdminController extends Controller
     }
 
     /**
-     * Guardar las preferencias informativas y operativas de la tienda.
+     * Guardar solo la información de la tienda.
      */
-    public function guardarConfiguracion(Request $request)
+    public function guardarInfoTienda(Request $request)
     {
         $request->validate([
             'shop_name' => 'required|string|max:100',
@@ -534,12 +544,39 @@ class AdminController extends Controller
         Cache::put('shop_phone', $request->shop_phone);
         Cache::put('shop_address', $request->shop_address);
 
-        // Guardamos también los toggles (checkboxes) si se envían
+        return back()->with('success', '¡La información de la tienda ha sido guardada con éxito!');
+    }
+
+    /**
+     * Guardar solo las preferencias y alertas.
+     */
+    public function guardarPreferencias(Request $request)
+    {
+        // Guardamos los toggles (checkboxes)
         Cache::put('maintenance_mode', $request->has('maintenance_mode'));
         Cache::put('notify_new_orders', $request->has('notify_new_orders'));
         Cache::put('stock_alert', $request->has('stock_alert'));
 
-        return back()->with('success', '¡La configuración de la tienda ha sido guardada con éxito!');
+        return back()->with('success', '¡Las preferencias han sido guardadas con éxito!');
+    }
+
+    /**
+     * Obtener las notas del dashboard.
+     */
+    public function obtenerNotas()
+    {
+        $notes = Cache::get('admin_notes', '');
+        return response()->json(['success' => true, 'notes' => $notes]);
+    }
+
+    /**
+     * Guardar las notas del dashboard.
+     */
+    public function guardarNotas(Request $request)
+    {
+        $notes = $request->input('notes', '');
+        Cache::put('admin_notes', $notes);
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -604,7 +641,7 @@ class AdminController extends Controller
      */
     public function categorias()
     {
-        $categories = Category::withCount('products')->orderBy('name', 'asc')->get();
+        $categories = Category::withCount('products')->orderBy('name', 'asc')->paginate(10);
         return view('admin.categories', compact('categories'));
     }
 
@@ -651,6 +688,12 @@ class AdminController extends Controller
         ]);
 
         $category = Category::findOrFail($id);
+
+        // Verificar si la categoría tiene productos vinculados
+        if ($category->products_count > 0) {
+            return back()->with('error', 'No se puede editar esta categoría porque tiene productos vinculados. Primero debes desvincular o eliminar los productos de esta categoría.');
+        }
+
         $img = $category->img;
 
         if ($request->hasFile('img_file')) {

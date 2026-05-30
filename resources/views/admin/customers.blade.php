@@ -188,7 +188,7 @@
             crmModal.style.display = "flex";
             setTimeout(() => crmModal.classList.add('active'), 10);
             
-            fetch(`/admin/clientes/${id}/detalles`)
+            fetch("{{ route('admin.clientes.details', ':id') }}".replace(':id', id))
                 .then(res => {
                     if (!res.ok) throw new Error('Error al cargar datos');
                     return res.json();
@@ -275,7 +275,7 @@
                                             €${parseFloat(o.total_price).toFixed(2)}
                                         </div>
                                         ${statusBadge}
-                                        <a href="/admin/pedidos?open=${o.id}&code=${String(o.id).padStart(3, '0')}&client=${encodeURIComponent(c.name)}" class="btn-icon-link" title="Ver líneas y facturar" style="font-size: 15px; color: var(--sage-green); margin-left: 5px;">
+                                        <a href="{{ url('/admin/pedidos') }}?open=${o.id}&code=${String(o.id).padStart(3, '0')}&client=${encodeURIComponent(c.name)}" class="btn-icon-link" title="Ver líneas y facturar" style="font-size: 15px; color: var(--sage-green); margin-left: 5px;">
                                             <i class="fa-solid fa-arrow-up-right-from-square"></i>
                                         </a>
                                     </div>

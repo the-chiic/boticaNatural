@@ -21,10 +21,10 @@
                 <input type="text" id="spaSearchInput" placeholder="Buscar producto por nombre..." style="width: 100%; padding: 10px 15px 10px 42px; border: 1px solid var(--beige); border-radius: 20px; outline: none; font-size: 14px; background-color: var(--white); transition: border-color 0.2s;" onkeyup="filterProductsTable()">
             </div>
             <div style="flex: 1;">
-                <select id="spaCategorySelect" style="width: 100%; padding: 10px 15px; border: 1px solid var(--beige); border-radius: 20px; outline: none; font-size: 14px; background-color: var(--white); cursor: pointer;" onchange="filterProductsTable()">
+                <select id="spaCategorySelect" style="width: 100%; padding: 10px 15px; border: 1px solid var(--beige); border-radius: 20px; outline: none; font-size: 14px; background-color: var(--white); cursor: pointer;" onchange="filterByCategory()">
                     <option value="">Todas las Categorías</option>
                     @foreach($categories as $category)
-                        <option value="{{ $category->name }}">{{ $category->name }}</option>
+                        <option value="{{ $category->name }}" {{ request('category') == $category->name ? 'selected' : '' }}>{{ $category->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -116,28 +116,88 @@
             </tbody>
         </table>
         
-        @if($products->hasPages())
-            <div class="pagination-container">
-                @if ($products->onFirstPage())
-                    <span>&laquo;</span>
-                @else
-                    <a href="{{ $products->previousPageUrl() }}">&laquo;</a>
-                @endif
+        @if($products->lastPage() > 1)
+        @php
+            $paginator = $products->withPath(url()->current())->appends(request()->query());
+            $currentPage = $paginator->currentPage();
+            $lastPage = $paginator->lastPage();
+            $start = max($currentPage - 2, 1);
+            $end = min($currentPage + 2, $lastPage);
+        @endphp
+        <div class="mt-6 flex justify-center pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; width: 100%; margin-top: 2rem;">
 
-                @foreach ($products->getUrlRange(max(1, $products->currentPage() - 2), min($products->lastPage(), $products->currentPage() + 2)) as $page => $url)
-                    @if ($page == $products->currentPage())
-                        <span class="active">{{ $page }}</span>
-                    @else
-                        <a href="{{ $url }}">{{ $page }}</a>
-                    @endif
-                @endforeach
+            {{-- Double Left Arrow: Jumps to First Page (Page 1) --}}
+            @if($paginator->onFirstPage())
+                <span class="pagination-btn disabled" style="opacity: 0.5; cursor: not-allowed; border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: #777; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;">
+                    <i class="fa-solid fa-angles-left"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->url(1) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                    <i class="fa-solid fa-angles-left"></i>
+                </a>
+            @endif
 
-                @if ($products->hasMorePages())
-                    <a href="{{ $products->nextPageUrl() }}">&raquo;</a>
-                @else
-                    <span>&raquo;</span>
+            {{-- Single Left Arrow: Jumps to Previous Page --}}
+            @if($paginator->onFirstPage())
+                <span class="pagination-btn disabled" style="opacity: 0.5; cursor: not-allowed; border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: #777; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;">
+                    <i class="fa-solid fa-angle-left"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->previousPageUrl() }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                    <i class="fa-solid fa-angle-left"></i>
+                </a>
+            @endif
+
+            {{-- Page Numbers (Truncated with Ellipsis) --}}
+            @if($start > 1)
+                <a href="{{ $paginator->url(1) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; font-weight: 600; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">1</a>
+                @if($start > 2)
+                    <span style="color: rgba(27,48,34,0.5); padding: 0 0.25rem;">...</span>
                 @endif
-            </div>
+            @endif
+
+            @for($i = $start; $i <= $end; $i++)
+                @if($i == $currentPage)
+                    <span class="pagination-btn active" style="background: var(--brand-green, #1E3A2E); color: white; border: 1px solid var(--brand-green, #1E3A2E); border-radius: 9999px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; width: 2.4rem; height: 2.4rem; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(30, 58, 46, 0.15);">
+                        {{ $i }}
+                    </span>
+                @else
+                    <a href="{{ $paginator->url($i) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; font-weight: 600; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                        {{ $i }}
+                    </a>
+                @endif
+            @endfor
+
+            @if($end < $lastPage)
+                @if($end < $lastPage - 1)
+                    <span style="color: rgba(27,48,34,0.5); padding: 0 0.25rem;">...</span>
+                @endif
+                <a href="{{ $paginator->url($lastPage) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; font-weight: 600; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">{{ $lastPage }}</a>
+            @endif
+
+            {{-- Single Right Arrow: Jumps to Next Page --}}
+            @if($paginator->currentPage() == $paginator->lastPage())
+                <span class="pagination-btn disabled" style="opacity: 0.5; cursor: not-allowed; border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: #777; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;">
+                    <i class="fa-solid fa-angle-right"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->nextPageUrl() }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                    <i class="fa-solid fa-angle-right"></i>
+                </a>
+            @endif
+
+            {{-- Double Right Arrow: Jumps to Last Page --}}
+            @if($paginator->currentPage() == $paginator->lastPage())
+                <span class="pagination-btn disabled" style="opacity: 0.5; cursor: not-allowed; border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: #777; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;">
+                    <i class="fa-solid fa-angles-right"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->url($paginator->lastPage()) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                    <i class="fa-solid fa-angles-right"></i>
+                </a>
+            @endif
+
+        </div>
         @endif
     </div>
 
@@ -260,17 +320,17 @@
             form.reset();
             document.getElementById('product_id').value = "";
             document.getElementById('product_img_preview').src = "{{ asset('img/imgPrueba.png') }}";
-            
+
             document.getElementById('existing_gallery_container').innerHTML = '';
             document.getElementById('gallery_urls_container').innerHTML = '';
-            
+
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('active'), 10);
         }
 
         function openEditModal(product) {
             modalTitle.innerText = "Editar Producto";
-            form.action = `/admin/productos/${product.id}`;
+            form.action = "{{ url('/admin/productos') }}/" + product.id;
             form.method = "POST";
             form.reset();
             
@@ -345,8 +405,12 @@
 
         function previewImageUrl(url, previewId) {
             const preview = document.getElementById(previewId);
-            if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/img/') || url.startsWith('img/'))) {
+            if (url && url.trim() !== '') {
                 preview.src = url;
+                preview.onerror = function() {
+                    this.src = "{{ asset('img/imgPrueba.png') }}";
+                    alert('La URL no es una imagen válida. Por favor, verifica que la URL sea una imagen directa.');
+                };
             } else {
                 preview.src = "{{ asset('img/imgPrueba.png') }}";
             }
@@ -359,22 +423,26 @@
 
         function filterProductsTable() {
             const searchQuery = document.getElementById('spaSearchInput').value.toLowerCase().trim();
-            const selectedCategory = document.getElementById('spaCategorySelect').value.toLowerCase().trim();
             const rows = document.querySelectorAll('.product-row');
-            
+
             rows.forEach(row => {
                 const name = row.getAttribute('data-name');
-                const category = row.getAttribute('data-category').toLowerCase().trim();
-                
+
                 const matchesSearch = name.includes(searchQuery);
-                const matchesCategory = !selectedCategory || category === selectedCategory;
-                
-                if (matchesSearch && matchesCategory) {
+
+                if (matchesSearch) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
                 }
             });
+        }
+
+        function filterByCategory() {
+            const selectedCategory = document.getElementById('spaCategorySelect').value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('category', selectedCategory);
+            window.location.href = url.toString();
         }
 
         window.onclick = function(event) {

@@ -95,6 +95,90 @@
                 @endforelse
             </tbody>
         </table>
+
+        @if($categories->lastPage() > 1)
+        @php
+            $paginator = $categories->withPath(url()->current())->appends(request()->query());
+            $currentPage = $paginator->currentPage();
+            $lastPage = $paginator->lastPage();
+            $start = max($currentPage - 2, 1);
+            $end = min($currentPage + 2, $lastPage);
+        @endphp
+        <div class="mt-6 flex justify-center pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; width: 100%; margin-top: 2rem;">
+
+            {{-- Double Left Arrow: Jumps to First Page (Page 1) --}}
+            @if($paginator->onFirstPage())
+                <span class="pagination-btn disabled" style="opacity: 0.5; cursor: not-allowed; border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: #777; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;">
+                    <i class="fa-solid fa-angles-left"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->url(1) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                    <i class="fa-solid fa-angles-left"></i>
+                </a>
+            @endif
+
+            {{-- Single Left Arrow: Jumps to Previous Page --}}
+            @if($paginator->onFirstPage())
+                <span class="pagination-btn disabled" style="opacity: 0.5; cursor: not-allowed; border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: #777; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;">
+                    <i class="fa-solid fa-angle-left"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->previousPageUrl() }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                    <i class="fa-solid fa-angle-left"></i>
+                </a>
+            @endif
+
+            {{-- Page Numbers (Truncated with Ellipsis) --}}
+            @if($start > 1)
+                <a href="{{ $paginator->url(1) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; font-weight: 600; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">1</a>
+                @if($start > 2)
+                    <span style="color: rgba(27,48,34,0.5); padding: 0 0.25rem;">...</span>
+                @endif
+            @endif
+
+            @for($i = $start; $i <= $end; $i++)
+                @if($i == $currentPage)
+                    <span class="pagination-btn active" style="background: var(--brand-green, #1E3A2E); color: white; border: 1px solid var(--brand-green, #1E3A2E); border-radius: 9999px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; width: 2.4rem; height: 2.4rem; font-size: 0.8rem; box-shadow: 0 4px 10px rgba(30, 58, 46, 0.15);">
+                        {{ $i }}
+                    </span>
+                @else
+                    <a href="{{ $paginator->url($i) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; font-weight: 600; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                        {{ $i }}
+                    </a>
+                @endif
+            @endfor
+
+            @if($end < $lastPage)
+                @if($end < $lastPage - 1)
+                    <span style="color: rgba(27,48,34,0.5); padding: 0 0.25rem;">...</span>
+                @endif
+                <a href="{{ $paginator->url($lastPage) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; font-weight: 600; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">{{ $lastPage }}</a>
+            @endif
+
+            {{-- Single Right Arrow: Jumps to Next Page --}}
+            @if($paginator->currentPage() == $paginator->lastPage())
+                <span class="pagination-btn disabled" style="opacity: 0.5; cursor: not-allowed; border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: #777; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;">
+                    <i class="fa-solid fa-angle-right"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->nextPageUrl() }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                    <i class="fa-solid fa-angle-right"></i>
+                </a>
+            @endif
+
+            {{-- Double Right Arrow: Jumps to Last Page --}}
+            @if($paginator->currentPage() == $paginator->lastPage())
+                <span class="pagination-btn disabled" style="opacity: 0.5; cursor: not-allowed; border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: #777; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;">
+                    <i class="fa-solid fa-angles-right"></i>
+                </span>
+            @else
+                <a href="{{ $paginator->url($paginator->lastPage()) }}" class="pagination-btn" style="border: 1px solid rgba(27,48,34,0.08); border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; background: white; color: var(--brand-green, #1E3A2E); text-decoration: none; transition: all 0.2s; width: 2.4rem; height: 2.4rem; font-size: 0.8rem;" onmouseover="this.style.background='var(--brand-cream, #FAF9F6)'" onmouseout="this.style.background='white'">
+                    <i class="fa-solid fa-angles-right"></i>
+                </a>
+            @endif
+
+        </div>
+        @endif
     </div>
 
     <!-- Modal Box -->
@@ -165,7 +249,7 @@
 
         function openEditModal(category) {
             modalTitle.innerText = "Editar Categoría";
-            form.action = `/admin/categorias/${category.id}`;
+            form.action = "{{ url('/admin/categorias') }}/" + category.id;
             form.reset();
             
             document.getElementById('category_id').value = category.id;
@@ -191,8 +275,12 @@
 
         function previewImageUrl(url, previewId) {
             const preview = document.getElementById(previewId);
-            if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/img/') || url.startsWith('img/'))) {
+            if (url && url.trim() !== '') {
                 preview.src = url;
+                preview.onerror = function() {
+                    this.src = "{{ asset('img/imgPrueba.png') }}";
+                    alert('La URL no es una imagen válida. Por favor, verifica que la URL sea una imagen directa.');
+                };
             } else {
                 preview.src = "{{ asset('img/imgPrueba.png') }}";
             }
