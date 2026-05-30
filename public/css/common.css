@@ -257,8 +257,22 @@ body {
     justify-content: center;
     color: var(--dark-green);
     font-weight: 600;
-    font-size: 14px;
-    transition: all 0.3s;
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: 8px;
+    color: var(--olive-green);
+    transition: all 0.3s ease;
+    border-radius: 50%;
+}
+
+.logout-btn:hover {
+    background-color: rgba(107, 127, 90, 0.1);
+    color: var(--dark-green);
 }
 
 .profile:hover .avatar {

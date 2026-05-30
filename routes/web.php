@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\ControladorAutenticacion;
 use App\Http\Controllers\ControladorPerfil;
 use App\Http\Controllers\CartController;
@@ -82,8 +83,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil/pedido/{id}/detalles', [ControladorPerfil::class, 'detallesPedido'])->name('profile.order.details');
 });
 
-// Admin Routes (Organized)
+// Admin Authentication Routes (sin protección)
 Route::prefix('admin')->group(function () {
+    Route::get('/login', [AdminAuthController::class, 'mostrarFormularioLogin'])->name('admin.login');
+    Route::post('/login', [AdminAuthController::class, 'iniciarSesion']);
+    Route::post('/logout', [AdminAuthController::class, 'cerrarSesion'])->name('admin.logout');
+});
+
+// Admin Routes (Protegidas con middleware AuthAdmin)
+Route::prefix('admin')->middleware(['auth.admin'])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     
     // Productos CRUD

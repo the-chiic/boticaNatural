@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class SampleDataSeeder extends Seeder
 {
@@ -32,8 +33,9 @@ class SampleDataSeeder extends Seeder
         DB::table('admin')->insert([
             'name' => 'Admin Principal',
             'email' => 'admin@botica.com',
-            'pw' => 'hashed_pw_1',
+            'pw' => Hash::make('password'),
             'phone' => '600111111',
+            'rol' => 'admin',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

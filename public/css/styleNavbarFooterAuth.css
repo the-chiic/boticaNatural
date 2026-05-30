@@ -1187,6 +1187,46 @@ input {
 .passwordRequirementsInfo li.incumplido {
     color: #ef4444;
 }
+.posicionadorContrasena {
+    position: relative;
+    width: 100%;
+    display: block;
+}
+
+.posicionadorContrasena .controlFormulario {
+    padding-right: 2.75rem !important;
+}
+
+.btn-toggle-password {
+    position: absolute !important;
+    right: 0.75rem !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0.25rem !important;
+    color: var(--color-principal, #1E3A2E) !important;
+    opacity: 0.65;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 15 !important;
+    font-size: 1.1rem !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.btn-toggle-password:hover {
+    opacity: 1;
+    color: var(--color-acento, #8B6F4A) !important;
+}
+
+.btn-toggle-password:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
 
 /* Luxury Announcement Promo Bar */
 .promo-announcement-bar {

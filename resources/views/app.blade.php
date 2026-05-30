@@ -268,7 +268,7 @@
                         container.innerHTML = `
                             <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">MIS FAVORITOS</h2>
                             <p style="opacity: 0.5;">Aún no tienes productos en tu lista de deseos.</p>
-                            <a href="${window.location.origin}/catalogo" class="btn-primary" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 2rem; text-decoration: none; border-radius: 0.5rem;">IR A LA TIENDA</a>
+                            <a href="{{ url('/catalogo') }}" class="btn-primary" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 2rem; text-decoration: none; border-radius: 0.5rem;">IR A LA TIENDA</a>
                         `;
                     } else {
                         let html = `

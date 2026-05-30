@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\PasswordResetToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -189,16 +190,25 @@ class ControladorAutenticacion extends Controller
         $usuario = User::where('email', $solicitud->email)->first();
 
         if ($usuario) {
-            // Generar un token único y seguro
+            // Si el usuario se registró a través de Google, impedir la recuperación e informar
+            if ($usuario->google_auth) {
+                return back()->withErrors(['email' => 'Esta cuenta está registrada a través de Google. Por favor, inicia sesión usando Google.']);
+            }
+
+            // Generar un token único y seguro (60 caracteres aleatorios)
             $token = Str::random(60);
 
-            // Almacenar el token y la expiración en la base de datos (60 minutos)
-            $usuario->update([
-                'password_reset_token' => $token,
-                'password_reset_expires_at' => now()->addMinutes(60),
-            ]);
+            // Almacenar el token en la tabla independiente 'passwordReset'
+            // Si ya tiene un token previo de solicitud, lo actualizamos o creamos uno nuevo
+            PasswordResetToken::updateOrCreate(
+                ['user_id' => $usuario->id],
+                [
+                    'token' => $token,
+                    'expires_at' => now()->addMinutes(60), // Expiración en 60 minutos (1 hora)
+                ]
+            );
 
-            // Enviar el correo
+            // Enviar el correo electrónico mediante Resend (a través del Mail Facade de Laravel)
             try {
                 $enlace = route('password.reset', ['token' => $token]) . '?email=' . urlencode($usuario->email);
                 Mail::to($usuario->email)->send(new RecuperarContrasenaMail($usuario->name, $enlace));
@@ -221,12 +231,23 @@ class ControladorAutenticacion extends Controller
 
         $usuario = User::where('email', $request->email)->first();
 
-        if (!$usuario || $usuario->password_reset_token !== $token) {
+        if (!$usuario) {
             return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación es inválido o ya ha sido utilizado.']);
         }
 
-        // Verificar expiración
-        if (now()->gt($usuario->password_reset_expires_at)) {
+        // Buscar el token en la tabla independiente
+        $resetToken = PasswordResetToken::where('user_id', $usuario->id)
+                                         ->where('token', $token)
+                                         ->first();
+
+        if (!$resetToken) {
+            return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación es inválido o ya ha sido utilizado.']);
+        }
+
+        // Verificar si el token ha expirado
+        if (now()->gt($resetToken->expires_at)) {
+            // Eliminar token caducado por seguridad
+            $resetToken->delete();
             return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación ha caducado.']);
         }
 
@@ -251,21 +272,32 @@ class ControladorAutenticacion extends Controller
 
         $usuario = User::where('email', $solicitud->email)->first();
 
-        if (!$usuario || $usuario->password_reset_token !== $solicitud->token) {
+        if (!$usuario) {
             return redirect()->route('password.request')->withErrors(['email' => 'El token de recuperación es inválido o ya ha sido utilizado.']);
         }
 
-        // Verificar expiración
-        if (now()->gt($usuario->password_reset_expires_at)) {
+        // Buscar el token en la tabla independiente
+        $resetToken = PasswordResetToken::where('user_id', $usuario->id)
+                                         ->where('token', $solicitud->token)
+                                         ->first();
+
+        if (!$resetToken) {
+            return redirect()->route('password.request')->withErrors(['email' => 'El token de recuperación es inválido o ya ha sido utilizado.']);
+        }
+
+        // Verificar si el token ha expirado
+        if (now()->gt($resetToken->expires_at)) {
+            $resetToken->delete();
             return redirect()->route('password.request')->withErrors(['email' => 'El enlace de recuperación ha caducado.']);
         }
 
-        // Actualizar la contraseña y limpiar el token de recuperación
+        // Actualizar la contraseña del usuario (hasheando de manera segura)
         $usuario->update([
             'pw' => Hash::make($solicitud->password),
-            'password_reset_token' => null,
-            'password_reset_expires_at' => null,
         ]);
+
+        // Eliminar el token para evitar que se pueda reutilizar (seguridad)
+        $resetToken->delete();
 
         return redirect()->route('login')->with('status', '¡Tu contraseña ha sido restablecida con éxito! Ya puedes iniciar sesión.');
     }

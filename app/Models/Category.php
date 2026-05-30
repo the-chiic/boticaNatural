@@ -11,7 +11,8 @@ class Category extends Model
     
     protected $fillable = [
         'name', 
-        'description'
+        'description',
+        'img'
     ];
 
     protected static function booted()

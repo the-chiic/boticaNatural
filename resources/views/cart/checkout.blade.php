@@ -32,27 +32,40 @@
                             </h2>
                             
                             <div class="form-group-grid">
-                                <!-- Address Dropdown (If customer has saved ones) -->
                                 @if($direcciones->isNotEmpty())
                                 <div style="grid-column: span 2; margin-bottom: 0.5rem;">
-                                    <label for="saved_address">¿Usar una dirección guardada?</label>
-                                    <select id="saved_address" class="input-field" onchange="fillAddress(this)" style="appearance: auto; background-image: none;">
-                                        <option value="">-- Seleccionar una dirección guardada --</option>
-                                        @foreach($direcciones as $dir)
-                                            <option value="{{ $dir->id }}" 
-                                                    data-name="{{ $dir->name_destination }}" 
-                                                    data-address="{{ $dir->address }}" 
-                                                    data-city="{{ $dir->city }}" 
-                                                    data-postcode="{{ $dir->post_code }}"
-                                                    data-country="{{ $dir->country }}"
-                                                    data-phone="{{ $dir->phone }}">
-                                                {{ $dir->name_destination }} - {{ $dir->address }}, {{ $dir->city }}
-                                            </option>
+                                    <label style="margin-bottom: 0.75rem;">Elige una dirección guardada</label>
+                                    <div class="checkout-address-grid" id="savedAddressGrid">
+                                        @foreach($direcciones as $index => $dir)
+                                            <label class="checkout-address-card {{ $index === 0 ? 'selected' : '' }}"
+                                                   data-id="{{ $dir->id }}"
+                                                   data-name="{{ $dir->name_destination }}"
+                                                   data-address="{{ $dir->address }}"
+                                                   data-city="{{ $dir->city }}"
+                                                   data-postcode="{{ $dir->post_code }}"
+                                                   data-country="{{ $dir->country }}"
+                                                   data-phone="{{ $dir->phone }}">
+                                                <input type="radio" name="saved_address_choice" value="{{ $dir->id }}" {{ $index === 0 ? 'checked' : '' }} class="checkout-address-radio">
+                                                <div class="checkout-address-card-body">
+                                                    <strong>{{ $dir->name_destination ?? $user->name }}</strong>
+                                                    <span>{{ $dir->address }}</span>
+                                                    <span>{{ $dir->post_code }} {{ $dir->city }}{{ $dir->province ? ', ' . $dir->province : '' }}</span>
+                                                    <span>{{ $dir->country }}</span>
+                                                    @if($dir->phone)
+                                                        <span><i class="fa-solid fa-phone"></i> {{ $dir->phone }}</span>
+                                                    @endif
+                                                </div>
+                                            </label>
                                         @endforeach
-                                    </select>
+                                    </div>
+                                    <button type="button" id="btnUseManualAddress" class="checkout-manual-address-btn">
+                                        <i class="fa-solid fa-plus"></i> Usar otra dirección distinta
+                                    </button>
                                 </div>
                                 @endif
 
+                                <div id="manualAddressFields" class="manual-address-fields {{ $direcciones->isNotEmpty() ? 'is-collapsed' : '' }}" style="grid-column: span 2;">
+                                    <div class="form-group-grid" style="margin-top: 0;">
                                 <div style="grid-column: span 2;">
                                     <label for="name_destination">Receptor (Nombre y Apellidos)</label>
                                     <input type="text" id="name_destination" name="name_destination" class="input-field" placeholder="Nombre de quien recibe el paquete" value="{{ old('name_destination', $user->name) }}" required>
@@ -81,6 +94,8 @@
                                 <div style="grid-column: span 1;">
                                     <label for="phone">Teléfono de contacto</label>
                                     <input type="text" id="phone" name="phone" class="input-field" placeholder="Ej. +34 600123456" value="{{ old('phone', $user->phone) }}">
+                                </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -326,18 +341,14 @@
         const email = ev.payerEmail || "{{ $user->email }}";
         const phone = ev.payerPhone || document.getElementById('phone').value || '';
         
-        const address = document.getElementById('address').value;
-        const city = document.getElementById('city').value;
-        const postcode = document.getElementById('post_code').value;
-        const country = document.getElementById('country').value;
-        const shipping_method = document.querySelector('input[name="shipping_method"]:checked').value;
-        
-        if (!address || !city || !postcode) {
+        const shippingPayload = getShippingPayload();
+
+        if (!validateShippingPayload(shippingPayload)) {
             ev.complete('fail');
             Swal.fire({
                 icon: 'warning',
                 title: 'Dirección Requerida',
-                text: 'Por favor, rellena tu dirección de envío en el paso 1 antes de usar Apple Pay o Google Pay para que sepamos a dónde enviar tu pedido.',
+                text: 'Por favor, elige una dirección guardada o rellena tu dirección de envío en el paso 1.',
                 confirmButtonColor: '#1b3022'
             });
             return;
@@ -353,13 +364,8 @@
                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
                 },
                 body: JSON.stringify({
-                    name_destination: name,
-                    address: address,
-                    city: city,
-                    post_code: postcode,
-                    country: country,
-                    phone: phone,
-                    shipping_method: shipping_method
+                    ...shippingPayload,
+                    payment_method: 'credit_card'
                 })
             });
 
@@ -428,17 +434,98 @@
         }
     });
 
-    // 2. Autocompletado de dirección guardada
-    function fillAddress(select) {
-        const option = select.options[select.selectedIndex];
-        if (!option || !option.value) return;
+    // 2. Direcciones guardadas y formulario manual
+    let selectedAddressId = null;
+    const savedAddressGrid = document.getElementById('savedAddressGrid');
+    const manualAddressFields = document.getElementById('manualAddressFields');
+    const btnUseManualAddress = document.getElementById('btnUseManualAddress');
 
-        document.getElementById('name_destination').value = option.getAttribute('data-name') || '';
-        document.getElementById('address').value = option.getAttribute('data-address') || '';
-        document.getElementById('city').value = option.getAttribute('data-city') || '';
-        document.getElementById('post_code').value = option.getAttribute('data-postcode') || '';
-        document.getElementById('country').value = option.getAttribute('data-country') || '';
-        document.getElementById('phone').value = option.getAttribute('data-phone') || '';
+    function fillAddressFromCard(card) {
+        if (!card) return;
+
+        document.getElementById('name_destination').value = card.dataset.name || '';
+        document.getElementById('address').value = card.dataset.address || '';
+        document.getElementById('city').value = card.dataset.city || '';
+        document.getElementById('post_code').value = card.dataset.postcode || '';
+        document.getElementById('country').value = card.dataset.country || '';
+        document.getElementById('phone').value = card.dataset.phone || '';
+    }
+
+    function selectSavedAddressCard(card) {
+        if (!savedAddressGrid || !card) return;
+
+        selectedAddressId = card.dataset.id;
+        savedAddressGrid.querySelectorAll('.checkout-address-card').forEach(item => item.classList.remove('selected'));
+        card.classList.add('selected');
+        const radio = card.querySelector('.checkout-address-radio');
+        if (radio) radio.checked = true;
+        fillAddressFromCard(card);
+
+        if (manualAddressFields) {
+            manualAddressFields.classList.add('is-collapsed');
+        }
+    }
+
+    function enableManualAddressMode() {
+        selectedAddressId = null;
+        if (savedAddressGrid) {
+            savedAddressGrid.querySelectorAll('.checkout-address-card').forEach(item => item.classList.remove('selected'));
+            savedAddressGrid.querySelectorAll('.checkout-address-radio').forEach(radio => radio.checked = false);
+        }
+        if (manualAddressFields) {
+            manualAddressFields.classList.remove('is-collapsed');
+        }
+        document.getElementById('name_destination').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('city').value = '';
+        document.getElementById('post_code').value = '';
+        document.getElementById('country').value = 'España';
+        document.getElementById('phone').value = '';
+        document.getElementById('name_destination').focus();
+    }
+
+    if (savedAddressGrid) {
+        savedAddressGrid.querySelectorAll('.checkout-address-card').forEach(card => {
+            card.addEventListener('click', () => selectSavedAddressCard(card));
+        });
+
+        const initialCard = savedAddressGrid.querySelector('.checkout-address-card.selected')
+            || savedAddressGrid.querySelector('.checkout-address-card');
+        if (initialCard) {
+            selectSavedAddressCard(initialCard);
+        }
+    }
+
+    if (btnUseManualAddress) {
+        btnUseManualAddress.addEventListener('click', enableManualAddressMode);
+    }
+
+    function getShippingPayload() {
+        const payload = {
+            shipping_method: document.querySelector('input[name="shipping_method"]:checked').value,
+        };
+
+        if (selectedAddressId) {
+            payload.address_id = selectedAddressId;
+            fillAddressFromCard(savedAddressGrid.querySelector(`[data-id="${selectedAddressId}"]`));
+        } else {
+            payload.name_destination = document.getElementById('name_destination').value;
+            payload.address = document.getElementById('address').value;
+            payload.city = document.getElementById('city').value;
+            payload.post_code = document.getElementById('post_code').value;
+            payload.country = document.getElementById('country').value;
+            payload.phone = document.getElementById('phone').value;
+        }
+
+        return payload;
+    }
+
+    function validateShippingPayload(payload) {
+        if (payload.address_id) {
+            return true;
+        }
+
+        return payload.address && payload.city && payload.post_code;
     }
 
     // 3. Selección y Recálculo de Envío Dinámico
@@ -522,6 +609,12 @@
         const paymentRadio = document.querySelector('input[name="payment_method"]:checked');
         const payment_method = paymentRadio ? paymentRadio.value : 'credit_card';
         const isStorePayment = (payment_method === 'store_payment');
+        const shippingPayload = getShippingPayload();
+
+        if (!validateShippingPayload(shippingPayload)) {
+            document.getElementById('card-errors').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Debes elegir o completar una dirección de envío.';
+            return;
+        }
         
         // Bloquear botón e indicar cargando
         submitBtn.disabled = true;
@@ -535,7 +628,6 @@
         const postcode = document.getElementById('post_code').value;
         const country = document.getElementById('country').value;
         const phone = document.getElementById('phone').value;
-        const shipping_method = document.querySelector('input[name="shipping_method"]:checked').value;
         
         try {
             // Fase 1: Pre-registrar el pedido
@@ -547,13 +639,7 @@
                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
                 },
                 body: JSON.stringify({
-                    name_destination: name,
-                    address: address,
-                    city: city,
-                    post_code: postcode,
-                    country: country,
-                    phone: phone,
-                    shipping_method: shipping_method,
+                    ...shippingPayload,
                     payment_method: payment_method
                 })
             });

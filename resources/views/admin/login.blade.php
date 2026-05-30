@@ -1,7 +1,6 @@
 @extends('app')
 
 @section('navbar')
-    @include('components.navbar')
 @endsection
 
 @section('content')
@@ -15,11 +14,11 @@
                     <img src="{{ asset('img/logo.jpg') }}" alt="Logo La Botica Natural" class="iconoMarca">
                     <span class="nombreMarca">{{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}</span>
                 </a>
-                <h1>BIENVENIDO DE NUEVO</h1>
-                <p>Tu camino hacia el bienestar natural continúa aquí.</p>
+                <h1>ACCESO ADMINISTRADOR</h1>
+                <p>Panel de gestión de La Botica Natural</p>
             </div>
 
-            <form id="formLogin" action="{{ route('login') }}" method="POST">
+            <form id="formLogin" action="{{ route('admin.login') }}" method="POST">
                 @csrf
                 
                 @if (session('status'))
@@ -32,7 +31,8 @@
                     <div class="cabeceraGrupoFormulario">
                         <label class="etiquetaFormulario" for="email">Correo Electrónico</label>
                     </div>
-                    <input type="email" name="email" id="email" class="controlFormulario" placeholder="admin@boticanatural.com o tu email" value="{{ old('email') }}">
+                    <input type="email" name="email" id="email" class="controlFormulario" placeholder="admin@botica.com" value="{{ old('email') }}" autofocus>
+                    <span id="email-error" style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: none;"></span>
                     @error('email')
                         <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                     @enderror
@@ -41,7 +41,6 @@
                 <div class="grupoFormulario">
                     <div class="cabeceraGrupoFormulario">
                         <label class="etiquetaFormulario" for="password">Contraseña</label>
-                        <a href="{{ route('password.request') }}" class="enlaceOlvido">¿Olvidaste tu contraseña?</a>
                     </div>
                     <div class="posicionadorContrasena">
                         <input type="password" name="password" id="password" class="controlFormulario" placeholder="........">
@@ -49,6 +48,7 @@
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
+                    <span id="password-error" style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: none;"></span>
                     @error('password')
                         <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                     @enderror
@@ -57,20 +57,8 @@
                 <button type="submit" class="boton botonPrincipal">INICIAR SESIÓN</button>
             </form>
 
-            <div class="divisor">O CONTINÚA CON</div>
-
-            <a href="{{ route('login.google') }}" class="botonGoogleOriginal">
-                <svg width="18" height="18" viewBox="0 0 18 18">
-                    <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.91a8.78 8.78 0 0 0 2.69-6.6z"/>
-                    <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.2l-2.91-2.26a5.41 5.41 0 0 1-8.09-2.85h-3v2.33A9 9 0 0 0 9 18z"/>
-                    <path fill="#FBBC05" d="M3.96 10.69a5.4 5.4 0 0 1 0-3.38V4.98h-3v2.33a9 9 0 0 0 0 7.71l3-2.33z"/>
-                    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59A9 9 0 0 0 1.25 4.98l3 2.33A5.41 5.41 0 0 1 9 3.58z"/>
-                </svg>
-                INICIAR SESIÓN CON GOOGLE
-            </a>
-
             <p style="text-align: center; margin-top: 2rem; font-size: 0.875rem;">
-                ¿No tienes cuenta? <a href="{{ url('registrarse') }}" style="color: var(--color-principal); font-weight: 700;">Regístrate</a>
+                <a href="{{ url('/') }}" style="color: var(--color-principal); font-weight: 700;">Volver a la tienda</a>
             </p>
         </div>
 
@@ -78,11 +66,11 @@
 
     <!-- Parte derecha -->
     <div class="autenticacionDerecha">
-        <img src="https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1400&auto=format&fit=crop" alt="Fondo Montaña" class="imagenFondo">
+        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1400&auto=format&fit=crop" alt="Fondo Oficina" class="imagenFondo">
         <div class="capaOscura"></div>
         <div class="contenidoDerecha">
-            <h2>BIENESTAR DIARIO</h2>
-            <p>"En cada caminata por la naturaleza uno recibe<br>mucho más de lo que busca."</p>
+            <h2>PANEL DE ADMINISTRACIÓN</h2>
+            <p>Gestiona productos, pedidos,<br>clientes y configuración</p>
             <div class="linea"></div>
         </div>
     </div>
@@ -92,4 +80,45 @@
 
 @push('scripts')
 <script src="{{ asset('js/auth.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formLogin');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const emailError = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
+
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Reset errores
+        emailError.style.display = 'none';
+        emailError.textContent = '';
+        passwordError.style.display = 'none';
+        passwordError.textContent = '';
+        
+        // Validar email
+        if (!emailInput.value.trim()) {
+            emailError.textContent = 'El correo electrónico es obligatorio.';
+            emailError.style.display = 'block';
+            isValid = false;
+        } else if (!emailInput.value.includes('@')) {
+            emailError.textContent = 'El formato del correo electrónico no es válido.';
+            emailError.style.display = 'block';
+            isValid = false;
+        }
+        
+        // Validar password
+        if (!passwordInput.value.trim()) {
+            passwordError.textContent = 'La contraseña es obligatoria.';
+            passwordError.style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
 @endpush

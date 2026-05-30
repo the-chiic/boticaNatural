@@ -24,9 +24,7 @@ class ViewController extends Controller
         }
 
         $user = Auth::user();
-        
-        // Obtener direcciones guardadas del usuario llamando al modelo Address
-        $direcciones = Address::getByUserId($user->id);
+        $direcciones = Address::where('user_id', Auth::id())->orderByDesc('created_at')->get();
 
         $subtotal = 0;
         foreach ($cart as $item) {

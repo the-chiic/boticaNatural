@@ -81,6 +81,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: flex-start;
 }
 
 .cart-item-info h4 {
@@ -104,6 +105,21 @@
 }
 
 /* Selector de Cantidad Premium */
+.cart-item-info .quantity-selector {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    width: auto;
+    max-width: fit-content;
+    flex: 0 0 auto;
+    border: 1px solid rgba(30, 58, 46, 0.12) !important;
+    border-radius: 9999px;
+    padding: 0.2rem;
+    background: #FCFBF9;
+    transition: all 0.3s var(--curva-premium);
+    box-shadow: inset 0 2px 4px rgba(30, 58, 46, 0.01);
+}
+
 .quantity-selector {
     display: inline-flex;
     align-items: center;
@@ -118,6 +134,36 @@
 .quantity-selector:focus-within {
     border-color: var(--brand-accent) !important;
     box-shadow: 0 0 0 3px rgba(107, 127, 90, 0.08);
+}
+
+.quantity-selector.is-updating {
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.qty-btn:disabled {
+    opacity: 0.45;
+    cursor: wait;
+}
+
+.cart-item-info .quantity-selector .qty-btn {
+    width: 2rem !important;
+    min-width: 2rem !important;
+    max-width: 2rem !important;
+    height: 2rem !important;
+    flex: 0 0 2rem !important;
+    padding: 0 !important;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--brand-green);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 400;
+    border-radius: 50%;
+    transition: all 0.3s var(--curva-premium);
 }
 
 .qty-btn {
@@ -139,6 +185,23 @@
 .qty-btn:hover {
     background: rgba(30, 58, 46, 0.05);
     color: var(--brand-accent);
+}
+
+.cart-item-info .quantity-selector .qty-input {
+    width: 2.5rem !important;
+    min-width: 2.5rem !important;
+    max-width: 2.5rem !important;
+    flex: 0 0 2.5rem !important;
+    height: 2rem;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans, 'Instrument Sans', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--brand-green);
+    padding: 0;
+    margin: 0;
 }
 
 .qty-input {

@@ -151,7 +151,7 @@
                                 <div class="empty-tab-state">
                                     <i class="fas fa-shopping-bag"></i>
                                     <p>Aún no tienes ningún pedido registrado en tu cuenta.</p>
-                                    <a href="/catalogo" class="btn-submit-premium" style="display: inline-block; text-decoration: none;">IR A LA TIENDA</a>
+                                    <a href="{{ url('/catalogo') }}" class="btn-submit-premium" style="display: inline-block; text-decoration: none;">IR A LA TIENDA</a>
                                 </div>
                             @endforelse
                         </div>
@@ -415,7 +415,7 @@
                     modal.classList.add('active');
 
                     // Petición AJAX segura
-                    fetch(`${window.location.origin}/perfil/pedido/${orderId}/detalles`)
+                    fetch(`{{ url('/perfil/pedido') }}/${orderId}/detalles`)
                         .then(response => {
                             if (!response.ok) throw new Error('Error al recuperar detalles');
                             return response.json();
@@ -436,13 +436,13 @@
                                 subtotalCalculado += price;
 
                                 const imgUrl = line.product_image 
-                                    ? `${window.location.origin}/storage/${line.product_image}` 
-                                    : `${window.location.origin}/img/imgPrueba.png`;
+                                    ? line.product_image 
+                                    : `{{ asset('img/imgPrueba.png') }}`;
 
                                 itemsContainer.innerHTML += `
                                     <div class="modal-item-row">
                                         <div class="modal-item-img-wrapper">
-                                            <img src="${imgUrl}" alt="${line.product_name}" onerror="this.src='${window.location.origin}/img/imgPrueba.png';">
+                                            <img src="${imgUrl}" alt="${line.product_name}" onerror="this.src='{{ asset('img/imgPrueba.png') }}';">
                                         </div>
                                         <div class="modal-item-details">
                                             <h5 class="modal-item-name">${line.product_name}</h5>

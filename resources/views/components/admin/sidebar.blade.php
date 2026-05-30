@@ -51,7 +51,7 @@
                 <i class="fa-solid fa-store"></i> Ver Tienda
             </li>
         </a>
-        <form action="{{ route('logout') }}" method="POST" style="margin:0; padding:0;">
+        <form action="{{ route('admin.logout') }}" method="POST" style="margin:0; padding:0;">
             @csrf
             <button type="submit" style="width:100%; background:transparent; border:none; cursor:pointer; padding:0; text-align:left;">
                 <li style="color: #ff8a80;">

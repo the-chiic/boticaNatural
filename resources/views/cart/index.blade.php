@@ -37,22 +37,19 @@
                     <!-- Items List -->
                     <div class="cart-items-list" style="box-shadow: var(--sombra-suave); border: 1px solid rgba(27, 48, 34, 0.05);">
                         @foreach($cart as $id => $item)
-                        <div class="cart-item">
-                            <img src="{{ $item['image'] ? asset('storage/' . $item['image']) : asset('img/imgPrueba.png') }}" class="cart-item-img" alt="{{ $item['name'] }}">
+                        <div class="cart-item" data-cart-item data-product-id="{{ $id }}">
+                            <img src="{{ $item['image'] ? (str_starts_with($item['image'], 'http') ? $item['image'] : (str_starts_with($item['image'], 'img/') ? asset($item['image']) : asset('storage/' . $item['image']))) : asset('img/imgPrueba.png') }}" class="cart-item-img" alt="{{ $item['name'] }}">
                             
                             <div class="cart-item-info">
                                 <h4 style="font-family: var(--fuente-serif); font-size: 1.15rem; font-weight: 500; color: var(--brand-green); margin-bottom: 0.25rem;">{{ $item['name'] }}</h4>
                                 <span style="font-size: 0.85rem; color: rgba(27, 48, 34, 0.5); font-family: var(--fuente-sans);">Precio unitario: {{ number_format($item['price'], 2) }}€</span>
                                 
-                                <!-- Quantity Controls via forms -->
-                                <form action="{{ route('cart.update', $id) }}" method="POST" class="cart-update-form" style="margin-top: 0.75rem;">
-                                    @csrf
-                                    <div class="quantity-selector">
-                                        <button type="submit" name="qty" value="{{ $item['qty'] - 1 }}" class="qty-btn">-</button>
-                                        <input type="number" readonly value="{{ $item['qty'] }}" class="qty-input">
-                                        <button type="submit" name="qty" value="{{ $item['qty'] + 1 }}" class="qty-btn">+</button>
-                                    </div>
-                                </form>
+                                <!-- Quantity Controls -->
+                                <div class="quantity-selector" data-cart-qty-controls data-product-id="{{ $id }}" data-update-url="{{ route('cart.update', $id) }}" style="margin-top: 0.75rem;">
+                                    <button type="button" class="qty-btn" data-qty-action="decrease" aria-label="Reducir cantidad">-</button>
+                                    <input type="number" readonly value="{{ $item['qty'] }}" class="qty-input" data-cart-qty>
+                                    <button type="button" class="qty-btn" data-qty-action="increase" aria-label="Aumentar cantidad">+</button>
+                                </div>
                             </div>
 
                             <div class="cart-item-actions">
@@ -62,7 +59,7 @@
                                         <i class="fa-regular fa-trash-can"></i> Eliminar
                                     </button>
                                 </form>
-                                <span class="cart-item-total">{{ number_format($item['price'] * $item['qty'], 2) }}€</span>
+                                <span class="cart-item-total" data-cart-line-total>{{ number_format($item['price'] * $item['qty'], 2) }}€</span>
                             </div>
                         </div>
                         @endforeach
@@ -86,13 +83,13 @@
 
                         <div class="summary-row">
                             <span>Subtotal</span>
-                            <span>{{ number_format($subtotal, 2) }}€</span>
+                            <span data-cart-subtotal>{{ number_format($subtotal, 2) }}€</span>
                         </div>
 
                         @if(isset($discount) && $discount > 0)
-                        <div class="summary-row" style="color: #a7f3d0; font-weight: 700; background: rgba(166, 243, 208, 0.08); padding: 0.65rem 0.85rem; border-radius: 0.75rem; border: 1px dashed rgba(166, 243, 208, 0.25); margin-bottom: 1.25rem;">
+                        <div class="summary-row" data-cart-discount-row style="color: #a7f3d0; font-weight: 700; background: rgba(166, 243, 208, 0.08); padding: 0.65rem 0.85rem; border-radius: 0.75rem; border: 1px dashed rgba(166, 243, 208, 0.25); margin-bottom: 1.25rem;">
                             <span style="display: flex; align-items: center; gap: 0.4rem;"><i class="fa-solid fa-gift" style="color: #8B6F4A; font-size: 1rem;"></i> Descuento (Cupón)</span>
-                            <span>-{{ number_format($discount, 2) }}€</span>
+                            <span data-cart-discount>-{{ number_format($discount, 2) }}€</span>
                         </div>
                         @endif
 
@@ -102,12 +99,12 @@
                         </div>
                         <div class="summary-row summary-taxes">
                             <span>Impuestos (21% IVA inc.)</span>
-                            <span>{{ number_format($iva, 2) }}€</span>
+                            <span data-cart-iva>{{ number_format($iva, 2) }}€</span>
                         </div>
 
                         <div class="summary-row summary-total">
                             <span>TOTAL</span>
-                            <span>{{ number_format($total, 2) }}€</span>
+                            <span data-cart-total>{{ number_format($total, 2) }}€</span>
                         </div>
 
                         <!-- Coupon application form -->
@@ -150,3 +147,7 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/jsCart.js') }}"></script>
+@endpush

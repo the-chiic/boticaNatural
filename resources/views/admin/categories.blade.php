@@ -28,10 +28,37 @@
                     $colors = ['bg-olive', 'bg-brown', 'bg-sage', 'bg-dark']; 
                 @endphp
                 @forelse($categories as $category)
+                    @php
+                        $catBgUrl = 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=800&auto=format&fit=crop';
+                        if (!empty($category->img)) {
+                            if (str_starts_with($category->img, 'http://') || str_starts_with($category->img, 'https://')) {
+                                $catBgUrl = $category->img;
+                            } elseif (file_exists(public_path($category->img))) {
+                                $catBgUrl = asset($category->img);
+                            } elseif (file_exists(public_path('img/' . $category->img))) {
+                                $catBgUrl = asset('img/' . $category->img);
+                            } elseif (file_exists(public_path('storage/' . $category->img))) {
+                                $catBgUrl = asset('storage/' . $category->img);
+                            }
+                        } else {
+                            $nameLower = mb_strtolower($category->name);
+                            if (str_contains($nameLower, 'infusion') || str_contains($nameLower, 'té') || str_contains($nameLower, 'te')) {
+                                $catBgUrl = 'https://images.unsplash.com/photo-1576092762791-dd9e2220d960?q=80&w=800&auto=format&fit=crop';
+                            } elseif (str_contains($nameLower, 'aceite')) {
+                                $catBgUrl = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop';
+                            } elseif (str_contains($nameLower, 'cosmet') || str_contains($nameLower, 'cosmét')) {
+                                $catBgUrl = 'https://images.unsplash.com/photo-1556228573-7303e8707198?q=80&w=800&auto=format&fit=crop';
+                            } elseif (str_contains($nameLower, 'medic')) {
+                                $catBgUrl = 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=800&auto=format&fit=crop';
+                            } elseif (str_contains($nameLower, 'herbol') || str_contains($nameLower, 'plant') || str_contains($nameLower, 'natural')) {
+                                $catBgUrl = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=800&auto=format&fit=crop';
+                            }
+                        }
+                    @endphp
                     <tr>
                         <td>
-                            <div class="thumb {{ $colors[$loop->index % 4] }}">
-                                <i class="fa-solid fa-tags" style="font-size: 16px;"></i>
+                            <div class="thumb" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: var(--beige);">
+                                <img src="{{ $catBgUrl }}" alt="{{ $category->name }}" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
                         </td>
                         <td style="font-weight: 600; color: var(--dark-green);">{{ $category->name }}</td>
@@ -43,11 +70,14 @@
                         </td>
                         <td style="text-align: right;">
                             <button class="btn-icon-link edit" title="Editar" 
-                                onclick="openEditModal({
-                                    id: '{{ $category->id }}',
-                                    name: '{{ addslashes($category->name) }}',
-                                    description: '{{ addslashes($category->description) }}'
-                                })">
+                                onclick="openEditModal(JSON.parse(this.getAttribute('data-category')))"
+                                data-category="{{ json_encode([
+                                    'id' => $category->id,
+                                    'name' => $category->name,
+                                    'description' => $category->description,
+                                    'img' => $category->img ?? '',
+                                    'display_image' => $catBgUrl
+                                ]) }}">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
                             <form action="{{ route('admin.categorias.delete', $category->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta categoría permanentemente? Se desvinculará de todos los productos.')">
@@ -75,7 +105,7 @@
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="categoryForm" action="{{ route('admin.categorias.store') }}" method="POST">
+                <form id="categoryForm" action="{{ route('admin.categorias.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" id="category_id" name="id">
                     
@@ -87,6 +117,23 @@
                     <div class="form-group">
                         <label for="description">Descripción (Máximo 255 caracteres)</label>
                         <textarea id="description" name="description" rows="3" maxlength="255" placeholder="Explica las propiedades de los productos en esta categoría..."></textarea>
+                    </div>
+
+                    <div class="form-row" style="margin-top: 15px;">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="img_file">Subir Imagen de la Categoría (Local)</label>
+                            <input type="file" id="img_file" name="img_file" accept="image/*" onchange="previewImage(this, 'category_img_preview')">
+                        </div>
+                        <div class="form-group" style="flex: 1; display: flex; align-items: flex-end; justify-content: center;">
+                            <div style="width: 80px; height: 80px; border: 1px solid var(--beige); border-radius: 8px; overflow: hidden; background-color: var(--white); display: flex; align-items: center; justify-content: center;">
+                                <img id="category_img_preview" src="{{ asset('img/imgPrueba.png') }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="img_url">O pegar URL de Imagen Externa</label>
+                        <input type="text" id="img_url" name="img_url" placeholder="https://ejemplo.com/imagen.jpg" oninput="previewImageUrl(this.value, 'category_img_preview')">
                     </div>
                     
                     <div class="form-actions" style="margin-top: 25px;">
@@ -110,6 +157,7 @@
             form.action = storeUrl;
             form.reset();
             document.getElementById('category_id').value = "";
+            document.getElementById('category_img_preview').src = "{{ asset('img/imgPrueba.png') }}";
             
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('active'), 10);
@@ -118,13 +166,36 @@
         function openEditModal(category) {
             modalTitle.innerText = "Editar Categoría";
             form.action = `/admin/categorias/${category.id}`;
+            form.reset();
             
             document.getElementById('category_id').value = category.id;
             document.getElementById('name').value = category.name;
             document.getElementById('description').value = category.description;
+            document.getElementById('img_url').value = category.img || '';
+            document.getElementById('category_img_preview').src = category.display_image || "{{ asset('img/imgPrueba.png') }}";
             
             modal.style.display = "flex";
             setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewImageUrl(url, previewId) {
+            const preview = document.getElementById(previewId);
+            if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/img/') || url.startsWith('img/'))) {
+                preview.src = url;
+            } else {
+                preview.src = "{{ asset('img/imgPrueba.png') }}";
+            }
         }
 
         function closeModal() {

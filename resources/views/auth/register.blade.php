@@ -39,7 +39,12 @@
 
                 <div class="grupoFormulario">
                     <label class="etiquetaFormulario" for="password">Contraseña</label>
-                    <input type="password" name="password" id="password" class="controlFormulario" placeholder="Mínimo 8 caracteres">
+                    <div class="posicionadorContrasena">
+                        <input type="password" name="password" id="password" class="controlFormulario" placeholder="Mínimo 8 caracteres">
+                        <button type="button" class="btn-toggle-password" aria-label="Mostrar contraseña">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                     @error('password')
                         <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                     @enderror
@@ -47,7 +52,12 @@
 
                 <div class="grupoFormulario">
                     <label class="etiquetaFormulario" for="password_confirmation">Confirmar Contraseña</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" class="controlFormulario" placeholder="Repite tu contraseña">
+                    <div class="posicionadorContrasena">
+                        <input type="password" name="password_confirmation" id="password_confirmation" class="controlFormulario" placeholder="Repite tu contraseña">
+                        <button type="button" class="btn-toggle-password" aria-label="Mostrar contraseña">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="boton botonPrincipal">CREAR CUENTA</button>
