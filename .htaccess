@@ -1,0 +1,19 @@
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /BoticaNatural/
+
+    RewriteRule ^$ index.php [L]
+
+    RewriteCond %{REQUEST_URI} !index\.php$
+    RewriteCond %{DOCUMENT_ROOT}/BoticaNatural/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/BoticaNatural/public/$1 -d
+    RewriteRule ^(.+)$ public/$1 [L]
+
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>

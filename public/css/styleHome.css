@@ -1,0 +1,1004 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Instrument+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --color-principal: #1E3A2E;
+    --color-principal-oscuro: #111612;
+    --color-acento: #8B6F4A;
+    --color-texto: #111612;
+    --color-texto-claro: #6B7F5A;
+    --color-texto-muy-claro: #A3B49A;
+    --color-fondo: #FAF9F6;
+    --color-fondo-oscuro: #EDE7DB;
+    --color-blanco: #ffffff;
+    --color-capa-oscura: rgba(17, 22, 18, 0.45);
+    --color-borde: rgba(237, 231, 219, 0.6);
+    --fuente-serif: 'Playfair Display', Georgia, serif;
+    --fuente-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    
+    --sombra-suave: 0 4px 20px rgba(17, 22, 18, 0.02);
+    --sombra-tarjeta: 0 8px 25px rgba(17, 22, 18, 0.04);
+    --sombra-hover: 0 15px 35px rgba(17, 22, 18, 0.08);
+    --curva-premium: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base body updates for home */
+body {
+    background-color: var(--color-fondo);
+    font-family: var(--fuente-sans);
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Sección Hero (Premium & Boutique)
+   ========================================================================== */
+.seccionHero {
+    position: relative;
+    height: calc(100vh - 5.5rem);
+    min-height: 40rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-image: url('https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=1400&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    color: var(--color-blanco);
+    padding: 0 1.5rem;
+    overflow: hidden;
+}
+
+.seccionHero .capaOscura {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(30, 58, 46, 0.4) 0%, rgba(17, 22, 18, 0.8) 100%);
+    z-index: 1;
+}
+
+.contenidoHero {
+    position: relative;
+    z-index: 3;
+    max-width: 52rem;
+    padding: 3rem;
+    border-radius: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 60px rgba(17, 22, 18, 0.25);
+    animation: fadeInUpHero 1.2s var(--curva-premium);
+}
+
+.badge-bienvenida {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--color-fondo-oscuro);
+    border: 1px solid rgba(250, 249, 246, 0.2);
+    background: rgba(250, 249, 246, 0.08);
+    padding: 0.5rem 1.5rem;
+    border-radius: 9999px;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+}
+
+.tituloHero {
+    font-family: var(--fuente-serif);
+    font-size: clamp(2rem, 4.5vw, 4rem);
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+}
+
+.resaltado-organico {
+    font-family: var(--fuente-serif);
+    font-style: italic;
+    color: var(--color-fondo-oscuro);
+}
+
+.subtituloHero {
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+    font-weight: 300;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+    color: rgba(250, 249, 246, 0.85);
+    max-width: 38rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.botonesHero .botonPrincipal {
+    position: relative;
+    background-color: var(--color-blanco);
+    color: var(--color-principal);
+    padding: 1rem 2.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.4s var(--curva-premium);
+    border: 1px solid transparent;
+}
+
+.botonesHero .botonPrincipal i {
+    transition: transform 0.3s var(--curva-premium);
+}
+
+.botonesHero .botonPrincipal:hover {
+    background-color: var(--color-principal);
+    color: var(--color-blanco);
+    border-color: rgba(250, 249, 246, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(17, 22, 18, 0.3);
+}
+
+.botonesHero .botonPrincipal:hover i {
+    transform: translateX(6px);
+}
+
+.scroll-indicador {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.scroll-texto {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(250, 249, 246, 0.8);
+}
+
+.scroll-linea {
+    width: 1px;
+    height: 2.5rem;
+    background: linear-gradient(to bottom, rgba(250, 249, 246, 0.8), transparent);
+    position: relative;
+    overflow: hidden;
+}
+
+.scroll-linea::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    background-color: var(--color-fondo-oscuro);
+    animation: scrollAnim 2s infinite ease-in-out;
+}
+
+@keyframes scrollAnim {
+    0% { transform: translateY(-100%); }
+    80% { transform: translateY(250%); }
+    100% { transform: translateY(250%); }
+}
+
+@keyframes fadeInUpHero {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Sección Layout & Cabeceras (100% Ancho de Fondo)
+   ========================================================================== */
+.contenedorCentrado {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+}
+
+.cabeceraSeccion {
+    margin-bottom: 4rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.subtituloSeccion {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--color-acento);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.cabeceraSeccion h2 {
+    font-family: var(--fuente-serif);
+    font-size: clamp(2rem, 3.5vw, 2.5rem);
+    color: var(--color-principal);
+    font-weight: 400;
+    margin-bottom: 1rem;
+}
+
+.decoracionCabecera {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.lineaCabecera {
+    width: 2.5rem;
+    height: 1px;
+    background-color: var(--color-borde);
+}
+
+.decoracionCabecera i {
+    color: var(--color-texto-claro);
+    font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   Carrusel Infinito de Categorías (Optimizado para jsHome.js)
+   ========================================================================== */
+.seccionCategorias {
+    background-color: var(--color-blanco);
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.carruselWrapper {
+    position: relative;
+    width: 100%;
+    padding: 0 4.5rem;
+}
+
+.carruselCategorias {
+    overflow: hidden;
+    width: 100%;
+    padding: 1rem 0;
+}
+
+.cuadriculaCategorias.carruselTrack {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 2rem;
+    width: 100%;
+}
+
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria {
+    flex: 0 0 calc((100% - 4rem) / 3) !important;
+    max-width: calc((100% - 4rem) / 3) !important;
+    box-sizing: border-box;
+    height: 460px;
+    position: relative;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    color: var(--color-blanco);
+    box-shadow: var(--sombra-tarjeta);
+    background-color: var(--color-principal-oscuro);
+    
+    transition: transform 0.55s var(--curva-premium),
+                filter 0.55s var(--curva-premium),
+                box-shadow 0.55s ease;
+    filter: brightness(0.72) grayscale(0.1);
+    transform: scale(0.93);
+    border: 1px solid rgba(237, 231, 219, 0.15);
+}
+
+.imagenCategoria {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+    transition: transform 0.8s var(--curva-premium);
+}
+
+.tarjetaCategoria::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(17, 22, 18, 0.85) 0%, rgba(17, 22, 18, 0.3) 50%, transparent 100%);
+    z-index: 2;
+}
+
+.contenidoTarjetaCategoria {
+    position: relative;
+    z-index: 3;
+    padding: 2rem;
+    width: 100%;
+    transform: translateY(1.2rem);
+    transition: transform 0.5s var(--curva-premium);
+}
+
+.contenidoTarjetaCategoria h3 {
+    font-family: var(--fuente-serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.01em;
+}
+
+.contenidoTarjetaCategoria p {
+    font-size: 0.85rem;
+    color: rgba(250, 249, 246, 0.75);
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s var(--curva-premium);
+}
+
+/* Enlace Explorar */
+.enlaceExplorar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--color-fondo-oscuro);
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 4px;
+}
+
+.enlaceExplorar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--color-acento);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s var(--curva-premium);
+}
+
+.enlaceExplorar .iconoFlecha {
+    transition: transform 0.3s var(--curva-premium);
+}
+
+.enlaceExplorar:hover {
+    color: #ffffff;
+}
+
+.enlaceExplorar:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.enlaceExplorar:hover .iconoFlecha {
+    transform: translateX(4px);
+}
+
+/* Hover y Destacado */
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria:hover {
+    transform: scale(0.95) translateY(-5px);
+    filter: brightness(0.85);
+    box-shadow: 0 10px 25px rgba(17, 22, 18, 0.12);
+}
+
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria.tarjetaDestacada {
+    filter: brightness(1) grayscale(0);
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(30, 58, 46, 0.15);
+    z-index: 5;
+    border-color: rgba(139, 111, 74, 0.3);
+}
+
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria.tarjetaDestacada .imagenCategoria {
+    transform: scale(1.03);
+}
+
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria.tarjetaDestacada .contenidoTarjetaCategoria {
+    transform: translateY(0);
+}
+
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria.tarjetaDestacada .contenidoTarjetaCategoria p {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.05s;
+}
+
+.cuadriculaCategorias.carruselTrack .tarjetaCategoria.tarjetaDestacada:hover {
+    transform: scale(1.08) translateY(-6px);
+    box-shadow: 0 25px 45px rgba(30, 58, 46, 0.22);
+}
+
+.botonCarrusel {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3.5rem;
+    height: 3.5rem;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(237, 231, 219, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(17, 22, 18, 0.04);
+    color: var(--color-principal);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s var(--curva-premium);
+    z-index: 10;
+}
+
+.botonCarrusel:hover {
+    background: var(--color-principal);
+    color: var(--color-blanco);
+    border-color: var(--color-principal);
+    box-shadow: 0 10px 25px rgba(30, 58, 46, 0.2);
+    transform: translateY(-50%) scale(1.08);
+}
+
+.botonCarruselIzquierda { left: 1rem; }
+.botonCarruselDerecha { right: 1rem; }
+
+/* ==========================================================================
+   Sección Novedades (Productos Premium de Ancho Completo)
+   ========================================================================== */
+.seccionMasVendidos {
+    background-color: #FAF9F6;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.cabeceraSeccionNovedades {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3.5rem;
+    border-bottom: 1px solid var(--color-borde);
+    padding-bottom: 1.5rem;
+}
+
+.cabeceraTexto h2 {
+    font-family: var(--fuente-serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    color: var(--color-principal);
+    font-weight: 400;
+    margin-top: 0.25rem;
+}
+
+.botonContenedorCat {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.botonContorno {
+    background-color: transparent;
+    border: 1px solid var(--color-principal);
+    color: var(--color-principal);
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: all 0.4s var(--curva-premium);
+    display: inline-flex;
+    width: auto;
+    white-space: nowrap;
+}
+
+.botonContorno:hover {
+    background-color: var(--color-principal);
+    color: var(--color-blanco);
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-suave);
+}
+
+/* Grid de Productos */
+.cuadriculaProductos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+}
+
+/* Tarjeta de Producto Boutique */
+.product-card {
+    background: var(--color-blanco);
+    border: 1px solid rgba(139, 111, 74, 0.12);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    transition: all 0.4s var(--curva-premium);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: var(--sombra-suave);
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--color-acento);
+    box-shadow: var(--sombra-hover);
+}
+
+.product-img {
+    height: 17rem;
+    overflow: hidden;
+    position: relative;
+    background-color: #f7f6f2;
+}
+
+.product-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s var(--curva-premium);
+}
+
+.product-card:hover .product-img img {
+    transform: scale(1.06);
+}
+
+/* Overlay Glassmorphic */
+.product-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 58, 46, 0.1);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity 0.4s var(--curva-premium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-card:hover .product-overlay {
+    opacity: 1;
+}
+
+.badge-detalle {
+    background: var(--color-blanco);
+    color: var(--color-principal);
+    padding: 0.6rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    box-shadow: 0 6px 20px rgba(17, 22, 18, 0.08);
+    transform: translateY(12px);
+    transition: transform 0.4s var(--curva-premium);
+}
+
+.product-card:hover .badge-detalle {
+    transform: translateY(0);
+}
+
+.product-details {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.producto-categoria {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--color-texto-claro);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.producto-titulo {
+    font-family: var(--fuente-serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    line-height: 1.35;
+    margin-bottom: 1.5rem;
+}
+
+.producto-titulo a {
+    color: var(--color-principal);
+}
+
+.producto-titulo a:hover {
+    color: var(--color-acento);
+}
+
+.producto-pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    border-top: 1px solid rgba(237, 231, 219, 0.5);
+    padding-top: 1rem;
+}
+
+.producto-precio {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--color-principal);
+}
+
+/* Botón Añadir Circular Elegante */
+.btn-anadir {
+    background-color: var(--color-principal);
+    color: var(--color-blanco);
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s var(--curva-premium);
+    cursor: pointer;
+    border: none;
+}
+
+.btn-anadir span {
+    display: none;
+}
+
+.btn-anadir i {
+    font-size: 0.75rem;
+    transition: transform 0.3s;
+}
+
+.btn-anadir:hover {
+    background-color: var(--color-acento);
+    transform: scale(1.1);
+}
+
+.btn-anadir:hover i {
+    transform: rotate(90deg);
+}
+
+/* ==========================================================================
+   Sección Características / Valores (Luxury Cards con SVG en Línea)
+   ========================================================================== */
+.seccionCaracteristicas {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.cuadriculaCaracteristicas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 2.5rem;
+}
+
+.itemCaracteristica {
+    background: #FAF9F6;
+    border: 1px solid var(--color-borde);
+    border-radius: 1.5rem;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    transition: all 0.4s var(--curva-premium);
+    box-shadow: var(--sombra-suave);
+}
+
+.itemCaracteristica:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--sombra-hover);
+    border-color: rgba(139, 111, 74, 0.3);
+    background: var(--color-blanco);
+}
+
+.iconoContenedor {
+    width: 4rem;
+    height: 4rem;
+    background-color: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.75rem;
+    transition: all 0.4s var(--curva-premium);
+    box-shadow: var(--sombra-suave);
+}
+
+.svgCaracteristica {
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--color-principal);
+    transition: transform 0.4s var(--curva-premium), color 0.4s;
+}
+
+.itemCaracteristica:hover .iconoContenedor {
+    background-color: var(--color-principal);
+    border-color: var(--color-principal);
+}
+
+.itemCaracteristica:hover .svgCaracteristica {
+    color: var(--color-blanco);
+    transform: scale(1.1) rotate(5deg);
+}
+
+.itemCaracteristica h3 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--color-principal);
+    margin-bottom: 0.75rem;
+}
+
+.itemCaracteristica p {
+    font-size: 0.85rem;
+    color: var(--color-texto-claro);
+    line-height: 1.65;
+}
+
+/* ==========================================================================
+   Responsive & Quirks
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .carruselWrapper {
+        padding: 0 3.5rem;
+    }
+    
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria {
+        flex: 0 0 calc((100% - 2rem) / 2) !important;
+        max-width: calc((100% - 2rem) / 2) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .contenedorCentrado {
+        padding: 3rem 1.25rem;
+    }
+
+    /* ── Sección Categorías en Móvil ── */
+    .seccionCategorias {
+        overflow: visible;
+    }
+
+    .carruselWrapper {
+        padding: 0;
+        overflow: visible;
+    }
+
+    /* Quitar el clip horizontal — el JS ya gestiona duplicados */
+    .carruselCategorias {
+        overflow: visible !important;
+        height: auto !important;
+        padding: 0.5rem 0 !important;
+    }
+
+    /* Track vertical: columna apilada */
+    .cuadriculaCategorias.carruselTrack {
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        gap: 1rem !important;
+        width: 100% !important;
+        /* El JS resetea transform a 'none' en móvil */
+    }
+
+    /* Cada tarjeta — ancho completo, altura generosa */
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria {
+        flex: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 220px !important;
+        filter: brightness(1) grayscale(0) !important;
+        transform: none !important;
+        transition: box-shadow 0.3s ease !important;
+        border-radius: 1rem !important;
+        box-shadow: 0 6px 24px rgba(17, 22, 18, 0.10) !important;
+    }
+
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria:hover {
+        box-shadow: 0 10px 32px rgba(17, 22, 18, 0.16) !important;
+        transform: none !important;
+    }
+
+    /* Gradiente más rico en móvil para que el texto destaque */
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria::after {
+        background: linear-gradient(
+            to top,
+            rgba(17, 22, 18, 0.90) 0%,
+            rgba(17, 22, 18, 0.50) 45%,
+            transparent 100%
+        ) !important;
+    }
+
+    /* Contenido siempre visible */
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria .contenidoTarjetaCategoria {
+        transform: none !important;
+        padding: 1.25rem 1.5rem !important;
+    }
+
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria .contenidoTarjetaCategoria h3 {
+        font-size: 1.3rem !important;
+        margin-bottom: 0.3rem !important;
+    }
+
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria .contenidoTarjetaCategoria p {
+        opacity: 1 !important;
+        transform: none !important;
+        font-size: 0.8rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .cuadriculaCategorias.carruselTrack .tarjetaCategoria .enlaceExplorar {
+        font-size: 0.65rem !important;
+    }
+
+    /* Ocultar botones de nav */
+    .botonCarrusel {
+        display: none !important;
+    }
+
+    /* ── Sección Novedades ── */
+    .cabeceraSeccionNovedades {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .botonContenedorCat {
+        width: 100%;
+    }
+
+    .botonContorno {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+}
+
+/* ==========================================================================
+   ESTILOS PREMIUM DE MARCA Y SELLO (NUEVO)
+   ========================================================================== */
+
+/* Sello en Hero */
+.hero-brand-stamp-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.hero-brand-stamp {
+    width: 6.75rem;
+    height: 6.75rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-acento);
+    box-shadow: 0 12px 35px rgba(17, 22, 18, 0.35);
+    background-color: var(--color-blanco);
+    transition: transform 0.8s var(--curva-premium), box-shadow 0.8s ease;
+    animation: floatStamp 6s ease-in-out infinite;
+}
+
+.hero-brand-stamp:hover {
+    transform: scale(1.08) rotate(8deg);
+    box-shadow: 0 18px 45px rgba(139, 111, 74, 0.45);
+}
+
+@keyframes floatStamp {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+/* Sección Historia y Sello con Órbitas */
+.historia-wrapper {
+    display: flex;
+    gap: 4.5rem;
+    align-items: center;
+    margin-bottom: 5.5rem;
+}
+
+.historia-sello-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 2rem;
+}
+
+.sello-historia-imagen {
+    width: 14rem;
+    height: 14rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-acento);
+    box-shadow: 0 15px 45px rgba(27, 48, 34, 0.12);
+    background-color: var(--color-blanco);
+    transition: transform 0.6s var(--curva-premium), box-shadow 0.6s ease;
+    z-index: 2;
+}
+
+.sello-historia-imagen:hover {
+    transform: scale(1.06) rotate(6deg);
+    box-shadow: 0 20px 55px rgba(139, 111, 74, 0.32);
+}
+
+.sello-decoracion-anillos {
+    position: absolute;
+    width: 17rem;
+    height: 17rem;
+    border: 1px dashed rgba(139, 111, 74, 0.25);
+    border-radius: 50%;
+    animation: rotateAnillos 45s linear infinite;
+    z-index: 1;
+}
+
+@keyframes rotateAnillos {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.historia-contenido {
+    flex: 1.5;
+    text-align: left;
+}
+
+.historia-titulo {
+    font-family: var(--fuente-serif);
+    font-size: clamp(2rem, 3.5vw, 2.65rem);
+    color: var(--color-principal);
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    line-height: 1.25;
+}
+
+.historia-parrafo {
+    color: var(--color-texto-claro);
+    font-size: 1.025rem;
+    line-height: 1.75;
+    margin-bottom: 1.25rem;
+    font-weight: 300;
+}
+
+.historia-parrafo:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsivo para sección Historia */
+@media (max-width: 992px) {
+    .historia-wrapper {
+        flex-direction: column;
+        gap: 3rem;
+        margin-bottom: 4rem;
+        text-align: center;
+    }
+    
+    .historia-contenido {
+        text-align: center;
+    }
+    
+    .sello-decoracion-anillos {
+        width: 14.5rem;
+        height: 14.5rem;
+    }
+    
+    .sello-historia-imagen {
+        width: 11.5rem;
+        height: 11.5rem;
+    }
+}
+
