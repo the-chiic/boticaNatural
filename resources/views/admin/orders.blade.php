@@ -260,7 +260,6 @@
         const orderDetailsBody = document.getElementById('orderDetailsBody');
         const detailTotalPrice = document.getElementById('detailTotalPrice');
 
-        // Estado global para la factura a imprimir
         let currentOrder = {
             id: '',
             code: '',
@@ -568,17 +567,15 @@
             setTimeout(() => modal.style.display = "none", 300);
         }
 
-        // Interceptor de parámetros de consulta para apertura automática (Dashboard -> Pedidos Click-through)
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const openId = urlParams.get('open');
             const openCode = urlParams.get('code');
             const openClient = urlParams.get('client');
-            
+
             if (openId && openCode && openClient) {
                 loadOrderDetails(openId, openCode, decodeURIComponent(openClient));
-                
-                // Limpiar la URL en la barra de navegación de forma silenciosa sin recargar la página
+
                 const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.replaceState({path: cleanUrl}, '', cleanUrl);
             }

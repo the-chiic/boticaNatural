@@ -82,7 +82,6 @@
 
     </div>
 
-    <!-- Parte derecha -->
     <div class="autenticacionDerecha">
         <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1400&auto=format&fit=crop" alt="Fondo Comunidad" class="imagenFondo">
         <div class="capaOscura"></div>

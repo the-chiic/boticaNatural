@@ -212,7 +212,6 @@
         const modalTitle = document.getElementById('modalTitle');
         const storeUrl = "{{ route('admin.promociones.store') }}";
 
-        // Validar formulario antes de enviar
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -234,6 +233,7 @@
                 const message = 'Por favor, rellena los siguientes campos: ' + emptyFields.join(', ');
                 errorContainer.textContent = message;
                 errorContainer.style.display = 'block';
+                document.querySelector('.modal-body').scrollTop = 0;
                 return;
             }
 

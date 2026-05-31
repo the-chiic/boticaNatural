@@ -115,7 +115,6 @@
     </style>
 
     <script>
-        // Force slide active logic to override cached functions
         var currentSlideIndex = 0;
 
         function slideGallery(direction) {
@@ -151,7 +150,6 @@
             });
         }
 
-        // Initialize active state on load
         document.addEventListener('DOMContentLoaded', function() {
             updateActiveSlide();
         });
@@ -267,7 +265,6 @@
                                         return false;
                                     }
 
-                                    // Ocultar el error si la validación pasa
                                     stockError.style.display = 'none';
                                     return true;
                                 });

@@ -64,7 +64,6 @@
 
     </div>
 
-    <!-- Parte derecha -->
     <div class="autenticacionDerecha">
         <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1400&auto=format&fit=crop" alt="Fondo Oficina" class="imagenFondo">
         <div class="capaOscura"></div>
@@ -90,14 +89,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     form.addEventListener('submit', function(e) {
         let isValid = true;
-        
-        // Reset errores
+
         emailError.style.display = 'none';
         emailError.textContent = '';
         passwordError.style.display = 'none';
         passwordError.textContent = '';
-        
-        // Validar email
+
         if (!emailInput.value.trim()) {
             emailError.textContent = 'El correo electrónico es obligatorio.';
             emailError.style.display = 'block';
@@ -107,8 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             emailError.style.display = 'block';
             isValid = false;
         }
-        
-        // Validar password
+
         if (!passwordInput.value.trim()) {
             passwordError.textContent = 'La contraseña es obligatoria.';
             passwordError.style.display = 'block';

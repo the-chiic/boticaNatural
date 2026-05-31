@@ -188,7 +188,6 @@
 
     @push('scripts')
     <script>
-        // Validar formulario de Información de la Tienda
         document.querySelector('form[action="{{ route('admin.configuracion.save.info') }}"]').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -210,6 +209,7 @@
                 const message = 'Por favor, rellena los siguientes campos: ' + emptyFields.join(', ');
                 errorContainer.textContent = message;
                 errorContainer.style.display = 'block';
+                window.scrollTo(0, 0);
                 return;
             }
 
@@ -217,7 +217,6 @@
             this.submit();
         });
 
-        // Validar formulario de Seguridad de la Cuenta
         document.querySelector('form[action="{{ route('admin.configuracion.security') }}"]').addEventListener('submit', function(e) {
             e.preventDefault();
 

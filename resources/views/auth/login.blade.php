@@ -76,7 +76,6 @@
 
     </div>
 
-    <!-- Parte derecha -->
     <div class="autenticacionDerecha">
         <img src="https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1400&auto=format&fit=crop" alt="Fondo Montaña" class="imagenFondo">
         <div class="capaOscura"></div>

@@ -43,34 +43,25 @@ class Product extends Model
         \Cache::forget('latest_products_4');
     }
 
-    /**
-     * Las categorías a las que pertenece el producto.
-     */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'product_category', 'product_id', 'category_id');
     }
 
-    /**
-     * Obtiene productos activos con filtros aplicados.
-     */
     public static function getFilteredProducts($categories = null, $search = null, $minPrice = null, $maxPrice = null, $sort = null)
     {
         $query = self::with('categories')->where('status', '=', 1)->where('stock', '>', 0);
 
-        // Filtrar por categorías
         if ($categories && is_array($categories) && count($categories) > 0) {
             $query->whereHas('categories', function($q) use ($categories) {
                 $q->whereIn('category.id', $categories);
             });
         }
 
-        // Filtrar por búsqueda de texto
         if ($search && $search != '') {
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        // Filtrar por rango de precio
         if ($minPrice !== null && $minPrice !== '' && $maxPrice !== null && $maxPrice !== '' && $minPrice > $maxPrice) {
             [$minPrice, $maxPrice] = [$maxPrice, $minPrice];
         }
@@ -83,7 +74,6 @@ class Product extends Model
             $query->where('price', '<=', $maxPrice);
         }
 
-        // Ordenar
         if ($sort && $sort != '') {
             if ($sort === 'price_asc') {
                 $query->orderBy('price', 'asc');
@@ -99,9 +89,6 @@ class Product extends Model
         return $query;
     }
 
-    /**
-     * Obtiene productos destacados aleatorios.
-     */
     public static function getFeatured($limit = 4)
     {
         return \Cache::remember('featured_products_' . $limit, 600, function() use ($limit) {
@@ -114,9 +101,6 @@ class Product extends Model
         });
     }
 
-    /**
-     * Obtiene productos relacionados a un producto específico.
-     */
     public static function getRelated($productId, $limit = 4)
     {
         return self::with('categories')
@@ -128,17 +112,11 @@ class Product extends Model
             ->get();
     }
 
-    /**
-     * Obtiene un producto activo por ID con sus categorías.
-     */
     public static function getActiveById($id)
     {
         return self::with('categories')->where('status', '=', 1)->where('stock', '>', 0)->findOrFail($id);
     }
 
-    /**
-     * Obtiene los productos más recientes añadidos a la BBDD.
-     */
     public static function getLatest($limit = 4)
     {
         return \Cache::remember('latest_products_' . $limit, 600, function() use ($limit) {
@@ -151,9 +129,6 @@ class Product extends Model
         });
     }
 
-    /**
-     * Accesor para obtener la URL de imagen premium del producto (archivo local o fallback de Unsplash).
-     */
     public function getImageUrlAttribute()
     {
         $rawImage = $this->attributes['image_url'] ?? null;
@@ -167,15 +142,14 @@ class Product extends Model
         if (self::$productImagesCache === null) {
             self::$productImagesCache = \DB::table('product_img')->pluck('name', 'id')->all();
         }
-        
+
         $imgName = self::$productImagesCache[$this->img_id] ?? null;
-        
+
         if ($imgName) {
             if (str_starts_with($imgName, 'http://') || str_starts_with($imgName, 'https://')) {
                 return $imgName;
             }
-            
-            // Si el archivo físico existe localmente en public/storage o public/img
+
             if (file_exists(public_path('storage/' . $imgName))) {
                 return asset('storage/' . $imgName);
             }
@@ -184,7 +158,6 @@ class Product extends Model
             }
         }
 
-        // Mapeo dinámico y elegante de imágenes Unsplash de alta calidad y resolución
         $name = mb_strtolower($this->name);
         
         if (str_contains($name, 'paracetamol')) {
@@ -281,7 +254,6 @@ class Product extends Model
             return 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?q=80&w=600&auto=format&fit=crop';
         }
 
-        // Aceites (general)
         if (str_contains($name, 'aceite')) {
             return 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=600&auto=format&fit=crop';
         }
@@ -289,13 +261,10 @@ class Product extends Model
         return asset('img/imgPrueba.png');
     }
 
-    /**
-     * Accesor para obtener una galería de varias imágenes de alta calidad (carrusel) para el producto.
-     */
     public function getGalleryImagesAttribute()
     {
         $mainImage = $this->image_url;
-        
+
         $gallery = [];
         if (!empty($mainImage)) {
             $gallery[] = $mainImage;
@@ -331,15 +300,12 @@ class Product extends Model
         return $unsplashGallery;
     }
 
-    /**
-     * Obtiene el listado de imágenes de fallback de Unsplash para el carrusel.
-     */
     public function getUnsplashFallbackGallery()
     {
         $mainImage = $this->image_url;
         $name = mb_strtolower($this->name);
         $additional = [];
-        
+
         if (str_contains($name, 'paracetamol') || str_contains($name, 'ibuprofeno') || str_contains($name, 'pastillas') || str_contains($name, 'suplemento') || str_contains($name, 'vitamina') || str_contains($name, 'colágeno') || str_contains($name, 'espirulina')) {
             $additional = [
                 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=600&auto=format&fit=crop',
@@ -371,7 +337,7 @@ class Product extends Model
                 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?q=80&w=600&auto=format&fit=crop'
             ];
         }
-        
+
         return array_merge([$mainImage], $additional);
     }
 }

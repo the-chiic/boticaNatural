@@ -156,7 +156,6 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Load saved notes from server
         const notepad = document.getElementById('adminNotepad');
         if (notepad) {
             fetch("{{ route('admin.notas.get') }}")
@@ -168,7 +167,6 @@
                 })
                 .catch(err => {
                     console.error('Error loading notes:', err);
-                    // Fallback to localStorage
                     notepad.value = localStorage.getItem('botica_admin_notes') || '';
                 });
         }
@@ -180,7 +178,6 @@
         const statusEl = document.getElementById('saveStatus');
 
         if (notepad) {
-            // Save to server
             fetch("{{ route('admin.notas.save') }}", {
                 method: 'POST',
                 headers: {
@@ -192,10 +189,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Also save to localStorage as backup
                     localStorage.setItem('botica_admin_notes', notepad.value);
 
-                    // Show "Guardado" status
                     if (statusEl) {
                         statusEl.style.opacity = '1';
                         clearTimeout(autoSaveTimeout);
@@ -207,7 +202,6 @@
             })
             .catch(err => {
                 console.error('Error saving notes:', err);
-                // Fallback to localStorage
                 localStorage.setItem('botica_admin_notes', notepad.value);
             });
         }

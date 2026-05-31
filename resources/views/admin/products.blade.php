@@ -272,7 +272,7 @@
                         <input type="text" id="image_url" name="image_url" placeholder="https://ejemplo.com/imagen.jpg" oninput="previewImageUrl(this.value, 'product_img_preview')">
                     </div>
 
-                    <!-- Galería de imágenes adicionales -->
+                    <div class="form-group" style="margin-top: 15px;">
                     <div class="form-group" style="margin-top: 20px; border-top: 1px solid var(--beige); padding-top: 15px;">
                         <label style="font-weight: 700; color: var(--dark-green); display: block; margin-bottom: 10px;">
                             Galería de Imágenes Adicionales
@@ -316,7 +316,6 @@
         const modalTitle = document.getElementById('modalTitle');
         const storeUrl = "{{ route('admin.productos.store') }}";
 
-        // Validar formulario antes de enviar
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -338,6 +337,7 @@
                 const message = 'Por favor, rellena los siguientes campos: ' + emptyFields.join(', ');
                 errorContainer.textContent = message;
                 errorContainer.style.display = 'block';
+                document.querySelector('.modal-body').scrollTop = 0;
                 return;
             }
 
@@ -352,7 +352,6 @@
             document.getElementById('product_id').value = "";
             document.getElementById('product_img_preview').src = "{{ asset('img/imgPrueba.png') }}";
 
-            // Eliminar campo _method si existe
             let methodField = document.getElementById('_method_field');
             if (methodField) {
                 methodField.remove();
@@ -370,7 +369,6 @@
             form.action = "{{ route('admin.productos.update', ['id' => ':id']) }}".replace(':id', product.id);
             form.method = "POST";
 
-            // Agregar campo oculto _method para simular PUT
             let methodField = document.getElementById('_method_field');
             if (!methodField) {
                 methodField = document.createElement('input');
@@ -383,18 +381,16 @@
                 methodField.value = 'PUT';
             }
 
-            // Establecer los valores
             document.getElementById('product_id').value = product.id;
             document.getElementById('name').value = product.name;
             document.getElementById('description').value = product.description;
             document.getElementById('price').value = product.price;
             document.getElementById('stock').value = product.stock;
             document.getElementById('category_id').value = product.category_id;
-            document.getElementById('status').value = String(product.status); // Convertir a string para el select
+            document.getElementById('status').value = String(product.status);
             document.getElementById('image_url').value = product.image_url || '';
             document.getElementById('product_img_preview').src = product.display_image || "{{ asset('img/imgPrueba.png') }}";
-            
-            // Cargar imágenes de la galería existentes
+
             const existingContainer = document.getElementById('existing_gallery_container');
             const urlsContainer = document.getElementById('gallery_urls_container');
             existingContainer.innerHTML = '';

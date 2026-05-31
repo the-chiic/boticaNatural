@@ -285,11 +285,9 @@
 @push('scripts')
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    // 1. Inicialización de Stripe Elements
     const stripe = Stripe("{{ $stripeKey }}");
     const elements = stripe.elements();
-    
-    // Configuración estética de Stripe que hereda el tema del proyecto
+
     const style = {
         base: {
             color: '#1b3022',
@@ -305,10 +303,10 @@
             iconColor: '#e53e3e'
         }
     };
-    
+
     const card = elements.create('card', { style: style, hidePostalCode: true });
     card.mount('#card-element');
-    
+
     card.on('change', function(event) {
         const displayError = document.getElementById('card-errors');
         if (event.error) {
@@ -318,9 +316,8 @@
         }
     });
 
-    // A. Configurar Stripe Payment Request (Apple Pay / Google Pay)
     let finalAmountCents = Math.round({{ $subtotalAfterDiscount >= 50 ? $subtotalAfterDiscount : $subtotalAfterDiscount + 4.99 }} * 100);
-    
+
     const paymentRequest = stripe.paymentRequest({
         country: 'ES',
         currency: 'eur',
@@ -343,7 +340,6 @@
         },
     });
 
-    // Comprobar si Apple Pay o Google Pay están disponibles
     paymentRequest.canMakePayment().then(function(result) {
         if (result) {
             prButton.mount('#payment-request-button');
@@ -353,7 +349,6 @@
         }
     });
 
-    // B. Procesar cobro con el monedero digital (Apple Pay / Google Pay)
     paymentRequest.on('paymentmethod', async function(ev) {
         const name = ev.payerName || document.getElementById('name_destination').value || 'Cliente';
         const email = ev.payerEmail || "{{ $user->email }}";
@@ -373,7 +368,6 @@
         }
 
         try {
-            // Fase 1: Pre-registrar pedido en backend
             const prepareResponse = await fetch("{{ route('cart.preparePayment') }}", {
                 method: "POST",
                 headers: {
@@ -397,7 +391,6 @@
             const paymentIntentId = prepareData.payment_intent_id;
             const orderId = prepareData.order_id;
 
-            // Fase 2: Confirmar en Stripe
             const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(
                 clientSecret,
                 { payment_method: ev.paymentMethod.id },
@@ -411,7 +404,6 @@
 
             ev.complete('success');
 
-            // Si requiere SCA
             if (paymentIntent.status === "requires_action") {
                 const { error: handleActionError } = await stripe.confirmCardPayment(clientSecret);
                 if (handleActionError) {
@@ -419,7 +411,6 @@
                 }
             }
 
-            // Fase 3: Confirmar en backend
             const confirmResponse = await fetch("{{ route('cart.confirmPayment') }}", {
                 method: "POST",
                 headers: {
@@ -452,7 +443,6 @@
         }
     });
 
-    // 2. Direcciones guardadas y formulario manual
     let selectedAddressId = null;
     const savedAddressGrid = document.getElementById('savedAddressGrid');
     const manualAddressFields = document.getElementById('manualAddressFields');
@@ -547,21 +537,17 @@
     function validateShippingPayload(payload) {
         const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
 
-        // Si es recogida en tienda, validar nombre y teléfono
         if (shippingMethod === 'store_pickup') {
             return payload.name_destination && payload.phone;
         }
 
-        // Si es envío a domicilio y tiene dirección guardada, validar
         if (payload.address_id) {
             return true;
         }
 
-        // Si es envío a domicilio, validar campos de dirección
         return payload.name_destination && payload.address && payload.city && payload.post_code && payload.country;
     }
 
-    // 3. Selección y Recálculo de Envío Dinámico
     const baseSubtotal = parseFloat("{{ $subtotalAfterDiscount }}");
     
     function toggleShippingMethod(radio) {
@@ -573,7 +559,6 @@
         const selectedCard = radio.closest('.payment-method-card');
         if (selectedCard) selectedCard.classList.add('selected');
 
-        // Mostrar/ocultar formularios según método de envío
         const storePickupForm = document.getElementById('storePickupForm');
         const shippingForm = document.getElementById('shippingForm');
         const isStorePickup = radio.value === 'store_pickup';
@@ -582,7 +567,6 @@
             storePickupForm.style.display = 'block';
             shippingForm.style.display = 'none';
 
-            // Seleccionar automáticamente pago en tienda
             const storePaymentRadio = document.querySelector('input[name="payment_method"][value="store_payment"]');
             if (storePaymentRadio) {
                 storePaymentRadio.checked = true;
@@ -592,7 +576,6 @@
             storePickupForm.style.display = 'none';
             shippingForm.style.display = 'block';
 
-            // Seleccionar automáticamente tarjeta bancaria
             const creditCardRadio = document.querySelector('input[name="payment_method"][value="credit_card"]');
             if (creditCardRadio) {
                 creditCardRadio.checked = true;
@@ -633,8 +616,7 @@
         } else if (shippingMethod === 'store_pickup') {
             shippingCost = 0.00;
         }
-        
-        // Actualizar el costo de envío en el DOM
+
         const shippingRowValue = document.getElementById('shipping-cost-value');
         if (shippingCost === 0.00) {
             shippingRowValue.textContent = 'Gratis';
@@ -643,12 +625,10 @@
             shippingRowValue.textContent = shippingCost.toFixed(2) + '€';
             shippingRowValue.style.color = 'var(--brand-green)';
         }
-        
-        // Actualizar el total general en el DOM
+
         const finalTotal = baseSubtotal + shippingCost;
         document.getElementById('grand-total-value').textContent = finalTotal.toFixed(2) + '€';
 
-        // C. Actualizar dinámicamente el total del monedero digital
         if (paymentRequest) {
             paymentRequest.update({
                 total: {
@@ -659,13 +639,12 @@
         }
     }
 
-    // 4. Intercepción del formulario y procesamiento AJAX del cobro
     const form = document.getElementById('checkoutForm');
     const submitBtn = document.getElementById('btnSubmitCheckout');
-    
+
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
-        
+
         const paymentRadio = document.querySelector('input[name="payment_method"]:checked');
         const payment_method = paymentRadio ? paymentRadio.value : 'credit_card';
         const isStorePayment = (payment_method === 'store_payment');
@@ -680,10 +659,9 @@
             }
             return;
         }
-        
-        // Bloquear botón e indicar cargando
+
         submitBtn.disabled = true;
-        submitBtn.innerHTML = isStorePayment 
+        submitBtn.innerHTML = isStorePayment
             ? '<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO PEDIDO...'
             : '<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO PAGO...';
         
@@ -695,7 +673,6 @@
         const phone = document.getElementById('phone').value;
         
         try {
-            // Fase 1: Pre-registrar el pedido
             const prepareResponse = await fetch("{{ route('cart.preparePayment') }}", {
                 method: "POST",
                 headers: {
@@ -708,24 +685,22 @@
                     payment_method: payment_method
                 })
             });
-            
+
             const prepareData = await prepareResponse.json();
-            
+
             if (!prepareResponse.ok || prepareData.error) {
                 throw new Error(prepareData.error || prepareData.message || "Error al preparar tu pedido.");
             }
-            
-            // Si es Pago en Tienda, redirigir directamente
+
             if (prepareData.is_store_payment) {
                 window.location.href = prepareData.redirect;
                 return;
             }
-            
+
             const clientSecret = prepareData.client_secret;
             const paymentIntentId = prepareData.payment_intent_id;
             const orderId = prepareData.order_id;
-            
-            // Fase 2: Confirmar el pago seguro con tarjeta en Stripe Elements (Maneja SCA/3D Secure)
+
             const stripeResult = await stripe.confirmCardPayment(clientSecret, {
                 payment_method: {
                     card: card,
@@ -736,17 +711,16 @@
                             line1: address,
                             city: city,
                             postal_code: postcode,
-                            country: 'ES' // Código de país por defecto
+                            country: 'ES'
                         }
                     }
                 }
             });
-            
+
             if (stripeResult.error) {
                 throw new Error(stripeResult.error.message);
             }
-            
-            // Fase 3: Confirmar la validez del cobro en el backend
+
             if (stripeResult.paymentIntent.status === 'succeeded') {
                 const confirmResponse = await fetch("{{ route('cart.confirmPayment') }}", {
                     method: "POST",
@@ -762,9 +736,8 @@
                 });
                 
                 const confirmData = await confirmResponse.json();
-                
+
                 if (confirmResponse.ok && confirmData.success) {
-                    // Redirección de éxito
                     window.location.href = confirmData.redirect;
                 } else {
                     throw new Error(confirmData.error || "El pago se realizó, pero la validación interna falló.");
@@ -772,13 +745,12 @@
             } else {
                 throw new Error("El pago no ha sido autorizado con éxito por tu entidad bancaria.");
             }
-            
+
         } catch (error) {
             console.error("Error en Checkout: ", error);
             const errorElement = document.getElementById('card-errors');
             errorElement.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + error.message;
-            
-            // Reactivar el botón para reintentos
+
             submitBtn.disabled = false;
             submitBtn.innerHTML = isStorePayment
                 ? '<i class="fa-solid fa-check-circle"></i> Confirmar Pedido'
@@ -786,7 +758,6 @@
         }
     });
 
-    // Inicializar estado de la sección de dirección según el método de envío seleccionado
     document.addEventListener('DOMContentLoaded', function() {
         const selectedShippingMethod = document.querySelector('input[name="shipping_method"]:checked');
         if (selectedShippingMethod) {

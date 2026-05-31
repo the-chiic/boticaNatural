@@ -82,7 +82,6 @@
                 @endphp
                 @forelse($customers as $customer)
                     @php
-                        // Calcular iniciales para el avatar
                         $names = explode(' ', $customer->name);
                         $initials = strtoupper(substr($names[0], 0, 1));
                         if (count($names) > 1) {
@@ -167,8 +166,7 @@
 
         function loadCustomerCRM(id, name) {
             crmTitle.innerText = `Ficha de Cliente: ${name}`;
-            
-            // Inyectar Spinners de Carga
+
             crmPersonalData.innerHTML = `
                 <p style="text-align: center; color: #888; padding: 10px; margin: 0; font-size: 13px;">
                     <i class="fa-solid fa-spinner fa-spin" style="margin-right: 6px;"></i> Cargando datos de contacto...
@@ -184,10 +182,10 @@
                     <i class="fa-solid fa-spinner fa-spin" style="margin-right: 6px;"></i> Obteniendo historial de pedidos...
                 </p>
             `;
-            
+
             crmModal.style.display = "flex";
             setTimeout(() => crmModal.classList.add('active'), 10);
-            
+
             fetch("{{ route('admin.clientes.details', ':id') }}".replace(':id', id))
                 .then(res => {
                     if (!res.ok) throw new Error('Error al cargar datos');
@@ -197,8 +195,8 @@
                     const c = data.customer;
                     const addrs = data.addresses;
                     const ords = data.orders;
-                    
-                    // 1. Datos Personales
+
+                    const dateObj = new Date(c.created_at);
                     const dateObj = new Date(c.created_at);
                     const formattedDate = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
                     crmPersonalData.innerHTML = `
@@ -207,8 +205,7 @@
                         <p style="margin: 5px 0; font-size: 13px; color: var(--dark-green);"><i class="fa-solid fa-phone" style="width: 18px; opacity: 0.7;"></i> <strong>Teléfono:</strong> ${c.phone || 'Sin Registrar'}</p>
                         <p style="margin: 5px 0; font-size: 13px; color: var(--dark-green);"><i class="fa-solid fa-calendar-day" style="width: 18px; opacity: 0.7;"></i> <strong>Registro:</strong> ${formattedDate}</p>
                     `;
-                    
-                    // 2. Direcciones de Envío
+
                     if (addrs.length === 0) {
                         crmAddressesList.innerHTML = `
                             <div style="text-align: center; color: #888; font-style: italic; font-size: 13px; padding: 15px; border: 1px dashed var(--beige); border-radius: 8px;">
@@ -231,8 +228,7 @@
                         });
                         crmAddressesList.innerHTML = addrsHtml;
                     }
-                    
-                    // 3. Historial de Pedidos
+
                     if (ords.length === 0) {
                         crmOrdersList.innerHTML = `
                             <div style="text-align: center; color: #888; font-style: italic; font-size: 13px; padding: 25px; border: 1px dashed var(--beige); border-radius: 8px;">

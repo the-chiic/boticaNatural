@@ -205,20 +205,17 @@
         @include('components.footer')
 
         @stack('scripts')
-        
-        <!-- Script Global de Favoritos con LocalStorage -->
+
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Cargar favoritos de localStorage
                 let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 
-                // Función para actualizar el estado visual de los corazones en la página
                 function actualizarBotonesFavoritos() {
                     document.querySelectorAll('.btn-favorito').forEach(btn => {
                         const id = btn.getAttribute('data-id');
                         const icon = btn.querySelector('i');
                         if (favoritos.some(fav => fav.id === id)) {
-                            btn.style.color = '#ef4444'; // rojo
+                            btn.style.color = '#ef4444';
                             icon.className = 'fa-solid fa-heart';
                         } else {
                             btn.style.color = '#ccc';
@@ -227,7 +224,6 @@
                     });
                 }
 
-                // Gestionar clics en los botones de favoritos
                 document.addEventListener('click', function(e) {
                     const btn = e.target.closest('.btn-favorito');
                     if (btn) {
