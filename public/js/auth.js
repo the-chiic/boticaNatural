@@ -23,13 +23,19 @@ document.addEventListener('DOMContentLoaded', () => {
         errorDiv.className = 'errorFeedback';
         errorDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${message}</span>`;
         
-        // Insertarlo justo después del input
-        inputElement.parentNode.appendChild(errorDiv);
+        // Insertarlo justo después del wrapper si existe, o del input
+        const wrapper = inputElement.closest('.posicionadorContrasena');
+        if (wrapper) {
+            wrapper.parentNode.appendChild(errorDiv);
+        } else {
+            inputElement.parentNode.appendChild(errorDiv);
+        }
     }
 
     function clearError(inputElement) {
         inputElement.classList.remove('invalido');
-        const parent = inputElement.parentNode;
+        const wrapper = inputElement.closest('.posicionadorContrasena');
+        const parent = wrapper ? wrapper.parentNode : inputElement.parentNode;
         const feedback = parent.querySelector('.errorFeedback');
         if (feedback) {
             parent.removeChild(feedback);
@@ -100,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="passwordStrengthBar" id="bar3"></div>
                 <div class="passwordStrengthBar" id="bar4"></div>
             `;
-            passwordInput.parentNode.appendChild(strengthMeter);
+            const targetParent = passwordInput.closest('.posicionadorContrasena') ? passwordInput.closest('.posicionadorContrasena').parentNode : passwordInput.parentNode;
+            targetParent.appendChild(strengthMeter);
 
             // Añadir los requisitos con checkmarks dinámicos
             const reqInfo = document.createElement('div');
@@ -115,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <li id="req-special" class="incumplido"><i class="fa-solid fa-circle-xmark"></i> Al menos un carácter especial (@$!%*?&_#)</li>
                 </ul>
             `;
-            passwordInput.parentNode.appendChild(reqInfo);
+            targetParent.appendChild(reqInfo);
 
             // Lógica de evaluación en tiempo real de la contraseña
             passwordInput.addEventListener('input', () => {
@@ -237,4 +244,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ----------------------------------------------------
+    // TOGGLE VISIBILIDAD DE CONTRASEÑA
+    // ----------------------------------------------------
+    document.querySelectorAll('.btn-toggle-password').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const wrapper = btn.closest('.posicionadorContrasena');
+            if (!wrapper) return;
+            const input = wrapper.querySelector('input');
+            const icon = btn.querySelector('i');
+            if (input && icon) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                    btn.setAttribute('aria-label', 'Ocultar contraseña');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                    btn.setAttribute('aria-label', 'Mostrar contraseña');
+                }
+            }
+        });
+    });
 });
+

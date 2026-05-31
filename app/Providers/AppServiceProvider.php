@@ -12,19 +12,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         if ($rootUrl = config('app.url')) {
-            URL::forceRootUrl(rtrim($rootUrl, '/'));
+            $rootUrl = preg_replace('#/public/?$#', '', rtrim($rootUrl, '/'));
+            URL::forceRootUrl($rootUrl);
         }
 
-        // Auto-creación de columnas de verificación para evitar errores en el servidor
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('user')) {
                 if (!\Illuminate\Support\Facades\Schema::hasColumn('user', 'email_verified_at')) {
@@ -46,7 +42,6 @@ class AppServiceProvider extends ServiceProvider
                 });
             }
         } catch (\Exception $e) {
-            // Silenciar errores de conexión durante comandos de consola o antes de conectar la DB
         }
     }
 }

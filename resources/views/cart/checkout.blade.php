@@ -28,59 +28,92 @@
                         <!-- Shipping Info -->
                         <div class="checkout-form-section" style="margin-bottom: 2rem;">
                             <h2 class="checkout-title">
-                                <i class="fa-solid fa-map-location-dot" style="opacity: 0.8;"></i> 1. Dirección de Envío
+                                <i class="fa-solid fa-map-location-dot" style="opacity: 0.8;"></i> 1. Información de Entrega
                             </h2>
-                            
-                            <div class="form-group-grid">
-                                <!-- Address Dropdown (If customer has saved ones) -->
+
+                            <!-- Formulario para Recogida en Tienda -->
+                            <div id="storePickupForm" class="form-group-grid" style="display: none;">
+                                <div style="grid-column: span 2; margin-bottom: 1rem;">
+                                    <p style="color: var(--brand-accent); font-size: 0.9rem; margin-bottom: 1rem;">
+                                        <i class="fa-solid fa-store"></i> Recogerás tu pedido en nuestra tienda. Solo necesitamos tu nombre y teléfono para contactarte.
+                                    </p>
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label for="pickup_name">Nombre completo <span style="color: #fa5252;">*</span></label>
+                                    <input type="text" id="pickup_name" name="pickup_name" class="input-field" placeholder="Tu nombre completo" value="{{ old('name_destination', $user->name) }}">
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label for="pickup_phone">Teléfono de contacto <span style="color: #fa5252;">*</span></label>
+                                    <input type="text" id="pickup_phone" name="pickup_phone" class="input-field" placeholder="Ej. +34 600123456" value="{{ old('phone', $user->phone) }}">
+                                </div>
+                            </div>
+
+                            <!-- Formulario para Envío a Domicilio -->
+                            <div id="shippingForm" class="form-group-grid">
                                 @if($direcciones->isNotEmpty())
                                 <div style="grid-column: span 2; margin-bottom: 0.5rem;">
-                                    <label for="saved_address">¿Usar una dirección guardada?</label>
-                                    <select id="saved_address" class="input-field" onchange="fillAddress(this)" style="appearance: auto; background-image: none;">
-                                        <option value="">-- Seleccionar una dirección guardada --</option>
-                                        @foreach($direcciones as $dir)
-                                            <option value="{{ $dir->id }}" 
-                                                    data-name="{{ $dir->name_destination }}" 
-                                                    data-address="{{ $dir->address }}" 
-                                                    data-city="{{ $dir->city }}" 
-                                                    data-postcode="{{ $dir->post_code }}"
-                                                    data-country="{{ $dir->country }}"
-                                                    data-phone="{{ $dir->phone }}">
-                                                {{ $dir->name_destination }} - {{ $dir->address }}, {{ $dir->city }}
-                                            </option>
+                                    <label style="margin-bottom: 0.75rem;">Elige una dirección guardada</label>
+                                    <div class="checkout-address-grid" id="savedAddressGrid">
+                                        @foreach($direcciones as $index => $dir)
+                                            <label class="checkout-address-card {{ $index === 0 ? 'selected' : '' }}"
+                                                   data-id="{{ $dir->id }}"
+                                                   data-name="{{ $dir->name_destination }}"
+                                                   data-address="{{ $dir->address }}"
+                                                   data-city="{{ $dir->city }}"
+                                                   data-postcode="{{ $dir->post_code }}"
+                                                   data-country="{{ $dir->country }}"
+                                                   data-phone="{{ $dir->phone }}">
+                                                <input type="radio" name="saved_address_choice" value="{{ $dir->id }}" {{ $index === 0 ? 'checked' : '' }} class="checkout-address-radio">
+                                                <div class="checkout-address-card-body">
+                                                    <strong>{{ $dir->name_destination ?? $user->name }}</strong>
+                                                    <span>{{ $dir->address }}</span>
+                                                    <span>{{ $dir->post_code }} {{ $dir->city }}{{ $dir->province ? ', ' . $dir->province : '' }}</span>
+                                                    <span>{{ $dir->country }}</span>
+                                                    @if($dir->phone)
+                                                        <span><i class="fa-solid fa-phone"></i> {{ $dir->phone }}</span>
+                                                    @endif
+                                                </div>
+                                            </label>
                                         @endforeach
-                                    </select>
+                                    </div>
+                                    <button type="button" id="btnUseManualAddress" class="checkout-manual-address-btn">
+                                        <i class="fa-solid fa-plus"></i> Usar otra dirección distinta
+                                    </button>
                                 </div>
                                 @endif
 
+                                <div id="manualAddressFields" class="manual-address-fields {{ $direcciones->isNotEmpty() ? 'is-collapsed' : '' }}" style="grid-column: span 2;">
+                                    <div class="form-group-grid" style="margin-top: 0;">
                                 <div style="grid-column: span 2;">
                                     <label for="name_destination">Receptor (Nombre y Apellidos)</label>
-                                    <input type="text" id="name_destination" name="name_destination" class="input-field" placeholder="Nombre de quien recibe el paquete" value="{{ old('name_destination', $user->name) }}" required>
+                                    <input type="text" id="name_destination" name="name_destination" class="input-field" placeholder="Nombre de quien recibe el paquete" value="{{ old('name_destination', $user->name) }}">
                                 </div>
-                                
+
                                 <div style="grid-column: span 2;">
                                     <label for="address">Dirección de Entrega</label>
-                                    <input type="text" id="address" name="address" class="input-field" placeholder="Calle, número, piso, puerta, urbanización..." value="{{ old('address') }}" required>
+                                    <input type="text" id="address" name="address" class="input-field" placeholder="Calle, número, piso, puerta, urbanización..." value="{{ old('address') }}">
                                 </div>
-                                
+
                                 <div style="grid-column: span 1;">
                                     <label for="city">Ciudad</label>
-                                    <input type="text" id="city" name="city" class="input-field" placeholder="Ej. Madrid" value="{{ old('city') }}" required>
+                                    <input type="text" id="city" name="city" class="input-field" placeholder="Ej. Madrid" value="{{ old('city') }}">
                                 </div>
-                                
+
                                 <div style="grid-column: span 1;">
                                     <label for="post_code">Código Postal</label>
-                                    <input type="text" id="post_code" name="post_code" class="input-field" placeholder="Ej. 28001" value="{{ old('post_code') }}" required>
+                                    <input type="text" id="post_code" name="post_code" class="input-field" placeholder="Ej. 28001" value="{{ old('post_code') }}">
                                 </div>
 
                                 <div style="grid-column: span 1;">
                                     <label for="country">País</label>
-                                    <input type="text" id="country" name="country" class="input-field" placeholder="Ej. España" value="{{ old('country', 'España') }}" required>
+                                    <input type="text" id="country" name="country" class="input-field" placeholder="Ej. España" value="{{ old('country', 'España') }}">
                                 </div>
 
                                 <div style="grid-column: span 1;">
                                     <label for="phone">Teléfono de contacto</label>
                                     <input type="text" id="phone" name="phone" class="input-field" placeholder="Ej. +34 600123456" value="{{ old('phone', $user->phone) }}">
+                                </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -252,11 +285,9 @@
 @push('scripts')
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    // 1. Inicialización de Stripe Elements
     const stripe = Stripe("{{ $stripeKey }}");
     const elements = stripe.elements();
-    
-    // Configuración estética de Stripe que hereda el tema del proyecto
+
     const style = {
         base: {
             color: '#1b3022',
@@ -272,10 +303,10 @@
             iconColor: '#e53e3e'
         }
     };
-    
+
     const card = elements.create('card', { style: style, hidePostalCode: true });
     card.mount('#card-element');
-    
+
     card.on('change', function(event) {
         const displayError = document.getElementById('card-errors');
         if (event.error) {
@@ -285,9 +316,8 @@
         }
     });
 
-    // A. Configurar Stripe Payment Request (Apple Pay / Google Pay)
     let finalAmountCents = Math.round({{ $subtotalAfterDiscount >= 50 ? $subtotalAfterDiscount : $subtotalAfterDiscount + 4.99 }} * 100);
-    
+
     const paymentRequest = stripe.paymentRequest({
         country: 'ES',
         currency: 'eur',
@@ -310,7 +340,6 @@
         },
     });
 
-    // Comprobar si Apple Pay o Google Pay están disponibles
     paymentRequest.canMakePayment().then(function(result) {
         if (result) {
             prButton.mount('#payment-request-button');
@@ -320,31 +349,25 @@
         }
     });
 
-    // B. Procesar cobro con el monedero digital (Apple Pay / Google Pay)
     paymentRequest.on('paymentmethod', async function(ev) {
         const name = ev.payerName || document.getElementById('name_destination').value || 'Cliente';
         const email = ev.payerEmail || "{{ $user->email }}";
         const phone = ev.payerPhone || document.getElementById('phone').value || '';
         
-        const address = document.getElementById('address').value;
-        const city = document.getElementById('city').value;
-        const postcode = document.getElementById('post_code').value;
-        const country = document.getElementById('country').value;
-        const shipping_method = document.querySelector('input[name="shipping_method"]:checked').value;
-        
-        if (!address || !city || !postcode) {
+        const shippingPayload = getShippingPayload();
+
+        if (!validateShippingPayload(shippingPayload)) {
             ev.complete('fail');
             Swal.fire({
                 icon: 'warning',
                 title: 'Dirección Requerida',
-                text: 'Por favor, rellena tu dirección de envío en el paso 1 antes de usar Apple Pay o Google Pay para que sepamos a dónde enviar tu pedido.',
+                text: 'Por favor, elige una dirección guardada o rellena tu dirección de envío en el paso 1.',
                 confirmButtonColor: '#1b3022'
             });
             return;
         }
 
         try {
-            // Fase 1: Pre-registrar pedido en backend
             const prepareResponse = await fetch("{{ route('cart.preparePayment') }}", {
                 method: "POST",
                 headers: {
@@ -353,13 +376,8 @@
                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
                 },
                 body: JSON.stringify({
-                    name_destination: name,
-                    address: address,
-                    city: city,
-                    post_code: postcode,
-                    country: country,
-                    phone: phone,
-                    shipping_method: shipping_method
+                    ...shippingPayload,
+                    payment_method: 'credit_card'
                 })
             });
 
@@ -373,7 +391,6 @@
             const paymentIntentId = prepareData.payment_intent_id;
             const orderId = prepareData.order_id;
 
-            // Fase 2: Confirmar en Stripe
             const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(
                 clientSecret,
                 { payment_method: ev.paymentMethod.id },
@@ -387,7 +404,6 @@
 
             ev.complete('success');
 
-            // Si requiere SCA
             if (paymentIntent.status === "requires_action") {
                 const { error: handleActionError } = await stripe.confirmCardPayment(clientSecret);
                 if (handleActionError) {
@@ -395,7 +411,6 @@
                 }
             }
 
-            // Fase 3: Confirmar en backend
             const confirmResponse = await fetch("{{ route('cart.confirmPayment') }}", {
                 method: "POST",
                 headers: {
@@ -428,20 +443,111 @@
         }
     });
 
-    // 2. Autocompletado de dirección guardada
-    function fillAddress(select) {
-        const option = select.options[select.selectedIndex];
-        if (!option || !option.value) return;
+    let selectedAddressId = null;
+    const savedAddressGrid = document.getElementById('savedAddressGrid');
+    const manualAddressFields = document.getElementById('manualAddressFields');
+    const btnUseManualAddress = document.getElementById('btnUseManualAddress');
 
-        document.getElementById('name_destination').value = option.getAttribute('data-name') || '';
-        document.getElementById('address').value = option.getAttribute('data-address') || '';
-        document.getElementById('city').value = option.getAttribute('data-city') || '';
-        document.getElementById('post_code').value = option.getAttribute('data-postcode') || '';
-        document.getElementById('country').value = option.getAttribute('data-country') || '';
-        document.getElementById('phone').value = option.getAttribute('data-phone') || '';
+    function fillAddressFromCard(card) {
+        if (!card) return;
+
+        document.getElementById('name_destination').value = card.dataset.name || '';
+        document.getElementById('address').value = card.dataset.address || '';
+        document.getElementById('city').value = card.dataset.city || '';
+        document.getElementById('post_code').value = card.dataset.postcode || '';
+        document.getElementById('country').value = card.dataset.country || '';
+        document.getElementById('phone').value = card.dataset.phone || '';
     }
 
-    // 3. Selección y Recálculo de Envío Dinámico
+    function selectSavedAddressCard(card) {
+        if (!savedAddressGrid || !card) return;
+
+        selectedAddressId = card.dataset.id;
+        savedAddressGrid.querySelectorAll('.checkout-address-card').forEach(item => item.classList.remove('selected'));
+        card.classList.add('selected');
+        const radio = card.querySelector('.checkout-address-radio');
+        if (radio) radio.checked = true;
+        fillAddressFromCard(card);
+
+        if (manualAddressFields) {
+            manualAddressFields.classList.add('is-collapsed');
+        }
+    }
+
+    function enableManualAddressMode() {
+        selectedAddressId = null;
+        if (savedAddressGrid) {
+            savedAddressGrid.querySelectorAll('.checkout-address-card').forEach(item => item.classList.remove('selected'));
+            savedAddressGrid.querySelectorAll('.checkout-address-radio').forEach(radio => radio.checked = false);
+        }
+        if (manualAddressFields) {
+            manualAddressFields.classList.remove('is-collapsed');
+        }
+        document.getElementById('name_destination').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('city').value = '';
+        document.getElementById('post_code').value = '';
+        document.getElementById('country').value = 'España';
+        document.getElementById('phone').value = '';
+        document.getElementById('name_destination').focus();
+    }
+
+    if (savedAddressGrid) {
+        savedAddressGrid.querySelectorAll('.checkout-address-card').forEach(card => {
+            card.addEventListener('click', () => selectSavedAddressCard(card));
+        });
+
+        const initialCard = savedAddressGrid.querySelector('.checkout-address-card.selected')
+            || savedAddressGrid.querySelector('.checkout-address-card');
+        if (initialCard) {
+            selectSavedAddressCard(initialCard);
+        }
+    }
+
+    if (btnUseManualAddress) {
+        btnUseManualAddress.addEventListener('click', enableManualAddressMode);
+    }
+
+    function getShippingPayload() {
+        const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
+        const payload = {
+            shipping_method: shippingMethod,
+        };
+
+        if (shippingMethod === 'store_pickup') {
+            payload.name_destination = document.getElementById('pickup_name').value;
+            payload.phone = document.getElementById('pickup_phone').value;
+        } else {
+            if (selectedAddressId) {
+                payload.address_id = selectedAddressId;
+                fillAddressFromCard(savedAddressGrid.querySelector(`[data-id="${selectedAddressId}"]`));
+            } else {
+                payload.name_destination = document.getElementById('name_destination').value;
+                payload.address = document.getElementById('address').value;
+                payload.city = document.getElementById('city').value;
+                payload.post_code = document.getElementById('post_code').value;
+                payload.country = document.getElementById('country').value;
+                payload.phone = document.getElementById('phone').value;
+            }
+        }
+
+        return payload;
+    }
+
+    function validateShippingPayload(payload) {
+        const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
+
+        if (shippingMethod === 'store_pickup') {
+            return payload.name_destination && payload.phone;
+        }
+
+        if (payload.address_id) {
+            return true;
+        }
+
+        return payload.name_destination && payload.address && payload.city && payload.post_code && payload.country;
+    }
+
     const baseSubtotal = parseFloat("{{ $subtotalAfterDiscount }}");
     
     function toggleShippingMethod(radio) {
@@ -449,10 +555,34 @@
             const card = input.closest('.payment-method-card');
             if (card) card.classList.remove('selected');
         });
-        
+
         const selectedCard = radio.closest('.payment-method-card');
         if (selectedCard) selectedCard.classList.add('selected');
-        
+
+        const storePickupForm = document.getElementById('storePickupForm');
+        const shippingForm = document.getElementById('shippingForm');
+        const isStorePickup = radio.value === 'store_pickup';
+
+        if (isStorePickup) {
+            storePickupForm.style.display = 'block';
+            shippingForm.style.display = 'none';
+
+            const storePaymentRadio = document.querySelector('input[name="payment_method"][value="store_payment"]');
+            if (storePaymentRadio) {
+                storePaymentRadio.checked = true;
+                togglePaymentMethod(storePaymentRadio);
+            }
+        } else {
+            storePickupForm.style.display = 'none';
+            shippingForm.style.display = 'block';
+
+            const creditCardRadio = document.querySelector('input[name="payment_method"][value="credit_card"]');
+            if (creditCardRadio) {
+                creditCardRadio.checked = true;
+                togglePaymentMethod(creditCardRadio);
+            }
+        }
+
         recalculateTotals();
     }
 
@@ -486,8 +616,7 @@
         } else if (shippingMethod === 'store_pickup') {
             shippingCost = 0.00;
         }
-        
-        // Actualizar el costo de envío en el DOM
+
         const shippingRowValue = document.getElementById('shipping-cost-value');
         if (shippingCost === 0.00) {
             shippingRowValue.textContent = 'Gratis';
@@ -496,12 +625,10 @@
             shippingRowValue.textContent = shippingCost.toFixed(2) + '€';
             shippingRowValue.style.color = 'var(--brand-green)';
         }
-        
-        // Actualizar el total general en el DOM
+
         const finalTotal = baseSubtotal + shippingCost;
         document.getElementById('grand-total-value').textContent = finalTotal.toFixed(2) + '€';
 
-        // C. Actualizar dinámicamente el total del monedero digital
         if (paymentRequest) {
             paymentRequest.update({
                 total: {
@@ -512,20 +639,29 @@
         }
     }
 
-    // 4. Intercepción del formulario y procesamiento AJAX del cobro
     const form = document.getElementById('checkoutForm');
     const submitBtn = document.getElementById('btnSubmitCheckout');
-    
+
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
-        
+
         const paymentRadio = document.querySelector('input[name="payment_method"]:checked');
         const payment_method = paymentRadio ? paymentRadio.value : 'credit_card';
         const isStorePayment = (payment_method === 'store_payment');
-        
-        // Bloquear botón e indicar cargando
+        const shippingPayload = getShippingPayload();
+
+        if (!validateShippingPayload(shippingPayload)) {
+            const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
+            if (shippingMethod === 'store_pickup') {
+                document.getElementById('card-errors').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Para recoger en tienda no es necesario completar la dirección de envío.';
+            } else {
+                document.getElementById('card-errors').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Debes elegir o completar una dirección de envío para envío a domicilio.';
+            }
+            return;
+        }
+
         submitBtn.disabled = true;
-        submitBtn.innerHTML = isStorePayment 
+        submitBtn.innerHTML = isStorePayment
             ? '<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO PEDIDO...'
             : '<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO PAGO...';
         
@@ -535,10 +671,8 @@
         const postcode = document.getElementById('post_code').value;
         const country = document.getElementById('country').value;
         const phone = document.getElementById('phone').value;
-        const shipping_method = document.querySelector('input[name="shipping_method"]:checked').value;
         
         try {
-            // Fase 1: Pre-registrar el pedido
             const prepareResponse = await fetch("{{ route('cart.preparePayment') }}", {
                 method: "POST",
                 headers: {
@@ -547,34 +681,26 @@
                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
                 },
                 body: JSON.stringify({
-                    name_destination: name,
-                    address: address,
-                    city: city,
-                    post_code: postcode,
-                    country: country,
-                    phone: phone,
-                    shipping_method: shipping_method,
+                    ...shippingPayload,
                     payment_method: payment_method
                 })
             });
-            
+
             const prepareData = await prepareResponse.json();
-            
+
             if (!prepareResponse.ok || prepareData.error) {
                 throw new Error(prepareData.error || prepareData.message || "Error al preparar tu pedido.");
             }
-            
-            // Si es Pago en Tienda, redirigir directamente
+
             if (prepareData.is_store_payment) {
                 window.location.href = prepareData.redirect;
                 return;
             }
-            
+
             const clientSecret = prepareData.client_secret;
             const paymentIntentId = prepareData.payment_intent_id;
             const orderId = prepareData.order_id;
-            
-            // Fase 2: Confirmar el pago seguro con tarjeta en Stripe Elements (Maneja SCA/3D Secure)
+
             const stripeResult = await stripe.confirmCardPayment(clientSecret, {
                 payment_method: {
                     card: card,
@@ -585,17 +711,16 @@
                             line1: address,
                             city: city,
                             postal_code: postcode,
-                            country: 'ES' // Código de país por defecto
+                            country: 'ES'
                         }
                     }
                 }
             });
-            
+
             if (stripeResult.error) {
                 throw new Error(stripeResult.error.message);
             }
-            
-            // Fase 3: Confirmar la validez del cobro en el backend
+
             if (stripeResult.paymentIntent.status === 'succeeded') {
                 const confirmResponse = await fetch("{{ route('cart.confirmPayment') }}", {
                     method: "POST",
@@ -611,9 +736,8 @@
                 });
                 
                 const confirmData = await confirmResponse.json();
-                
+
                 if (confirmResponse.ok && confirmData.success) {
-                    // Redirección de éxito
                     window.location.href = confirmData.redirect;
                 } else {
                     throw new Error(confirmData.error || "El pago se realizó, pero la validación interna falló.");
@@ -621,17 +745,23 @@
             } else {
                 throw new Error("El pago no ha sido autorizado con éxito por tu entidad bancaria.");
             }
-            
+
         } catch (error) {
             console.error("Error en Checkout: ", error);
             const errorElement = document.getElementById('card-errors');
             errorElement.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + error.message;
-            
-            // Reactivar el botón para reintentos
+
             submitBtn.disabled = false;
-            submitBtn.innerHTML = isStorePayment 
+            submitBtn.innerHTML = isStorePayment
                 ? '<i class="fa-solid fa-check-circle"></i> Confirmar Pedido'
                 : '<i class="fa-solid fa-lock"></i> Confirmar y Pagar';
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectedShippingMethod = document.querySelector('input[name="shipping_method"]:checked');
+        if (selectedShippingMethod) {
+            toggleShippingMethod(selectedShippingMethod);
         }
     });
 </script>

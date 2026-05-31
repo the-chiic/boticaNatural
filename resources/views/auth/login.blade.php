@@ -43,7 +43,12 @@
                         <label class="etiquetaFormulario" for="password">Contraseña</label>
                         <a href="{{ route('password.request') }}" class="enlaceOlvido">¿Olvidaste tu contraseña?</a>
                     </div>
-                    <input type="password" name="password" id="password" class="controlFormulario" placeholder="........">
+                    <div class="posicionadorContrasena">
+                        <input type="password" name="password" id="password" class="controlFormulario" placeholder="........">
+                        <button type="button" class="btn-toggle-password" aria-label="Mostrar contraseña">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                     @error('password')
                         <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                     @enderror
@@ -71,7 +76,6 @@
 
     </div>
 
-    <!-- Parte derecha -->
     <div class="autenticacionDerecha">
         <img src="https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=1400&auto=format&fit=crop" alt="Fondo Montaña" class="imagenFondo">
         <div class="capaOscura"></div>

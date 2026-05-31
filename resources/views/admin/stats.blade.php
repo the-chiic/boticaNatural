@@ -141,7 +141,7 @@
                     {
                         label: 'Nuevos Clientes',
                         data: @json($newClientsData),
-                        borderColor: '#8B6F4A', // brown
+                        borderColor: '#8B6F4A',
                         backgroundColor: 'rgba(139, 111, 74, 0.1)',
                         borderWidth: 3,
                         tension: 0.4,
@@ -150,7 +150,7 @@
                     {
                         label: 'Clientes Recurrentes',
                         data: @json($recurrentClientsData),
-                        borderColor: '#6B7F5A', // olive
+                        borderColor: '#6B7F5A',
                         backgroundColor: 'transparent',
                         borderWidth: 3,
                         tension: 0.4,

@@ -76,10 +76,14 @@ class CatalogController extends Controller
      */
     public function show($id)
     {
-        $product = $this->getProductById($id);
-        $relatedProducts = $this->getRelatedProducts($id);
-        
-        return view('catalog.show', compact('product', 'relatedProducts'));
+        try {
+            $product = $this->getProductById($id);
+            $relatedProducts = $this->getRelatedProducts($id);
+
+            return view('catalog.show', compact('product', 'relatedProducts'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            abort(404, 'Producto no encontrado o no disponible');
+        }
     }
 
     /**
@@ -92,16 +96,35 @@ class CatalogController extends Controller
             $nameLower = mb_strtolower($category->name);
             $bgUrl = 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=800&auto=format&fit=crop'; // default
             
-            if (str_contains($nameLower, 'infusion') || str_contains($nameLower, 'té') || str_contains($nameLower, 'te')) {
-                $bgUrl = 'https://images.unsplash.com/photo-1576092762791-dd9e2220d960?q=80&w=800&auto=format&fit=crop';
-            } elseif (str_contains($nameLower, 'aceite')) {
-                $bgUrl = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop';
-            } elseif (str_contains($nameLower, 'cosmet') || str_contains($nameLower, 'cosmét')) {
-                $bgUrl = 'https://images.unsplash.com/photo-1556228573-7303e8707198?q=80&w=800&auto=format&fit=crop';
-            } elseif (str_contains($nameLower, 'medic')) {
-                $bgUrl = 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=800&auto=format&fit=crop';
-            } elseif (str_contains($nameLower, 'herbol') || str_contains($nameLower, 'plant') || str_contains($nameLower, 'natural')) {
-                $bgUrl = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=800&auto=format&fit=crop';
+            $hasCustomImg = false;
+            if (!empty($category->img)) {
+                if (str_starts_with($category->img, 'http://') || str_starts_with($category->img, 'https://')) {
+                    $bgUrl = $category->img;
+                    $hasCustomImg = true;
+                } elseif (file_exists(public_path($category->img))) {
+                    $bgUrl = asset($category->img);
+                    $hasCustomImg = true;
+                } elseif (file_exists(public_path('img/' . $category->img))) {
+                    $bgUrl = asset('img/' . $category->img);
+                    $hasCustomImg = true;
+                } elseif (file_exists(public_path('storage/' . $category->img))) {
+                    $bgUrl = asset('storage/' . $category->img);
+                    $hasCustomImg = true;
+                }
+            }
+            
+            if (!$hasCustomImg) {
+                if (str_contains($nameLower, 'infusion') || str_contains($nameLower, 'té') || str_contains($nameLower, 'te')) {
+                    $bgUrl = 'https://images.unsplash.com/photo-1576092762791-dd9e2220d960?q=80&w=800&auto=format&fit=crop';
+                } elseif (str_contains($nameLower, 'aceite')) {
+                    $bgUrl = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop';
+                } elseif (str_contains($nameLower, 'cosmet') || str_contains($nameLower, 'cosmét')) {
+                    $bgUrl = 'https://images.unsplash.com/photo-1556228573-7303e8707198?q=80&w=800&auto=format&fit=crop';
+                } elseif (str_contains($nameLower, 'medic')) {
+                    $bgUrl = 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=800&auto=format&fit=crop';
+                } elseif (str_contains($nameLower, 'herbol') || str_contains($nameLower, 'plant') || str_contains($nameLower, 'natural')) {
+                    $bgUrl = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=800&auto=format&fit=crop';
+                }
             }
             
             $resolvedCategories[] = [

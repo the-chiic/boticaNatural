@@ -50,7 +50,6 @@
 
     </div>
 
-    <!-- Parte derecha -->
     <div class="autenticacionDerecha">
         <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1400&auto=format&fit=crop" alt="Fondo Comunidad" class="imagenFondo">
         <div class="capaOscura"></div>
@@ -88,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Limpiar errores en tiempo real cuando el usuario escribe
     document.querySelectorAll('.controlFormulario').forEach(input => {
         input.addEventListener('input', () => {
             if (input.classList.contains('invalido')) {
@@ -98,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (passwordInput) {
-        // Añadir el contenedor de la barra de fuerza
         const strengthMeter = document.createElement('div');
         strengthMeter.className = 'passwordStrengthMeter';
         strengthMeter.innerHTML = `
@@ -109,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         passwordInput.parentNode.appendChild(strengthMeter);
 
-        // Añadir los requisitos con checkmarks dinámicos
         const reqInfo = document.createElement('div');
         reqInfo.className = 'passwordRequirementsInfo';
         reqInfo.innerHTML = `
@@ -124,25 +120,21 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         passwordInput.parentNode.appendChild(reqInfo);
 
-        // Lógica de evaluación en tiempo real de la contraseña
         passwordInput.addEventListener('input', () => {
             const val = passwordInput.value;
-            
-            // Criterios
+
             const hasLength = val.length >= 8;
             const hasUpper = /[A-Z]/.test(val);
             const hasLower = /[a-z]/.test(val);
             const hasNumber = /[0-9]/.test(val);
             const hasSpecial = /[@$!%*?&_#\-\+\(\)\[\]\{\}\.\,\:\;\/\=\?\|]/.test(val);
 
-            // Actualizar interfaz de requisitos
             updateRequirementUI('req-length', hasLength);
             updateRequirementUI('req-upper', hasUpper);
             updateRequirementUI('req-lower', hasLower);
             updateRequirementUI('req-number', hasNumber);
             updateRequirementUI('req-special', hasSpecial);
 
-            // Calcular barra de nivel de seguridad (de 0 a 4)
             let score = 0;
             if (val.length > 0) {
                 if (hasLength) score++;
@@ -174,9 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('bar3'),
             document.getElementById('bar4')
         ];
-        
-        // Colores correspondientes
-        const colors = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981']; // rojo, naranja, azul, verde
+
+        const colors = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'];
 
         bars.forEach((bar, idx) => {
             if (!bar) return;

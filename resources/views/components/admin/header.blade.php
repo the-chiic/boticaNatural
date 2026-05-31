@@ -1,5 +1,9 @@
 @props(['title', 'subtitle' => ''])
 
+@php
+    $admin = Auth::guard('admin')->user();
+@endphp
+
 <header class="header">
     <div>
         <h1 class="title">{{ $title }}</h1>
@@ -9,17 +13,12 @@
     </div>
     
     <div class="actions">
-        <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" placeholder="Buscar...">
-        </div>
-        
         <div class="profile">
             <div class="user-details">
-                <p class="name">Admin</p>
-                <p class="email">admin@herbolario.com</p>
+                <p class="name">{{ $admin->name ?? 'Admin' }}</p>
+                <p class="email">{{ $admin->email ?? 'admin@boticanatural.es' }}</p>
             </div>
-            <div class="avatar">A</div>
+            <div class="avatar">{{ substr($admin->name ?? 'A', 0, 1) }}</div>
         </div>
     </div>
 </header>

@@ -5,6 +5,8 @@ function initQuantitySelector() {
     const minusBtn = document.getElementById('minus');
 
     if (plusBtn && minusBtn && qtyInput) {
+        const maxStock = parseInt(qtyInput.getAttribute('data-max-stock')) || 9999;
+
         plusBtn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -28,6 +30,24 @@ function initQuantitySelector() {
             }
         });
     }
+}
+
+function validateCartForm(event) {
+    const qtyInput = document.getElementById('qty');
+    if (!qtyInput) return true;
+
+    const maxStock = parseInt(qtyInput.getAttribute('data-max-stock')) || 9999;
+    const qty = parseInt(qtyInput.value) || 0;
+
+    if (qty > maxStock) {
+        event.preventDefault();
+        alert('La cantidad seleccionada es superior al stock restante. Solo quedan ' + maxStock + ' unidades disponibles.');
+        qtyInput.value = maxStock;
+        qtyInput.focus();
+        return false;
+    }
+
+    return true;
 }
 
 document.addEventListener('DOMContentLoaded', initQuantitySelector);
@@ -55,8 +75,13 @@ function jumpToGalleryImage(index, thumbnailEl) {
 }
 
 function updateActiveSlide() {
+    const slider = document.getElementById('imageSlider');
     const slides = document.querySelectorAll('.main-image-slide');
     const thumbnails = document.querySelectorAll('.thumbnail-item');
+
+    if (slider && slides.length > 0) {
+        slider.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+    }
 
     slides.forEach((slide, idx) => {
         slide.classList.toggle('active', idx === currentSlideIndex);

@@ -9,30 +9,24 @@ use Illuminate\Support\Facades\DB;
 
 class ControladorPerfil extends Controller
 {
-    // Mostrar la vista del Perfil con sus datos reales (Pedidos y Direcciones)
     public function verPerfil()
     {
         $idUsuario = Auth::id();
 
-        // 1. Obtener los pedidos reales del usuario desde la base de datos MySQL
         $pedidos = DB::table('orders')
             ->where('user_id', $idUsuario)
             ->orderBy('order_date', 'desc')
             ->get();
 
-        // 2. Obtener las direcciones reales del usuario desde la base de datos
         $direcciones = DB::table('address')
             ->where('user_id', $idUsuario)
             ->get();
 
-        // Retornar la vista pasando los datos dinámicos
         return view('profile.index', compact('pedidos', 'direcciones'));
     }
 
-    // Guardar cambios del perfil (Nombre y Teléfono)
     public function actualizarDatos(Request $solicitud)
     {
-        // Validar campos recibidos
         $solicitud->validate([
             'name' => ['required', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:30'],
@@ -40,20 +34,16 @@ class ControladorPerfil extends Controller
 
         $usuario = Auth::user();
 
-        // Actualizar el registro en la base de datos
         $usuario->update([
             'name' => $solicitud->name,
             'phone' => $solicitud->phone,
         ]);
 
-        // Volver atrás con alerta verde de éxito
         return back()->with('success', '¡Tus datos personales se han actualizado con éxito!');
     }
 
-    // Añadir nueva dirección
     public function agregarDireccion(Request $solicitud)
     {
-        // Validar campos recibidos
         $solicitud->validate([
             'address' => ['required', 'string', 'max:255'],
             'province' => ['nullable', 'string', 'max:100'],
@@ -66,7 +56,6 @@ class ControladorPerfil extends Controller
 
         $idUsuario = Auth::id();
 
-        // Insertar registro en la base de datos
         DB::table('address')->insert([
             'user_id' => $idUsuario,
             'address' => $solicitud->address,
@@ -80,15 +69,13 @@ class ControladorPerfil extends Controller
             'updated_at' => now(),
         ]);
 
-        // Volver atrás con alerta verde de éxito
         return back()->with('success', '¡La nueva dirección ha sido añadida con éxito!');
     }
 
-    // Eliminar una dirección de forma segura
     public function eliminarDireccion($id)
     {
         $idUsuario = Auth::id();
-        
+
         DB::table('address')
             ->where('id', $id)
             ->where('user_id', $idUsuario)
@@ -97,12 +84,10 @@ class ControladorPerfil extends Controller
         return back()->with('success', '¡La dirección ha sido eliminada con éxito!');
     }
 
-    // Obtener detalles de un pedido de forma segura en JSON
     public function detallesPedido($id)
     {
         $idUsuario = Auth::id();
 
-        // Validar propiedad del pedido
         $pedido = DB::table('orders')
             ->where('id', $id)
             ->where('user_id', $idUsuario)
@@ -112,12 +97,16 @@ class ControladorPerfil extends Controller
             return response()->json(['error' => 'Pedido no encontrado o no autorizado'], 403);
         }
 
-        // Obtener líneas del pedido
         $lineas = DB::table('order_line')
             ->join('product', 'order_line.product_id', '=', 'product.id')
             ->where('order_line.order_id', $id)
-            ->select('order_line.*', 'product.name as product_name', 'product.image as product_image')
+            ->select('order_line.*', 'product.name as product_name')
             ->get();
+
+        foreach ($lineas as $linea) {
+            $product = \App\Models\Product::find($linea->product_id);
+            $linea->product_image = $product ? $product->image_url : null;
+        }
 
         return response()->json([
             'order' => $pedido,

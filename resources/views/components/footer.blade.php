@@ -31,15 +31,6 @@
                 <li><i class="fa-regular fa-envelope"></i> {{ \Illuminate\Support\Facades\Cache::get('shop_email', 'contacto@laboticanatural.com') }}</li>
             </ul>
         </div>
-
-        <div class="columnaPie columnaNewsletter">
-            <h3>NEWSLETTER</h3>
-            <p>Suscríbete para recibir consejos sobre bienestar natural y ofertas exclusivas.</p>
-            <form class="formularioNewsletter" action="#">
-                <input type="email" placeholder="Tu email" class="inputNewsletter" required>
-                <button type="submit" class="boton botonPrincipal">SUSCRIBIRME</button>
-            </form>
-        </div>
     </div>
 
     <div class="pieInferior">

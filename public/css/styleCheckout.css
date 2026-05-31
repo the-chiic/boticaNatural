@@ -424,4 +424,75 @@ select.input-field {
     white-space: nowrap;
 }
 
+.checkout-address-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.checkout-address-card {
+    position: relative;
+    display: block;
+    padding: 1.1rem 1.2rem;
+    border: 1.5px solid rgba(30, 58, 46, 0.12);
+    border-radius: 1rem;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.25s var(--curva-premium);
+}
+
+.checkout-address-card:hover,
+.checkout-address-card.selected {
+    border-color: var(--brand-green);
+    box-shadow: 0 12px 24px rgba(30, 58, 46, 0.08);
+}
+
+.checkout-address-card.selected {
+    background: rgba(30, 58, 46, 0.03);
+}
+
+.checkout-address-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.checkout-address-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-family: var(--fuente-sans);
+    font-size: 0.88rem;
+    color: rgba(27, 48, 34, 0.85);
+}
+
+.checkout-address-card-body strong {
+    color: var(--brand-green);
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
+}
+
+.checkout-manual-address-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.25rem;
+    padding: 0.65rem 0;
+    border: none;
+    background: transparent;
+    color: var(--brand-accent, #8B6F4A);
+    font-family: var(--fuente-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.checkout-manual-address-btn:hover {
+    text-decoration: underline;
+}
+
+.manual-address-fields.is-collapsed {
+    display: none !important;
+}
 

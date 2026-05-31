@@ -79,9 +79,19 @@ class AdminController extends Controller
     /**
      * Gestión y listado de productos con paginación.
      */
-    public function productos()
+    public function productos(Request $request)
     {
-        $products = Product::with('categories')->orderBy('id', 'desc')->paginate(10);
+        $query = Product::with('categories')->orderBy('id', 'desc');
+
+        // Filtrar por categoría si se selecciona
+        if ($request->has('category') && !empty($request->category)) {
+            $categoryName = $request->category;
+            $query->whereHas('categories', function ($q) use ($categoryName) {
+                $q->where('name', $categoryName);
+            });
+        }
+
+        $products = $query->paginate(10);
         $categories = Category::getAllOrdered();
 
         return view('admin.products', compact('products', 'categories'));
@@ -99,15 +109,58 @@ class AdminController extends Controller
             'stock' => 'required|integer|min:0',
             'status' => 'required|boolean',
             'category_id' => 'required|exists:category,id',
+            'image_url' => 'nullable|string|max:2048',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'gallery_urls' => 'nullable|array',
+            'gallery_urls.*' => 'nullable|string|max:2048',
+            'gallery_files' => 'nullable|array',
+            'gallery_files.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
+
+        $imageUrl = $request->input('image_url');
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img'), $filename);
+            $imageUrl = 'img/' . $filename;
+        }
+
+        // Procesar galería de imágenes
+        $galleryImages = [];
+
+        // 1. Agregar URLs ingresadas
+        if ($request->has('gallery_urls') && is_array($request->gallery_urls)) {
+            foreach ($request->gallery_urls as $url) {
+                if (!empty($url)) {
+                    $galleryImages[] = $url;
+                }
+            }
+        }
+
+        // 2. Agregar archivos locales subidos
+        if ($request->hasFile('gallery_files')) {
+            foreach ($request->file('gallery_files') as $file) {
+                if ($file->isValid()) {
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('img'), $filename);
+                    $galleryImages[] = 'img/' . $filename;
+                }
+            }
+        }
 
         $product = Product::create([
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
             'stock' => $request->stock,
-            'status' => $request->status,
+            'status' => (int)$request->status,
+            'image_url' => $imageUrl,
+            'gallery_images' => count($galleryImages) > 0 ? $galleryImages : null,
         ]);
+
+        // Limpiar cache de productos
+        Product::clearProductCaches();
 
         // Guardar la categoría en la tabla pivot
         $product->categories()->attach($request->category_id);
@@ -120,28 +173,115 @@ class AdminController extends Controller
      */
     public function actualizarProducto(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:150',
-            'description' => 'nullable|string|max:200',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'status' => 'required|boolean',
-            'category_id' => 'required|exists:category,id',
-        ]);
+        try {
+            \Log::info('actualizarProducto iniciado', ['id' => $id, 'request' => $request->all()]);
 
-        $product = Product::findOrFail($id);
-        $product->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'status' => $request->status,
-        ]);
+            $request->validate([
+                'name' => 'required|string|max:150',
+                'description' => 'nullable|string|max:200',
+                'price' => 'required|numeric|min:0',
+                'stock' => 'required|integer|min:0',
+                'status' => 'required|in:0,1',
+                'category_id' => 'required|exists:category,id',
+                'image_url' => 'nullable|string|max:2048',
+                'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+                'existing_gallery' => 'nullable|array',
+                'gallery_urls' => 'nullable|array',
+                'gallery_urls.*' => 'nullable|string|max:2048',
+                'gallery_files' => 'nullable|array',
+                'gallery_files.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            ]);
 
-        // Sincronizar la categoría en la tabla pivot
-        $product->categories()->sync([$request->category_id]);
+            // Convertir status a entero para asegurar consistencia
+            $request->merge(['status' => (int)$request->status]);
 
-        return back()->with('success', '¡El producto se ha actualizado correctamente!');
+            \Log::info('validación pasada');
+
+            $product = Product::findOrFail($id);
+            $imageUrl = $product->image_url;
+
+            if ($request->hasFile('image_file')) {
+                $file = $request->file('image_file');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('img'), $filename);
+                $imageUrl = 'img/' . $filename;
+            } elseif ($request->filled('image_url')) {
+                $imageUrl = $request->image_url;
+            } elseif ($request->has('image_url') && empty($request->input('image_url'))) {
+                $imageUrl = null;
+            }
+
+            // Procesar imágenes adicionales de galería
+            $galleryImages = [];
+
+            // 1. Conservar imágenes existentes que no fueron eliminadas
+            if ($request->has('existing_gallery') && is_array($request->existing_gallery)) {
+                foreach ($request->existing_gallery as $img) {
+                    if (!empty($img)) {
+                        $parsedUrl = parse_url($img);
+                        $path = $parsedUrl['path'] ?? '';
+                        $relativePath = ltrim($path, '/');
+
+                        if (str_starts_with($relativePath, 'img/')) {
+                            $galleryImages[] = $relativePath;
+                        } elseif (str_starts_with($relativePath, 'storage/')) {
+                            $galleryImages[] = $relativePath;
+                        } else {
+                            $galleryImages[] = $img;
+                        }
+                    }
+                }
+            }
+
+            // 2. Agregar nuevas URLs
+            if ($request->has('gallery_urls') && is_array($request->gallery_urls)) {
+                foreach ($request->gallery_urls as $url) {
+                    if (!empty($url)) {
+                        $galleryImages[] = $url;
+                    }
+                }
+            }
+
+            // 3. Agregar nuevos archivos subidos
+            if ($request->hasFile('gallery_files')) {
+                foreach ($request->file('gallery_files') as $file) {
+                    if ($file->isValid()) {
+                        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $file->move(public_path('img'), $filename);
+                        $galleryImages[] = 'img/' . $filename;
+                    }
+                }
+            }
+
+            \Log::info('antes de actualizar producto', ['product_id' => $product->id, 'status_request' => $request->status, 'status_type' => gettype($request->status)]);
+
+            $product->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'status' => (int)$request->status,
+                'image_url' => $imageUrl,
+                'gallery_images' => count($galleryImages) > 0 ? $galleryImages : null,
+            ]);
+
+            \Log::info('producto actualizado', ['product_id' => $product->id, 'status_after' => $product->status, 'status_after_type' => gettype($product->status)]);
+
+            // Limpiar cache de productos si el status cambió
+            Product::clearProductCaches();
+
+            \Log::info('producto actualizado');
+
+            // Sincronizar la categoría en la tabla pivot
+            $product->categories()->sync([$request->category_id]);
+
+            \Log::info('categoría sincronizada');
+
+            return back()->with('success', '¡El producto se ha actualizado correctamente!');
+        } catch (\Exception $e) {
+            \Log::error('Error en actualizarProducto', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return back()->with('error', 'Error al actualizar el producto: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -196,13 +336,30 @@ class AdminController extends Controller
      */
     public function detallesPedido($id)
     {
-        $lines = DB::table('order_line')
-            ->join('product', 'order_line.product_id', '=', 'product.id')
-            ->where('order_line.order_id', $id)
-            ->select('order_line.*', 'product.name as product_name')
-            ->get();
+        try {
+            \Log::info('detallesPedido iniciado', ['id' => $id]);
 
-        return response()->json($lines);
+            $lines = DB::table('order_line')
+                ->join('product', 'order_line.product_id', '=', 'product.id')
+                ->where('order_line.order_id', $id)
+                ->select(
+                    'order_line.order_id',
+                    'order_line.num_line as num_line',
+                    'order_line.product_id',
+                    'order_line.unit',
+                    'order_line.price as unit_price',
+                    'order_line.total_price',
+                    'product.name as product_name'
+                )
+                ->get();
+
+            \Log::info('detallesPedido resultado', ['count' => count($lines), 'lines' => $lines]);
+
+            return response()->json($lines);
+        } catch (\Exception $e) {
+            \Log::error('Error en detallesPedido', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -380,9 +537,9 @@ class AdminController extends Controller
     }
 
     /**
-     * Guardar las preferencias informativas y operativas de la tienda.
+     * Guardar solo la información de la tienda.
      */
-    public function guardarConfiguracion(Request $request)
+    public function guardarInfoTienda(Request $request)
     {
         $request->validate([
             'shop_name' => 'required|string|max:100',
@@ -398,12 +555,39 @@ class AdminController extends Controller
         Cache::put('shop_phone', $request->shop_phone);
         Cache::put('shop_address', $request->shop_address);
 
-        // Guardamos también los toggles (checkboxes) si se envían
+        return back()->with('success', '¡La información de la tienda ha sido guardada con éxito!');
+    }
+
+    /**
+     * Guardar solo las preferencias y alertas.
+     */
+    public function guardarPreferencias(Request $request)
+    {
+        // Guardamos los toggles (checkboxes)
         Cache::put('maintenance_mode', $request->has('maintenance_mode'));
         Cache::put('notify_new_orders', $request->has('notify_new_orders'));
         Cache::put('stock_alert', $request->has('stock_alert'));
 
-        return back()->with('success', '¡La configuración de la tienda ha sido guardada con éxito!');
+        return back()->with('success', '¡Las preferencias han sido guardadas con éxito!');
+    }
+
+    /**
+     * Obtener las notas del dashboard.
+     */
+    public function obtenerNotas()
+    {
+        $notes = Cache::get('admin_notes', '');
+        return response()->json(['success' => true, 'notes' => $notes]);
+    }
+
+    /**
+     * Guardar las notas del dashboard.
+     */
+    public function guardarNotas(Request $request)
+    {
+        $notes = $request->input('notes', '');
+        Cache::put('admin_notes', $notes);
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -463,13 +647,12 @@ class AdminController extends Controller
         ]);
     }
 
-
     /**
      * Gestión y listado de categorías.
      */
     public function categorias()
     {
-        $categories = Category::withCount('products')->orderBy('name', 'asc')->get();
+        $categories = Category::withCount('products')->orderBy('name', 'asc')->paginate(10);
         return view('admin.categories', compact('categories'));
     }
 
@@ -481,11 +664,23 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:category,name',
             'description' => 'nullable|string|max:255',
+            'img_url' => 'nullable|url|max:2048',
+            'img_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
+
+        $img = $request->input('img_url');
+
+        if ($request->hasFile('img_file')) {
+            $file = $request->file('img_file');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img'), $filename);
+            $img = 'img/' . $filename;
+        }
 
         Category::create([
             'name' => $request->name,
             'description' => $request->description,
+            'img' => $img,
         ]);
 
         return back()->with('success', '¡La categoría se ha creado correctamente!');
@@ -499,12 +694,34 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:100|unique:category,name,' . $id,
             'description' => 'nullable|string|max:255',
+            'img_url' => 'nullable|url|max:2048',
+            'img_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $category = Category::findOrFail($id);
+
+        // Verificar si la categoría tiene productos vinculados
+        if ($category->products_count > 0) {
+            return back()->with('error', 'No se puede editar esta categoría porque tiene productos vinculados. Primero debes desvincular o eliminar los productos de esta categoría.');
+        }
+
+        $img = $category->img;
+
+        if ($request->hasFile('img_file')) {
+            $file = $request->file('img_file');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('img'), $filename);
+            $img = 'img/' . $filename;
+        } elseif ($request->filled('img_url')) {
+            $img = $request->img_url;
+        } elseif ($request->has('img_url') && empty($request->input('img_url'))) {
+            $img = null;
+        }
+
         $category->update([
             'name' => $request->name,
             'description' => $request->description,
+            'img' => $img,
         ]);
 
         return back()->with('success', '¡La categoría se ha actualizado correctamente!');

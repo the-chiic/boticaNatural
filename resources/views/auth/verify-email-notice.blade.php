@@ -49,7 +49,6 @@
 
     </div>
 
-    <!-- Parte derecha -->
     <div class="autenticacionDerecha">
         <img src="https://images.unsplash.com/photo-1506084868230-bb9d95c24759?q=80&w=1400&auto=format&fit=crop" alt="Fondo Naturaleza" class="imagenFondo">
         <div class="capaOscura"></div>

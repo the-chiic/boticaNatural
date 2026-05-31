@@ -151,7 +151,7 @@
                                 <div class="empty-tab-state">
                                     <i class="fas fa-shopping-bag"></i>
                                     <p>Aún no tienes ningún pedido registrado en tu cuenta.</p>
-                                    <a href="/catalogo" class="btn-submit-premium" style="display: inline-block; text-decoration: none;">IR A LA TIENDA</a>
+                                    <a href="{{ url('/catalogo') }}" class="btn-submit-premium" style="display: inline-block; text-decoration: none;">IR A LA TIENDA</a>
                                 </div>
                             @endforelse
                         </div>
@@ -344,7 +344,6 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- GESTIÓN DE PESTAÑAS (TABS) ---
             const tabs = document.querySelectorAll('.profile-nav-link[data-tab]');
             const contents = document.querySelectorAll('.profile-tab-content');
 
@@ -353,11 +352,9 @@
                     e.preventDefault();
                     const target = this.getAttribute('data-tab');
 
-                    // Desactivar todas las pestañas y contenidos
                     tabs.forEach(t => t.classList.remove('active'));
                     contents.forEach(c => c.classList.remove('active'));
 
-                    // Activar la seleccionada
                     this.classList.add('active');
                     const targetEl = document.getElementById('tab-' + target);
                     if (targetEl) {
@@ -366,14 +363,12 @@
                 });
             });
 
-            // --- SINCRONIZAR ESTADÍSTICAS RÁPIDAS (FAVORITOS DE LOCALSTORAGE) ---
             const favs = JSON.parse(localStorage.getItem('favoritos')) || [];
             const favsCountEl = document.getElementById('stats-favoritos-count');
             if (favsCountEl) {
                 favsCountEl.textContent = favs.length;
             }
 
-            // --- GESTIÓN DE NUEVA DIRECCIÓN ---
             const btnNuevaDireccion = document.getElementById('btn-nueva-direccion');
             const formNuevaDireccion = document.getElementById('form-nueva-direccion');
             const btnCancelarDireccion = document.getElementById('btn-cancelar-direccion');
@@ -389,33 +384,29 @@
                 });
             }
 
-            // --- DETALLES DE PEDIDO POR AJAX + MODAL PREMIUM ---
             const modal = document.getElementById('order-detail-modal');
             const modalTitle = document.getElementById('modal-order-title');
             const modalLoader = document.getElementById('modal-loader');
             const modalContent = document.getElementById('modal-content');
             const itemsContainer = document.getElementById('modal-items-container');
-            
+
             const subtotalEl = document.getElementById('modal-summary-subtotal');
             const shippingEl = document.getElementById('modal-summary-shipping');
             const totalEl = document.getElementById('modal-summary-total');
 
             const btnCloseModal = document.getElementById('btn-close-modal');
-            
-            // Abrir modal y cargar datos por AJAX
+
             document.querySelectorAll('.btn-detail-trigger').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const orderId = this.getAttribute('data-order-id');
-                    
-                    // Mostrar modal vacío con Loader
+
                     modalTitle.textContent = `DETALLE DE PEDIDO #BN-${orderId}`;
                     modalLoader.style.display = 'flex';
                     modalContent.style.display = 'none';
                     modal.classList.add('active');
 
-                    // Petición AJAX segura
-                    fetch(`${window.location.origin}/perfil/pedido/${orderId}/detalles`)
+                    fetch(`{{ url('/perfil/pedido') }}/${orderId}/detalles`)
                         .then(response => {
                             if (!response.ok) throw new Error('Error al recuperar detalles');
                             return response.json();
@@ -424,25 +415,23 @@
                             const order = data.order;
                             const lines = data.lines;
 
-                            // Limpiar contenedor de artículos
                             itemsContainer.innerHTML = '';
-                            
+
                             let subtotalCalculado = 0;
 
-                            // Iterar e insertar las líneas
                             lines.forEach(line => {
                                 const price = parseFloat(line.price || line.total_price);
                                 const unitPrice = price / line.unit;
                                 subtotalCalculado += price;
 
                                 const imgUrl = line.product_image 
-                                    ? `${window.location.origin}/storage/${line.product_image}` 
-                                    : `${window.location.origin}/img/imgPrueba.png`;
+                                    ? line.product_image 
+                                    : `{{ asset('img/imgPrueba.png') }}`;
 
                                 itemsContainer.innerHTML += `
                                     <div class="modal-item-row">
                                         <div class="modal-item-img-wrapper">
-                                            <img src="${imgUrl}" alt="${line.product_name}" onerror="this.src='${window.location.origin}/img/imgPrueba.png';">
+                                            <img src="${imgUrl}" alt="${line.product_name}" onerror="this.src='{{ asset('img/imgPrueba.png') }}';">
                                         </div>
                                         <div class="modal-item-details">
                                             <h5 class="modal-item-name">${line.product_name}</h5>
@@ -453,7 +442,6 @@
                                 `;
                             });
 
-                            // Actualizar Resumen de Precios
                             const orderTotal = parseFloat(order.total_price);
                             const shippingCost = orderTotal - subtotalCalculado;
 
@@ -461,7 +449,6 @@
                             shippingEl.textContent = shippingCost > 0 ? `${shippingCost.toFixed(2)}€` : 'Gratis';
                             totalEl.textContent = `${orderTotal.toFixed(2)}€`;
 
-                            // Ocultar Loader y Mostrar Contenido
                             modalLoader.style.display = 'none';
                             modalContent.style.display = 'block';
                         })
@@ -474,7 +461,6 @@
                 });
             });
 
-            // Cerrar Modal
             function cerrarModal() {
                 modal.classList.remove('active');
             }
@@ -483,14 +469,12 @@
                 btnCloseModal.addEventListener('click', cerrarModal);
             }
 
-            // Cerrar modal al hacer clic en el overlay exterior
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     cerrarModal();
                 }
             });
 
-            // Cerrar modal con la tecla Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && modal.classList.contains('active')) {
                     cerrarModal();

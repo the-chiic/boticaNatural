@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderLine;
 use App\Models\Payment;
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -20,13 +21,22 @@ class CartController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
-        
+
+        // Eliminar productos ocultos del carrito
+        foreach ($cart as $productId => $item) {
+            $product = Product::find($productId);
+            if (!$product || $product->status != 1) {
+                unset($cart[$productId]);
+            }
+        }
+        session()->put('cart', $cart);
+
         // Calcular desgloses
         $subtotal = 0;
         foreach ($cart as $item) {
             $subtotal += $item['price'] * $item['qty'];
         }
-        
+
         $discount = 0;
         if (session()->has('coupon')) {
             $promoDiscount = session()->get('coupon.discount');
@@ -45,10 +55,27 @@ class CartController extends Controller
     public function add(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+
+        // Validar que el producto esté activo
+        if ($product->status != 1) {
+            return redirect()
+                ->back()
+                ->with('error', 'Este producto no está disponible actualmente.');
+        }
+
         $qty = (int) $request->input('qty', 1);
         if ($qty < 1) $qty = 1;
 
+        // Validar que no se exceda el stock disponible
         $cart = session()->get('cart', []);
+        $currentQty = isset($cart[$id]) ? $cart[$id]['qty'] : 0;
+        $totalQty = $currentQty + $qty;
+
+        if ($totalQty > $product->stock) {
+            return redirect()
+                ->back()
+                ->with('error', 'La cantidad seleccionada es superior al stock restante. Solo quedan ' . $product->stock . ' unidades disponibles.');
+        }
 
         if (isset($cart[$id])) {
             $cart[$id]['qty'] += $qty;
@@ -79,6 +106,16 @@ class CartController extends Controller
 
         if (isset($cart[$id])) {
             if ($qty > 0) {
+                // Validar que no se exceda el stock disponible
+                $product = Product::findOrFail($id);
+                if ($qty > $product->stock) {
+                    if ($request->expectsJson()) {
+                        return response()->json([
+                            'error' => 'La cantidad seleccionada es superior al stock restante. Solo quedan ' . $product->stock . ' unidades disponibles.'
+                        ], 400);
+                    }
+                    return redirect()->route('cart.index')->with('error', 'La cantidad seleccionada es superior al stock restante. Solo quedan ' . $product->stock . ' unidades disponibles.');
+                }
                 $cart[$id]['qty'] = $qty;
             } else {
                 unset($cart[$id]);
@@ -86,7 +123,11 @@ class CartController extends Controller
             session()->put('cart', $cart);
         }
 
-        return redirect()->route('cart.index')->with('success', '¡Cantidad de producto actualizada!');
+        if ($request->expectsJson()) {
+            return response()->json($this->buildCartResponse($cart, (int) $id));
+        }
+
+        return redirect()->route('cart.index');
     }
 
     /**
@@ -129,15 +170,12 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'name_destination' => 'required|string|max:100',
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:100',
-            'post_code' => 'required|string|max:20',
-            'country' => 'required|string|max:100',
-            'phone' => 'nullable|string|max:30',
+            'address_id' => 'nullable|integer|exists:address,id',
             'shipping_method' => 'required|string|in:standard,express,store_pickup',
             'payment_method' => 'required|string|in:credit_card,store_payment',
         ]);
+
+        $shipping = $this->resolveShippingDetails($request);
 
         $cart = session()->get('cart', []);
         if (empty($cart)) {
@@ -179,12 +217,12 @@ class CartController extends Controller
                 'total_price' => $total,
                 'order_date' => now(),
                 'status' => 0, // 0 = Pendiente de pago
-                'shipping_name' => $request->name_destination,
-                'shipping_address' => $request->address,
-                'shipping_city' => $request->city,
-                'shipping_post_code' => $request->post_code,
-                'shipping_country' => $request->country,
-                'shipping_phone' => $request->phone,
+                'shipping_name' => $shipping['name_destination'],
+                'shipping_address' => $shipping['address'],
+                'shipping_city' => $shipping['city'],
+                'shipping_post_code' => $shipping['post_code'],
+                'shipping_country' => $shipping['country'],
+                'shipping_phone' => $shipping['phone'],
                 'shipping_method' => $request->shipping_method,
                 'shipping_cost' => $shippingCost,
             ]);
@@ -380,5 +418,104 @@ class CartController extends Controller
     {
         session()->forget('coupon');
         return redirect()->route('cart.index')->with('success', 'Cupón de descuento eliminado.');
+    }
+
+    /**
+     * Obtiene los datos de envío desde una dirección guardada o del formulario manual.
+     */
+    private function resolveShippingDetails(Request $request): array
+    {
+        // Si es recogida en tienda, requerir solo nombre y teléfono
+        if ($request->shipping_method === 'store_pickup') {
+            $request->validate([
+                'name_destination' => 'required|string|max:100',
+                'phone' => 'required|string|max:30',
+            ]);
+
+            return [
+                'name_destination' => $request->name_destination,
+                'address' => 'Recogida en tienda',
+                'city' => '',
+                'post_code' => '',
+                'country' => '',
+                'phone' => $request->phone,
+            ];
+        }
+
+        if ($request->filled('address_id')) {
+            $address = Address::where('id', $request->address_id)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+
+            return [
+                'name_destination' => $address->name_destination ?? Auth::user()->name,
+                'address' => $address->address,
+                'city' => $address->city,
+                'post_code' => $address->post_code ?? '',
+                'country' => $address->country,
+                'phone' => $address->phone ?? Auth::user()->phone,
+            ];
+        }
+
+        $request->validate([
+            'name_destination' => 'required|string|max:100',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
+            'post_code' => 'required|string|max:20',
+            'country' => 'required|string|max:100',
+            'phone' => 'nullable|string|max:30',
+        ]);
+
+        return [
+            'name_destination' => $request->name_destination,
+            'address' => $request->address,
+            'city' => $request->city,
+            'post_code' => $request->post_code,
+            'country' => $request->country,
+            'phone' => $request->phone,
+        ];
+    }
+
+    private function calculateCartTotals(array $cart): array
+    {
+        $subtotal = 0;
+        foreach ($cart as $item) {
+            $subtotal += $item['price'] * $item['qty'];
+        }
+
+        $discount = 0;
+        if (session()->has('coupon')) {
+            $discount = round($subtotal * (session('coupon.discount') / 100), 2);
+        }
+
+        $iva = round(($subtotal - $discount) * 0.21, 2);
+        $total = max(0, $subtotal - $discount);
+
+        return compact('subtotal', 'discount', 'iva', 'total');
+    }
+
+    private function buildCartResponse(array $cart, int $productId): array
+    {
+        $totals = $this->calculateCartTotals($cart);
+        $cartCount = array_sum(array_column($cart, 'qty'));
+        $item = $cart[$productId] ?? null;
+
+        return [
+            'success' => true,
+            'product_id' => $productId,
+            'removed' => $item === null,
+            'qty' => $item['qty'] ?? 0,
+            'line_total' => $item ? round($item['price'] * $item['qty'], 2) : 0,
+            'cart_count' => $cartCount,
+            'is_empty' => empty($cart),
+            'formatted' => [
+                'subtotal' => number_format($totals['subtotal'], 2),
+                'discount' => number_format($totals['discount'], 2),
+                'iva' => number_format($totals['iva'], 2),
+                'total' => number_format($totals['total'], 2),
+                'line_total' => $item ? number_format($item['price'] * $item['qty'], 2) : '0.00',
+            ],
+            ...$totals,
+        ];
     }
 }

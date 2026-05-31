@@ -50,7 +50,6 @@
 
     </div>
 
-    <!-- Parte derecha -->
     <div class="autenticacionDerecha">
         <img src="https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?q=80&w=1400&auto=format&fit=crop" alt="Fondo Hojas" class="imagenFondo">
         <div class="capaOscura"></div>
