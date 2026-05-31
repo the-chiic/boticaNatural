@@ -76,10 +76,14 @@ class CatalogController extends Controller
      */
     public function show($id)
     {
-        $product = $this->getProductById($id);
-        $relatedProducts = $this->getRelatedProducts($id);
-        
-        return view('catalog.show', compact('product', 'relatedProducts'));
+        try {
+            $product = $this->getProductById($id);
+            $relatedProducts = $this->getRelatedProducts($id);
+
+            return view('catalog.show', compact('product', 'relatedProducts'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            abort(404, 'Producto no encontrado o no disponible');
+        }
     }
 
     /**

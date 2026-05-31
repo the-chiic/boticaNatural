@@ -28,10 +28,28 @@
                         <!-- Shipping Info -->
                         <div class="checkout-form-section" style="margin-bottom: 2rem;">
                             <h2 class="checkout-title">
-                                <i class="fa-solid fa-map-location-dot" style="opacity: 0.8;"></i> 1. Dirección de Envío
+                                <i class="fa-solid fa-map-location-dot" style="opacity: 0.8;"></i> 1. Información de Entrega
                             </h2>
-                            
-                            <div class="form-group-grid">
+
+                            <!-- Formulario para Recogida en Tienda -->
+                            <div id="storePickupForm" class="form-group-grid" style="display: none;">
+                                <div style="grid-column: span 2; margin-bottom: 1rem;">
+                                    <p style="color: var(--brand-accent); font-size: 0.9rem; margin-bottom: 1rem;">
+                                        <i class="fa-solid fa-store"></i> Recogerás tu pedido en nuestra tienda. Solo necesitamos tu nombre y teléfono para contactarte.
+                                    </p>
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label for="pickup_name">Nombre completo <span style="color: #fa5252;">*</span></label>
+                                    <input type="text" id="pickup_name" name="pickup_name" class="input-field" placeholder="Tu nombre completo" value="{{ old('name_destination', $user->name) }}">
+                                </div>
+                                <div style="grid-column: span 2;">
+                                    <label for="pickup_phone">Teléfono de contacto <span style="color: #fa5252;">*</span></label>
+                                    <input type="text" id="pickup_phone" name="pickup_phone" class="input-field" placeholder="Ej. +34 600123456" value="{{ old('phone', $user->phone) }}">
+                                </div>
+                            </div>
+
+                            <!-- Formulario para Envío a Domicilio -->
+                            <div id="shippingForm" class="form-group-grid">
                                 @if($direcciones->isNotEmpty())
                                 <div style="grid-column: span 2; margin-bottom: 0.5rem;">
                                     <label style="margin-bottom: 0.75rem;">Elige una dirección guardada</label>
@@ -68,27 +86,27 @@
                                     <div class="form-group-grid" style="margin-top: 0;">
                                 <div style="grid-column: span 2;">
                                     <label for="name_destination">Receptor (Nombre y Apellidos)</label>
-                                    <input type="text" id="name_destination" name="name_destination" class="input-field" placeholder="Nombre de quien recibe el paquete" value="{{ old('name_destination', $user->name) }}" required>
+                                    <input type="text" id="name_destination" name="name_destination" class="input-field" placeholder="Nombre de quien recibe el paquete" value="{{ old('name_destination', $user->name) }}">
                                 </div>
-                                
+
                                 <div style="grid-column: span 2;">
                                     <label for="address">Dirección de Entrega</label>
-                                    <input type="text" id="address" name="address" class="input-field" placeholder="Calle, número, piso, puerta, urbanización..." value="{{ old('address') }}" required>
+                                    <input type="text" id="address" name="address" class="input-field" placeholder="Calle, número, piso, puerta, urbanización..." value="{{ old('address') }}">
                                 </div>
-                                
+
                                 <div style="grid-column: span 1;">
                                     <label for="city">Ciudad</label>
-                                    <input type="text" id="city" name="city" class="input-field" placeholder="Ej. Madrid" value="{{ old('city') }}" required>
+                                    <input type="text" id="city" name="city" class="input-field" placeholder="Ej. Madrid" value="{{ old('city') }}">
                                 </div>
-                                
+
                                 <div style="grid-column: span 1;">
                                     <label for="post_code">Código Postal</label>
-                                    <input type="text" id="post_code" name="post_code" class="input-field" placeholder="Ej. 28001" value="{{ old('post_code') }}" required>
+                                    <input type="text" id="post_code" name="post_code" class="input-field" placeholder="Ej. 28001" value="{{ old('post_code') }}">
                                 </div>
 
                                 <div style="grid-column: span 1;">
                                     <label for="country">País</label>
-                                    <input type="text" id="country" name="country" class="input-field" placeholder="Ej. España" value="{{ old('country', 'España') }}" required>
+                                    <input type="text" id="country" name="country" class="input-field" placeholder="Ej. España" value="{{ old('country', 'España') }}">
                                 </div>
 
                                 <div style="grid-column: span 1;">
@@ -501,31 +519,46 @@
     }
 
     function getShippingPayload() {
+        const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
         const payload = {
-            shipping_method: document.querySelector('input[name="shipping_method"]:checked').value,
+            shipping_method: shippingMethod,
         };
 
-        if (selectedAddressId) {
-            payload.address_id = selectedAddressId;
-            fillAddressFromCard(savedAddressGrid.querySelector(`[data-id="${selectedAddressId}"]`));
+        if (shippingMethod === 'store_pickup') {
+            payload.name_destination = document.getElementById('pickup_name').value;
+            payload.phone = document.getElementById('pickup_phone').value;
         } else {
-            payload.name_destination = document.getElementById('name_destination').value;
-            payload.address = document.getElementById('address').value;
-            payload.city = document.getElementById('city').value;
-            payload.post_code = document.getElementById('post_code').value;
-            payload.country = document.getElementById('country').value;
-            payload.phone = document.getElementById('phone').value;
+            if (selectedAddressId) {
+                payload.address_id = selectedAddressId;
+                fillAddressFromCard(savedAddressGrid.querySelector(`[data-id="${selectedAddressId}"]`));
+            } else {
+                payload.name_destination = document.getElementById('name_destination').value;
+                payload.address = document.getElementById('address').value;
+                payload.city = document.getElementById('city').value;
+                payload.post_code = document.getElementById('post_code').value;
+                payload.country = document.getElementById('country').value;
+                payload.phone = document.getElementById('phone').value;
+            }
         }
 
         return payload;
     }
 
     function validateShippingPayload(payload) {
+        const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
+
+        // Si es recogida en tienda, validar nombre y teléfono
+        if (shippingMethod === 'store_pickup') {
+            return payload.name_destination && payload.phone;
+        }
+
+        // Si es envío a domicilio y tiene dirección guardada, validar
         if (payload.address_id) {
             return true;
         }
 
-        return payload.address && payload.city && payload.post_code;
+        // Si es envío a domicilio, validar campos de dirección
+        return payload.name_destination && payload.address && payload.city && payload.post_code && payload.country;
     }
 
     // 3. Selección y Recálculo de Envío Dinámico
@@ -536,10 +569,37 @@
             const card = input.closest('.payment-method-card');
             if (card) card.classList.remove('selected');
         });
-        
+
         const selectedCard = radio.closest('.payment-method-card');
         if (selectedCard) selectedCard.classList.add('selected');
-        
+
+        // Mostrar/ocultar formularios según método de envío
+        const storePickupForm = document.getElementById('storePickupForm');
+        const shippingForm = document.getElementById('shippingForm');
+        const isStorePickup = radio.value === 'store_pickup';
+
+        if (isStorePickup) {
+            storePickupForm.style.display = 'block';
+            shippingForm.style.display = 'none';
+
+            // Seleccionar automáticamente pago en tienda
+            const storePaymentRadio = document.querySelector('input[name="payment_method"][value="store_payment"]');
+            if (storePaymentRadio) {
+                storePaymentRadio.checked = true;
+                togglePaymentMethod(storePaymentRadio);
+            }
+        } else {
+            storePickupForm.style.display = 'none';
+            shippingForm.style.display = 'block';
+
+            // Seleccionar automáticamente tarjeta bancaria
+            const creditCardRadio = document.querySelector('input[name="payment_method"][value="credit_card"]');
+            if (creditCardRadio) {
+                creditCardRadio.checked = true;
+                togglePaymentMethod(creditCardRadio);
+            }
+        }
+
         recalculateTotals();
     }
 
@@ -612,7 +672,12 @@
         const shippingPayload = getShippingPayload();
 
         if (!validateShippingPayload(shippingPayload)) {
-            document.getElementById('card-errors').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Debes elegir o completar una dirección de envío.';
+            const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
+            if (shippingMethod === 'store_pickup') {
+                document.getElementById('card-errors').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Para recoger en tienda no es necesario completar la dirección de envío.';
+            } else {
+                document.getElementById('card-errors').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Debes elegir o completar una dirección de envío para envío a domicilio.';
+            }
             return;
         }
         
@@ -715,9 +780,17 @@
             
             // Reactivar el botón para reintentos
             submitBtn.disabled = false;
-            submitBtn.innerHTML = isStorePayment 
+            submitBtn.innerHTML = isStorePayment
                 ? '<i class="fa-solid fa-check-circle"></i> Confirmar Pedido'
                 : '<i class="fa-solid fa-lock"></i> Confirmar y Pagar';
+        }
+    });
+
+    // Inicializar estado de la sección de dirección según el método de envío seleccionado
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectedShippingMethod = document.querySelector('input[name="shipping_method"]:checked');
+        if (selectedShippingMethod) {
+            toggleShippingMethod(selectedShippingMethod);
         }
     });
 </script>

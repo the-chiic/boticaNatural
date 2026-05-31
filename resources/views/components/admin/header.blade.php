@@ -13,11 +13,6 @@
     </div>
     
     <div class="actions">
-        <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" placeholder="Buscar...">
-        </div>
-        
         <div class="profile">
             <div class="user-details">
                 <p class="name">{{ $admin->name ?? 'Admin' }}</p>

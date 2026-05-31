@@ -189,13 +189,15 @@
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
+                <div id="formErrors" style="display: none; background-color: rgba(217, 48, 37, 0.1); color: #d93025; padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #d93025; font-size: 13px;"></div>
+
                 <form id="categoryForm" action="{{ route('admin.categorias.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" id="category_id" name="id">
-                    
+
                     <div class="form-group">
                         <label for="name">Nombre de la Categoría</label>
-                        <input type="text" id="name" name="name" required placeholder="Ej. Aromaterapia">
+                        <input type="text" id="name" name="name" placeholder="Ej. Aromaterapia">
                     </div>
                     
                     <div class="form-group">
@@ -235,6 +237,27 @@
         const form = document.getElementById('categoryForm');
         const modalTitle = document.getElementById('modalTitle');
         const storeUrl = "{{ route('admin.categorias.store') }}";
+
+        // Validar formulario antes de enviar
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const emptyFields = [];
+            const name = document.getElementById('name').value.trim();
+
+            if (!name) emptyFields.push('Nombre de la Categoría');
+
+            const errorContainer = document.getElementById('formErrors');
+            if (emptyFields.length > 0) {
+                const message = 'Por favor, rellena los siguientes campos: ' + emptyFields.join(', ');
+                errorContainer.textContent = message;
+                errorContainer.style.display = 'block';
+                return;
+            }
+
+            errorContainer.style.display = 'none';
+            form.submit();
+        });
 
         function openAddModal() {
             modalTitle.innerText = "Nueva Categoría";

@@ -21,13 +21,22 @@ class CartController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
-        
+
+        // Eliminar productos ocultos del carrito
+        foreach ($cart as $productId => $item) {
+            $product = Product::find($productId);
+            if (!$product || $product->status != 1) {
+                unset($cart[$productId]);
+            }
+        }
+        session()->put('cart', $cart);
+
         // Calcular desgloses
         $subtotal = 0;
         foreach ($cart as $item) {
             $subtotal += $item['price'] * $item['qty'];
         }
-        
+
         $discount = 0;
         if (session()->has('coupon')) {
             $promoDiscount = session()->get('coupon.discount');
@@ -46,10 +55,27 @@ class CartController extends Controller
     public function add(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+
+        // Validar que el producto esté activo
+        if ($product->status != 1) {
+            return redirect()
+                ->back()
+                ->with('error', 'Este producto no está disponible actualmente.');
+        }
+
         $qty = (int) $request->input('qty', 1);
         if ($qty < 1) $qty = 1;
 
+        // Validar que no se exceda el stock disponible
         $cart = session()->get('cart', []);
+        $currentQty = isset($cart[$id]) ? $cart[$id]['qty'] : 0;
+        $totalQty = $currentQty + $qty;
+
+        if ($totalQty > $product->stock) {
+            return redirect()
+                ->back()
+                ->with('error', 'La cantidad seleccionada es superior al stock restante. Solo quedan ' . $product->stock . ' unidades disponibles.');
+        }
 
         if (isset($cart[$id])) {
             $cart[$id]['qty'] += $qty;
@@ -80,6 +106,16 @@ class CartController extends Controller
 
         if (isset($cart[$id])) {
             if ($qty > 0) {
+                // Validar que no se exceda el stock disponible
+                $product = Product::findOrFail($id);
+                if ($qty > $product->stock) {
+                    if ($request->expectsJson()) {
+                        return response()->json([
+                            'error' => 'La cantidad seleccionada es superior al stock restante. Solo quedan ' . $product->stock . ' unidades disponibles.'
+                        ], 400);
+                    }
+                    return redirect()->route('cart.index')->with('error', 'La cantidad seleccionada es superior al stock restante. Solo quedan ' . $product->stock . ' unidades disponibles.');
+                }
                 $cart[$id]['qty'] = $qty;
             } else {
                 unset($cart[$id]);
@@ -389,6 +425,23 @@ class CartController extends Controller
      */
     private function resolveShippingDetails(Request $request): array
     {
+        // Si es recogida en tienda, requerir solo nombre y teléfono
+        if ($request->shipping_method === 'store_pickup') {
+            $request->validate([
+                'name_destination' => 'required|string|max:100',
+                'phone' => 'required|string|max:30',
+            ]);
+
+            return [
+                'name_destination' => $request->name_destination,
+                'address' => 'Recogida en tienda',
+                'city' => '',
+                'post_code' => '',
+                'country' => '',
+                'phone' => $request->phone,
+            ];
+        }
+
         if ($request->filled('address_id')) {
             $address = Address::where('id', $request->address_id)
                 ->where('user_id', Auth::id())

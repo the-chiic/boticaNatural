@@ -109,10 +109,10 @@ class AdminController extends Controller
             'stock' => 'required|integer|min:0',
             'status' => 'required|boolean',
             'category_id' => 'required|exists:category,id',
-            'image_url' => 'nullable|url|max:2048',
+            'image_url' => 'nullable|string|max:2048',
             'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'gallery_urls' => 'nullable|array',
-            'gallery_urls.*' => 'nullable|url|max:2048',
+            'gallery_urls.*' => 'nullable|string|max:2048',
             'gallery_files' => 'nullable|array',
             'gallery_files.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
@@ -154,10 +154,13 @@ class AdminController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'stock' => $request->stock,
-            'status' => $request->status,
+            'status' => (int)$request->status,
             'image_url' => $imageUrl,
             'gallery_images' => count($galleryImages) > 0 ? $galleryImages : null,
         ]);
+
+        // Limpiar cache de productos
+        Product::clearProductCaches();
 
         // Guardar la categoría en la tabla pivot
         $product->categories()->attach($request->category_id);
@@ -180,14 +183,17 @@ class AdminController extends Controller
                 'stock' => 'required|integer|min:0',
                 'status' => 'required|in:0,1',
                 'category_id' => 'required|exists:category,id',
-                'image_url' => 'nullable|url|max:2048',
+                'image_url' => 'nullable|string|max:2048',
                 'image_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
                 'existing_gallery' => 'nullable|array',
                 'gallery_urls' => 'nullable|array',
-                'gallery_urls.*' => 'nullable|url|max:2048',
+                'gallery_urls.*' => 'nullable|string|max:2048',
                 'gallery_files' => 'nullable|array',
                 'gallery_files.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
+
+            // Convertir status a entero para asegurar consistencia
+            $request->merge(['status' => (int)$request->status]);
 
             \Log::info('validación pasada');
 
@@ -247,17 +253,22 @@ class AdminController extends Controller
                 }
             }
 
-            \Log::info('antes de actualizar producto', ['product_id' => $product->id]);
+            \Log::info('antes de actualizar producto', ['product_id' => $product->id, 'status_request' => $request->status, 'status_type' => gettype($request->status)]);
 
             $product->update([
                 'name' => $request->name,
                 'description' => $request->description,
                 'price' => $request->price,
                 'stock' => $request->stock,
-                'status' => $request->status == '1' ? 1 : 0,
+                'status' => (int)$request->status,
                 'image_url' => $imageUrl,
                 'gallery_images' => count($galleryImages) > 0 ? $galleryImages : null,
             ]);
+
+            \Log::info('producto actualizado', ['product_id' => $product->id, 'status_after' => $product->status, 'status_after_type' => gettype($product->status)]);
+
+            // Limpiar cache de productos si el status cambió
+            Product::clearProductCaches();
 
             \Log::info('producto actualizado');
 

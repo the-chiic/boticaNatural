@@ -145,24 +145,26 @@
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
+                <div id="formErrors" style="display: none; background-color: rgba(217, 48, 37, 0.1); color: #d93025; padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #d93025; font-size: 13px;"></div>
+
                 <form id="promotionForm" action="{{ route('admin.promociones.store') }}" method="POST">
                     @csrf
                     <input type="hidden" id="promotion_id" name="id">
-                    
+
                     <div class="form-group">
                         <label for="name">Nombre de la Promoción / Campaña</label>
-                        <input type="text" id="name" name="name" required placeholder="Ej. Descuento de Primavera">
+                        <input type="text" id="name" name="name" placeholder="Ej. Descuento de Primavera">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="code">Código del Cupón</label>
-                            <input type="text" id="code" name="code" required placeholder="Ej. PRIMAVERA20" style="text-transform: uppercase;">
+                            <input type="text" id="code" name="code" placeholder="Ej. PRIMAVERA20" style="text-transform: uppercase;">
                             <small style="color: #666; font-size: 11px;">El código se convertirá automáticamente a mayúsculas.</small>
                         </div>
                         <div class="form-group">
                             <label for="discount">Porcentaje de Descuento (%)</label>
-                            <input type="number" id="discount" name="discount" step="0.01" min="0" max="100" required placeholder="Ej. 15.00">
+                            <input type="number" id="discount" name="discount" step="0.01" min="0" max="100" placeholder="Ej. 15.00">
                         </div>
                     </div>
                     
@@ -180,14 +182,14 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="is_active">Estado Inicial</label>
-                            <select id="is_active" name="is_active" required>
+                            <select id="is_active" name="is_active">
                                 <option value="1" selected>Activo (Habilitado para compras)</option>
                                 <option value="0">Inactivo (Deshabilitado)</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="show_on_web">Mostrar en Web de Clientes</label>
-                            <select id="show_on_web" name="show_on_web" required>
+                            <select id="show_on_web" name="show_on_web">
                                 <option value="1" selected>Visible (Mostrar banner)</option>
                                 <option value="0">Oculto (Ocultar banner)</option>
                             </select>
@@ -209,6 +211,35 @@
         const form = document.getElementById('promotionForm');
         const modalTitle = document.getElementById('modalTitle');
         const storeUrl = "{{ route('admin.promociones.store') }}";
+
+        // Validar formulario antes de enviar
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const emptyFields = [];
+            const name = document.getElementById('name').value.trim();
+            const code = document.getElementById('code').value.trim();
+            const discount = document.getElementById('discount').value.trim();
+            const isActive = document.getElementById('is_active').value.trim();
+            const showOnWeb = document.getElementById('show_on_web').value.trim();
+
+            if (!name) emptyFields.push('Nombre de la Promoción');
+            if (!code) emptyFields.push('Código del Cupón');
+            if (!discount) emptyFields.push('Porcentaje de Descuento');
+            if (!isActive) emptyFields.push('Estado');
+            if (!showOnWeb) emptyFields.push('Mostrar en Web');
+
+            const errorContainer = document.getElementById('formErrors');
+            if (emptyFields.length > 0) {
+                const message = 'Por favor, rellena los siguientes campos: ' + emptyFields.join(', ');
+                errorContainer.textContent = message;
+                errorContainer.style.display = 'block';
+                return;
+            }
+
+            errorContainer.style.display = 'none';
+            form.submit();
+        });
 
         function openAddModal() {
             modalTitle.innerText = "Nuevo Cupón de Descuento";

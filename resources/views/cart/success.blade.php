@@ -244,7 +244,12 @@
                         </div>
                         <div>
                             <strong>Método de Pago</strong>
-                            @if($order->payment_method === 'store')
+                            @if($order->shipping_method === 'store_pickup' && $order->payment_method === 'store_payment')
+                                <span style="display:inline-flex;align-items:center;gap:0.3rem;">
+                                    <i class="fa-solid fa-store" style="color:var(--brand-accent);font-size:0.85rem;"></i>
+                                    Pago en Tienda
+                                </span>
+                            @elseif($order->payment_method === 'store_payment')
                                 <span style="display:inline-flex;align-items:center;gap:0.3rem;">
                                     <i class="fa-solid fa-store" style="color:var(--brand-accent);font-size:0.85rem;"></i>
                                     Pago en Tienda
@@ -263,7 +268,7 @@
                                     <i class="fa-solid fa-bolt" style="color:#f59e0b;font-size:0.85rem;"></i>
                                     Exprés 24h
                                 </span>
-                            @elseif($order->shipping_method === 'store')
+                            @elseif($order->shipping_method === 'store_pickup')
                                 <span style="display:inline-flex;align-items:center;gap:0.3rem;">
                                     <i class="fa-solid fa-shop" style="color:var(--brand-accent);font-size:0.85rem;"></i>
                                     Recogida en Tienda
@@ -277,11 +282,18 @@
                         </div>
                         <div style="grid-column: span 2;">
                             <strong>Dirección de Envío</strong>
-                            {{ $order->shipping_name }}<br>
-                            {{ $order->shipping_address }}<br>
-                            {{ $order->shipping_post_code }} - {{ $order->shipping_city }} ({{ $order->shipping_country }})<br>
-                            @if($order->shipping_phone)
-                                <span style="opacity: 0.8; font-size: 0.8rem; margin-top: 0.25rem; display: block;"><i class="fa-solid fa-phone" style="font-size: 0.75rem;"></i> {{ $order->shipping_phone }}</span>
+                            @if($order->shipping_method === 'store_pickup')
+                                Recogida en tienda<br>
+                                @if($order->shipping_phone)
+                                    <span style="opacity: 0.8; font-size: 0.8rem; margin-top: 0.25rem; display: block;"><i class="fa-solid fa-phone" style="font-size: 0.75rem;"></i> {{ $order->shipping_phone }}</span>
+                                @endif
+                            @else
+                                {{ $order->shipping_name }}<br>
+                                {{ $order->shipping_address }}<br>
+                                {{ $order->shipping_post_code }} {{ $order->shipping_city }} ({{ $order->shipping_country }})<br>
+                                @if($order->shipping_phone)
+                                    <span style="opacity: 0.8; font-size: 0.8rem; margin-top: 0.25rem; display: block;"><i class="fa-solid fa-phone" style="font-size: 0.75rem;"></i> {{ $order->shipping_phone }}</span>
+                                @endif
                             @endif
                         </div>
                     </div>

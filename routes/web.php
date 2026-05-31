@@ -97,7 +97,7 @@ Route::prefix('admin')->middleware(['auth.admin'])->group(function () {
     // Productos CRUD
     Route::get('/productos', [AdminController::class, 'productos'])->name('admin.productos');
     Route::post('/productos', [AdminController::class, 'guardarProducto'])->name('admin.productos.store');
-    Route::post('/productos/{id}', [AdminController::class, 'actualizarProducto'])->name('admin.productos.update');
+    Route::put('/productos/{id}', [AdminController::class, 'actualizarProducto'])->name('admin.productos.update');
     Route::post('/productos/{id}/eliminar', [AdminController::class, 'eliminarProducto'])->name('admin.productos.delete');
     
     // Pedidos Management

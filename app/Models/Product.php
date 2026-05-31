@@ -56,7 +56,7 @@ class Product extends Model
      */
     public static function getFilteredProducts($categories = null, $search = null, $minPrice = null, $maxPrice = null, $sort = null)
     {
-        $query = self::with('categories')->where('status', 1);
+        $query = self::with('categories')->where('status', '=', 1)->where('stock', '>', 0);
 
         // Filtrar por categorías
         if ($categories && is_array($categories) && count($categories) > 0) {
@@ -106,7 +106,8 @@ class Product extends Model
     {
         return \Cache::remember('featured_products_' . $limit, 600, function() use ($limit) {
             return self::with('categories')
-                ->where('status', 1)
+                ->where('status', '=', 1)
+                ->where('stock', '>', 0)
                 ->inRandomOrder()
                 ->take($limit)
                 ->get();
@@ -119,7 +120,8 @@ class Product extends Model
     public static function getRelated($productId, $limit = 4)
     {
         return self::with('categories')
-            ->where('status', 1)
+            ->where('status', '=', 1)
+            ->where('stock', '>', 0)
             ->where('id', '!=', $productId)
             ->inRandomOrder()
             ->take($limit)
@@ -131,7 +133,7 @@ class Product extends Model
      */
     public static function getActiveById($id)
     {
-        return self::with('categories')->where('status', 1)->findOrFail($id);
+        return self::with('categories')->where('status', '=', 1)->where('stock', '>', 0)->findOrFail($id);
     }
 
     /**
@@ -141,7 +143,8 @@ class Product extends Model
     {
         return \Cache::remember('latest_products_' . $limit, 600, function() use ($limit) {
             return self::with('categories')
-                ->where('status', 1)
+                ->where('status', '=', 1)
+                ->where('stock', '>', 0)
                 ->orderBy('id', 'desc')
                 ->take($limit)
                 ->get();

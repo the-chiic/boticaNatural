@@ -209,13 +209,15 @@
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
+                <div id="formErrors" style="display: none; background-color: rgba(217, 48, 37, 0.1); color: #d93025; padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #d93025; font-size: 13px;"></div>
+
                 <form id="productForm" action="{{ route('admin.productos.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" id="product_id" name="id">
-                    
+
                     <div class="form-group">
                         <label for="name">Nombre del Producto</label>
-                        <input type="text" id="name" name="name" required placeholder="Ej. Crema Facial de Rosa Mosqueta">
+                        <input type="text" id="name" name="name" placeholder="Ej. Crema Facial de Rosa Mosqueta">
                     </div>
                     
                     <div class="form-group">
@@ -226,18 +228,18 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="price">Precio (€)</label>
-                            <input type="number" id="price" name="price" step="0.01" min="0" required placeholder="0.00">
+                            <input type="number" id="price" name="price" step="0.01" min="0" placeholder="0.00">
                         </div>
                         <div class="form-group">
                             <label for="stock">Stock Disponible</label>
-                            <input type="number" id="stock" name="stock" min="0" required placeholder="0">
+                            <input type="number" id="stock" name="stock" min="0" placeholder="0">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label for="category_id">Categoría Principal</label>
-                            <select id="category_id" name="category_id" required>
+                            <select id="category_id" name="category_id">
                                 <option value="" disabled selected>Selecciona una categoría</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -246,8 +248,8 @@
                         </div>
                         <div class="form-group">
                             <label for="status">Estado del Catálogo</label>
-                            <select id="status" name="status" required>
-                                <option value="1" selected>Activo (Visible en tienda)</option>
+                            <select id="status" name="status">
+                                <option value="1">Activo (Visible en tienda)</option>
                                 <option value="0">Inactivo (Oculto)</option>
                             </select>
                         </div>
@@ -314,12 +316,47 @@
         const modalTitle = document.getElementById('modalTitle');
         const storeUrl = "{{ route('admin.productos.store') }}";
 
+        // Validar formulario antes de enviar
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const emptyFields = [];
+            const name = document.getElementById('name').value.trim();
+            const price = document.getElementById('price').value.trim();
+            const stock = document.getElementById('stock').value.trim();
+            const categoryId = document.getElementById('category_id').value.trim();
+            const status = document.getElementById('status').value.trim();
+
+            if (!name) emptyFields.push('Nombre del Producto');
+            if (!price) emptyFields.push('Precio');
+            if (!stock) emptyFields.push('Stock');
+            if (!categoryId) emptyFields.push('Categoría');
+            if (!status) emptyFields.push('Estado');
+
+            const errorContainer = document.getElementById('formErrors');
+            if (emptyFields.length > 0) {
+                const message = 'Por favor, rellena los siguientes campos: ' + emptyFields.join(', ');
+                errorContainer.textContent = message;
+                errorContainer.style.display = 'block';
+                return;
+            }
+
+            errorContainer.style.display = 'none';
+            form.submit();
+        });
+
         function openAddModal() {
             modalTitle.innerText = "Nuevo Producto";
             form.action = storeUrl;
             form.reset();
             document.getElementById('product_id').value = "";
             document.getElementById('product_img_preview').src = "{{ asset('img/imgPrueba.png') }}";
+
+            // Eliminar campo _method si existe
+            let methodField = document.getElementById('_method_field');
+            if (methodField) {
+                methodField.remove();
+            }
 
             document.getElementById('existing_gallery_container').innerHTML = '';
             document.getElementById('gallery_urls_container').innerHTML = '';
@@ -330,17 +367,30 @@
 
         function openEditModal(product) {
             modalTitle.innerText = "Editar Producto";
-            form.action = "{{ url('/admin/productos') }}/" + product.id;
+            form.action = "{{ route('admin.productos.update', ['id' => ':id']) }}".replace(':id', product.id);
             form.method = "POST";
-            form.reset();
-            
+
+            // Agregar campo oculto _method para simular PUT
+            let methodField = document.getElementById('_method_field');
+            if (!methodField) {
+                methodField = document.createElement('input');
+                methodField.type = 'hidden';
+                methodField.name = '_method';
+                methodField.id = '_method_field';
+                methodField.value = 'PUT';
+                form.appendChild(methodField);
+            } else {
+                methodField.value = 'PUT';
+            }
+
+            // Establecer los valores
             document.getElementById('product_id').value = product.id;
             document.getElementById('name').value = product.name;
             document.getElementById('description').value = product.description;
             document.getElementById('price').value = product.price;
             document.getElementById('stock').value = product.stock;
             document.getElementById('category_id').value = product.category_id;
-            document.getElementById('status').value = product.status;
+            document.getElementById('status').value = String(product.status); // Convertir a string para el select
             document.getElementById('image_url').value = product.image_url || '';
             document.getElementById('product_img_preview').src = product.display_image || "{{ asset('img/imgPrueba.png') }}";
             

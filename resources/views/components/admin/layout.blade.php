@@ -13,7 +13,7 @@
 
     <main class="main">
         <x-admin.header :title="$headerTitle ?? $title" :subtitle="$subtitle ?? ''" />
-        
+
         {{ $slot }}
     </main>
 

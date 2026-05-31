@@ -227,17 +227,53 @@
                         @endif
                     </p>
 
-                    <form action="{{ route('cart.add', $product->id) }}" method="POST" class="purchase-actions" style="display: flex; gap: 1rem; width: 100%; margin-bottom: 2rem; border: none; background: transparent; padding: 0;">
+                    <div id="stockError" style="display: none; background-color: #fee; border: 1px solid #fcc; border-radius: 8px; padding: 12px 16px; margin-bottom: 1rem; color: #c33; font-size: 14px; font-family: var(--fuente-sans);">
+                        <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+                        <span id="stockErrorMessage"></span>
+                    </div>
+
+                    <form action="{{ route('cart.add', $product->id) }}" method="POST" class="purchase-actions" style="display: flex; gap: 1rem; width: 100%; margin-bottom: 2rem; border: none; background: transparent; padding: 0;" id="cartForm">
                         @csrf
                         <div class="quantity-selector">
                             <button type="button" class="qty-btn" id="minus">-</button>
-                            <input type="number" name="qty" value="1" min="1" class="qty-input" id="qty">
+                            <input type="number" name="qty" value="1" min="1" class="qty-input" id="qty" data-max-stock="{{ $product->stock }}">
                             <button type="button" class="qty-btn" id="plus">+</button>
                         </div>
                         <button type="submit" class="btn-primary" style="flex: 1; padding: 1.25rem; font-family: var(--fuente-sans); border: none; cursor: pointer; text-align: center; text-transform: uppercase; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.08em; border-radius: 9999px;">
                             Añadir al Carrito
                         </button>
                     </form>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const cartForm = document.getElementById('cartForm');
+                            const stockError = document.getElementById('stockError');
+                            const stockErrorMessage = document.getElementById('stockErrorMessage');
+
+                            if (cartForm) {
+                                cartForm.addEventListener('submit', function(event) {
+                                    const qtyInput = document.getElementById('qty');
+                                    if (!qtyInput) return true;
+
+                                    const maxStock = parseInt(qtyInput.getAttribute('data-max-stock')) || 9999;
+                                    const qty = parseInt(qtyInput.value) || 0;
+
+                                    if (qty > maxStock) {
+                                        event.preventDefault();
+                                        stockErrorMessage.textContent = 'La cantidad seleccionada es superior al stock restante. Solo quedan ' + maxStock + ' unidades disponibles.';
+                                        stockError.style.display = 'block';
+                                        qtyInput.value = maxStock;
+                                        qtyInput.focus();
+                                        return false;
+                                    }
+
+                                    // Ocultar el error si la validación pasa
+                                    stockError.style.display = 'none';
+                                    return true;
+                                });
+                            }
+                        });
+                    </script>
 
                     <div class="benefits-grid" style="font-family: var(--fuente-sans);">
                         <div class="benefit-item">
