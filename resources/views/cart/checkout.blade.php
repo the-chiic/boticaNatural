@@ -639,6 +639,124 @@
         }
     }
 
+    function showError(inputElement, message) {
+        clearError(inputElement);
+        inputElement.classList.add('invalido');
+        
+        inputElement.style.borderColor = '#fa5252';
+        inputElement.style.boxShadow = '0 0 0 4px rgba(250, 82, 82, 0.08)';
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'errorFeedback';
+        errorDiv.style.color = '#fa5252';
+        errorDiv.style.fontSize = '0.78rem';
+        errorDiv.style.marginTop = '0.4rem';
+        errorDiv.style.display = 'flex';
+        errorDiv.style.alignItems = 'center';
+        errorDiv.style.gap = '0.3rem';
+        errorDiv.style.fontFamily = 'var(--fuente-sans)';
+        errorDiv.style.fontWeight = '500';
+        errorDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${message}</span>`;
+        
+        inputElement.parentNode.appendChild(errorDiv);
+    }
+
+    function clearError(inputElement) {
+        inputElement.classList.remove('invalido');
+        inputElement.style.borderColor = '';
+        inputElement.style.boxShadow = '';
+        const parent = inputElement.parentNode;
+        const feedback = parent.querySelector('.errorFeedback');
+        if (feedback) {
+            parent.removeChild(feedback);
+        }
+    }
+
+    document.querySelectorAll('.input-field').forEach(input => {
+        input.addEventListener('input', () => {
+            clearError(input);
+        });
+    });
+
+    function validateAndShowErrors() {
+        let isValid = true;
+        const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
+
+        if (shippingMethod === 'store_pickup') {
+            const pickupName = document.getElementById('pickup_name');
+            const pickupPhone = document.getElementById('pickup_phone');
+
+            if (!pickupName.value.trim()) {
+                showError(pickupName, 'El nombre completo es obligatorio.');
+                isValid = false;
+            } else {
+                clearError(pickupName);
+            }
+
+            if (!pickupPhone.value.trim()) {
+                showError(pickupPhone, 'El teléfono de contacto es obligatorio.');
+                isValid = false;
+            } else {
+                clearError(pickupPhone);
+            }
+        } else {
+            if (selectedAddressId) {
+                return true;
+            }
+
+            const nameDest = document.getElementById('name_destination');
+            const address = document.getElementById('address');
+            const city = document.getElementById('city');
+            const postCode = document.getElementById('post_code');
+            const country = document.getElementById('country');
+            const phone = document.getElementById('phone');
+
+            if (!nameDest.value.trim()) {
+                showError(nameDest, 'El nombre del receptor es obligatorio.');
+                isValid = false;
+            } else {
+                clearError(nameDest);
+            }
+
+            if (!address.value.trim()) {
+                showError(address, 'La dirección de entrega es obligatoria.');
+                isValid = false;
+            } else {
+                clearError(address);
+            }
+
+            if (!city.value.trim()) {
+                showError(city, 'La ciudad es obligatoria.');
+                isValid = false;
+            } else {
+                clearError(city);
+            }
+
+            if (!postCode.value.trim()) {
+                showError(postCode, 'El código postal es obligatorio.');
+                isValid = false;
+            } else {
+                clearError(postCode);
+            }
+
+            if (!country.value.trim()) {
+                showError(country, 'El país es obligatorio.');
+                isValid = false;
+            } else {
+                clearError(country);
+            }
+
+            if (!phone.value.trim()) {
+                showError(phone, 'El teléfono de contacto es obligatorio.');
+                isValid = false;
+            } else {
+                clearError(phone);
+            }
+        }
+
+        return isValid;
+    }
+
     const form = document.getElementById('checkoutForm');
     const submitBtn = document.getElementById('btnSubmitCheckout');
 
@@ -650,13 +768,16 @@
         const isStorePayment = (payment_method === 'store_payment');
         const shippingPayload = getShippingPayload();
 
-        if (!validateShippingPayload(shippingPayload)) {
-            const shippingMethod = document.querySelector('input[name="shipping_method"]:checked').value;
-            if (shippingMethod === 'store_pickup') {
-                document.getElementById('card-errors').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Para recoger en tienda no es necesario completar la dirección de envío.';
-            } else {
-                document.getElementById('card-errors').innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Debes elegir o completar una dirección de envío para envío a domicilio.';
-            }
+        // Limpiar errores anteriores
+        document.querySelectorAll('.input-field').forEach(input => clearError(input));
+
+        if (!validateAndShowErrors()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos Obligatorios',
+                text: 'Por favor, completa los campos marcados en rojo antes de proceder con el pago.',
+                confirmButtonColor: '#1b3022'
+            });
             return;
         }
 
