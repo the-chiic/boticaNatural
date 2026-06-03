@@ -61,24 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const emailInput = formLogin.querySelector('#email');
             const passwordInput = formLogin.querySelector('#password');
             
-            // Validar Email
-            if (!emailInput.value.trim()) {
-                showError(emailInput, 'El correo electrónico es obligatorio.');
-                isValid = false;
-            } else if (!emailRegex.test(emailInput.value.trim())) {
-                showError(emailInput, 'El correo electrónico no es válido.');
-                isValid = false;
+            // Validar Email (solo si se ingresa texto)
+            if (emailInput.value.trim() !== '') {
+                if (!emailRegex.test(emailInput.value.trim())) {
+                    showError(emailInput, 'El correo electrónico no es válido.');
+                    isValid = false;
+                } else {
+                    clearError(emailInput);
+                }
             } else {
                 clearError(emailInput);
             }
             
-            // Validar Contraseña
-            if (!passwordInput.value) {
-                showError(passwordInput, 'La contraseña es obligatoria.');
-                isValid = false;
-            } else {
-                clearError(passwordInput);
-            }
+            // Validar Contraseña (no es obligatoria)
+            clearError(passwordInput);
             
             if (!isValid) {
                 e.preventDefault();
@@ -191,50 +187,33 @@ document.addEventListener('DOMContentLoaded', () => {
         formRegister.addEventListener('submit', (e) => {
             let isValid = true;
 
-            // Validar Nombre
-            if (!nameInput.value.trim()) {
-                showError(nameInput, 'El nombre completo es obligatorio.');
-                isValid = false;
-            } else {
-                clearError(nameInput);
-            }
+            // Validar Nombre (no es obligatorio, limpiar error)
+            clearError(nameInput);
 
-            // Validar Email
-            if (!emailInput.value.trim()) {
-                showError(emailInput, 'El correo electrónico es obligatorio.');
-                isValid = false;
-            } else if (!emailRegex.test(emailInput.value.trim())) {
-                showError(emailInput, 'El correo electrónico no es válido.');
-                isValid = false;
+            // Validar Email (solo si se ingresa texto)
+            if (emailInput.value.trim() !== '') {
+                if (!emailRegex.test(emailInput.value.trim())) {
+                    showError(emailInput, 'El correo electrónico no es válido.');
+                    isValid = false;
+                } else {
+                    clearError(emailInput);
+                }
             } else {
                 clearError(emailInput);
             }
 
-            // Validar Contraseña Segura
+            // Validar Contraseña (no es obligatoria)
             const passwordVal = passwordInput.value;
-            const hasLength = passwordVal.length >= 8;
-            const hasUpper = /[A-Z]/.test(passwordVal);
-            const hasLower = /[a-z]/.test(passwordVal);
-            const hasNumber = /[0-9]/.test(passwordVal);
-            const hasSpecial = /[@$!%*?&_#\-\+\(\)\[\]\{\}\.\,\:\;\/\=\?\|]/.test(passwordVal);
+            clearError(passwordInput);
 
-            if (!passwordVal) {
-                showError(passwordInput, 'La contraseña es obligatoria.');
-                isValid = false;
-            } else if (!(hasLength && hasUpper && hasLower && hasNumber && hasSpecial)) {
-                showError(passwordInput, 'La contraseña debe ser segura y cumplir con todos los requisitos en verde.');
-                isValid = false;
-            } else {
-                clearError(passwordInput);
-            }
-
-            // Validar Confirmación de Contraseña
-            if (!confirmInput.value) {
-                showError(confirmInput, 'Por favor, confirma tu contraseña.');
-                isValid = false;
-            } else if (confirmInput.value !== passwordVal) {
-                showError(confirmInput, 'Las contraseñas no coinciden.');
-                isValid = false;
+            // Validar Confirmación de Contraseña (solo si hay contraseña o se ingresa confirmación)
+            if (passwordVal !== '' || confirmInput.value !== '') {
+                if (confirmInput.value !== passwordVal) {
+                    showError(confirmInput, 'Las contraseñas no coinciden.');
+                    isValid = false;
+                } else {
+                    clearError(confirmInput);
+                }
             } else {
                 clearError(confirmInput);
             }

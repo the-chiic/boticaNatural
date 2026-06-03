@@ -31,7 +31,7 @@
 
                 <div class="grupoFormulario">
                     <label class="etiquetaFormulario" for="email">Correo Electrónico</label>
-                    <input type="email" name="email" id="email" class="controlFormulario" placeholder="ejemplo@correo.com" value="{{ old('email') }}">
+                    <input type="text" name="email" id="email" class="controlFormulario" placeholder="ejemplo@correo.com" value="{{ old('email') }}">
                     @error('email')
                         <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                     @enderror

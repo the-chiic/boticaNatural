@@ -30,9 +30,9 @@
                 
                 <div class="grupoFormulario">
                     <div class="cabeceraGrupoFormulario">
-                        <label class="etiquetaFormulario" for="email">Correo Electrónico</label>
+                         <label class="etiquetaFormulario" for="email">Correo Electrónico</label>
                     </div>
-                    <input type="email" name="email" id="email" class="controlFormulario" placeholder="admin@boticanatural.com o tu email" value="{{ old('email') }}">
+                    <input type="text" name="email" id="email" class="controlFormulario" placeholder="admin@boticanatural.com o tu email" value="{{ old('email') }}">
                     @error('email')
                         <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
                     @enderror
@@ -41,7 +41,6 @@
                 <div class="grupoFormulario">
                     <div class="cabeceraGrupoFormulario">
                         <label class="etiquetaFormulario" for="password">Contraseña</label>
-                        <a href="{{ route('password.request') }}" class="enlaceOlvido">¿Olvidaste tu contraseña?</a>
                     </div>
                     <div class="posicionadorContrasena">
                         <input type="password" name="password" id="password" class="controlFormulario" placeholder="........">
