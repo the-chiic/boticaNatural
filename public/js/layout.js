@@ -3,6 +3,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const botonUsuario = document.getElementById('botonUsuario');
     const menuUsuario = document.getElementById('menuUsuario');
 
+    console.log('layout.js loaded');
+    console.log('botonUsuario:', botonUsuario);
+    console.log('menuUsuario:', menuUsuario);
+    console.log('session logged_in:', '{{ session("logged_in") }}');
+
     if (botonUsuario && menuUsuario) {
         const cerrarMenu = () => {
             menuUsuario.classList.remove('activo');
@@ -16,6 +21,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         botonUsuario.addEventListener('click', function (e) {
             e.stopPropagation();
+            console.log('botonUsuario clicked');
+            console.log('menuUsuario classes:', menuUsuario.classList);
             if (menuUsuario.classList.contains('activo')) {
                 cerrarMenu();
             } else {
@@ -34,6 +41,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 cerrarMenu();
             }
         });
+    } else {
+        console.log('botonUsuario o menuUsuario no encontrado');
     }
 
     // 2. Mobile Hamburger Drawer Menu Toggle Lógica

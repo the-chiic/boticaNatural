@@ -119,7 +119,7 @@
     </div>
 
     <!-- Modal Box (Detalles CRM de Cliente) -->
-    <div id="customerCRMModal" class="modal-overlay">
+    <div id="customerCRMModal" class="modal-overlay" style="display: none; z-index: 9999;">
         <div class="modal-box">
             <div class="modal-header">
                 <h3 id="crmModalTitle">Ficha de Cliente</h3>
@@ -156,7 +156,6 @@
         </div>
     </div>
 
-    @push('scripts')
     <script>
         const crmModal = document.getElementById('customerCRMModal');
         const crmTitle = document.getElementById('crmModalTitle');
@@ -164,7 +163,17 @@
         const crmAddressesList = document.getElementById('crmAddressesList');
         const crmOrdersList = document.getElementById('crmOrdersList');
 
+        console.log('customers.blade.php script loaded');
+        console.log('crmModal:', crmModal);
+
         function loadCustomerCRM(id, name) {
+            console.log('loadCustomerCRM called with id:', id, 'name:', name);
+            
+            if (!crmModal) {
+                console.error('crmModal not found');
+                return;
+            }
+
             crmTitle.innerText = `Ficha de Cliente: ${name}`;
 
             crmPersonalData.innerHTML = `
@@ -184,9 +193,13 @@
             `;
 
             crmModal.style.display = "flex";
+            crmModal.style.opacity = "1";
             setTimeout(() => crmModal.classList.add('active'), 10);
 
-            fetch("{{ route('admin.clientes.details', ':id') }}".replace(':id', id))
+            const url = "{{ route('admin.clientes.details', ':id') }}".replace(':id', id);
+            console.log('Fetching URL:', url);
+
+            fetch(url)
                 .then(res => {
                     if (!res.ok) throw new Error('Error al cargar datos');
                     return res.json();
@@ -196,7 +209,6 @@
                     const addrs = data.addresses;
                     const ords = data.orders;
 
-                    const dateObj = new Date(c.created_at);
                     const dateObj = new Date(c.created_at);
                     const formattedDate = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
                     crmPersonalData.innerHTML = `
@@ -314,5 +326,4 @@
             }
         }
     </script>
-    @endpush
 </x-admin.layout>

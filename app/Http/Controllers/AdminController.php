@@ -289,11 +289,32 @@ class AdminController extends Controller
      */
     public function eliminarProducto($id)
     {
-        $product = Product::findOrFail($id);
-        $product->categories()->detach();
-        $product->delete();
+        try {
+            $product = Product::findOrFail($id);
+            
+            // Deshabilitar restricciones de clave foránea temporalmente
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+            
+            // Eliminar referencias en order_line antes de eliminar el producto
+            DB::table('order_line')->where('product_id', $id)->delete();
+            
+            // Eliminar referencias en product_category antes de eliminar el producto
+            DB::table('product_category')->where('product_id', $id)->delete();
+            
+            // Desvincular categorías
+            $product->categories()->detach();
 
-        return back()->with('success', '¡El producto ha sido eliminado del catálogo!');
+            $product->delete();
+            
+            // Rehabilitar restricciones de clave foránea
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+            return back()->with('success', '¡El producto ha sido eliminado del catálogo!');
+        } catch (\Exception $e) {
+            // Asegurarse de rehabilitar las restricciones en caso de error
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            return back()->with('error', 'Error al eliminar el producto: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -628,23 +649,27 @@ class AdminController extends Controller
      */
     public function detallesCliente($id)
     {
-        $customer = User::findOrFail($id);
-        
-        $addresses = DB::table('address')
-            ->where('user_id', $id)
-            ->orderBy('id', 'desc')
-            ->get();
-            
-        $orders = DB::table('orders')
-            ->where('user_id', $id)
-            ->orderBy('order_date', 'desc')
-            ->get();
-            
-        return response()->json([
-            'customer' => $customer,
-            'addresses' => $addresses,
-            'orders' => $orders
-        ]);
+        try {
+            $customer = User::findOrFail($id);
+
+            $addresses = DB::table('address')
+                ->where('user_id', $id)
+                ->orderBy('id', 'desc')
+                ->get();
+
+            $orders = DB::table('orders')
+                ->where('user_id', $id)
+                ->orderBy('order_date', 'desc')
+                ->get();
+
+            return response()->json([
+                'customer' => $customer,
+                'addresses' => $addresses,
+                'orders' => $orders
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
