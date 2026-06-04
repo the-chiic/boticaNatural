@@ -61,20 +61,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const emailInput = formLogin.querySelector('#email');
             const passwordInput = formLogin.querySelector('#password');
             
-            // Validar Email (solo si se ingresa texto)
-            if (emailInput.value.trim() !== '') {
-                if (!emailRegex.test(emailInput.value.trim())) {
-                    showError(emailInput, 'El correo electrónico no es válido.');
-                    isValid = false;
-                } else {
-                    clearError(emailInput);
-                }
+            // Validar Email
+            if (!emailInput.value.trim()) {
+                showError(emailInput, 'Falta rellenar el campo');
+                isValid = false;
+            } else if (!emailRegex.test(emailInput.value.trim())) {
+                showError(emailInput, 'El correo electrónico no es válido.');
+                isValid = false;
             } else {
                 clearError(emailInput);
             }
             
-            // Validar Contraseña (no es obligatoria)
-            clearError(passwordInput);
+            // Validar Contraseña
+            if (!passwordInput.value) {
+                showError(passwordInput, 'Falta rellenar el campo');
+                isValid = false;
+            } else {
+                clearError(passwordInput);
+            }
             
             if (!isValid) {
                 e.preventDefault();
@@ -187,33 +191,40 @@ document.addEventListener('DOMContentLoaded', () => {
         formRegister.addEventListener('submit', (e) => {
             let isValid = true;
 
-            // Validar Nombre (no es obligatorio, limpiar error)
-            clearError(nameInput);
+            // Validar Nombre
+            if (!nameInput.value.trim()) {
+                showError(nameInput, 'Falta rellenar el campo');
+                isValid = false;
+            } else {
+                clearError(nameInput);
+            }
 
-            // Validar Email (solo si se ingresa texto)
-            if (emailInput.value.trim() !== '') {
-                if (!emailRegex.test(emailInput.value.trim())) {
-                    showError(emailInput, 'El correo electrónico no es válido.');
-                    isValid = false;
-                } else {
-                    clearError(emailInput);
-                }
+            // Validar Email
+            if (!emailInput.value.trim()) {
+                showError(emailInput, 'Falta rellenar el campo');
+                isValid = false;
+            } else if (!emailRegex.test(emailInput.value.trim())) {
+                showError(emailInput, 'El correo electrónico no es válido.');
+                isValid = false;
             } else {
                 clearError(emailInput);
             }
 
-            // Validar Contraseña (no es obligatoria)
-            const passwordVal = passwordInput.value;
-            clearError(passwordInput);
+            // Validar Contraseña
+            if (!passwordInput.value) {
+                showError(passwordInput, 'Falta rellenar el campo');
+                isValid = false;
+            } else {
+                clearError(passwordInput);
+            }
 
-            // Validar Confirmación de Contraseña (solo si hay contraseña o se ingresa confirmación)
-            if (passwordVal !== '' || confirmInput.value !== '') {
-                if (confirmInput.value !== passwordVal) {
-                    showError(confirmInput, 'Las contraseñas no coinciden.');
-                    isValid = false;
-                } else {
-                    clearError(confirmInput);
-                }
+            // Validar Confirmación
+            if (!confirmInput.value) {
+                showError(confirmInput, 'Falta rellenar el campo');
+                isValid = false;
+            } else if (confirmInput.value !== passwordInput.value) {
+                showError(confirmInput, 'Las contraseñas no coinciden.');
+                isValid = false;
             } else {
                 clearError(confirmInput);
             }
@@ -250,4 +261,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-

@@ -7,9 +7,9 @@
             </a>
             <p style="margin-top: 0.5rem;">Bienestar diario inspirado en la naturaleza. Ofrecemos los mejores productos botánicos artesanales para cuidar tu cuerpo y mente de forma sostenible.</p>
             <div class="redesSociales">
-                <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="https://www.instagram.com/laboticanatural_2000?igsh=MWR6YW9wMmdoOXg4Yw==" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-twitter"></i></a>
             </div>
         </div>
 

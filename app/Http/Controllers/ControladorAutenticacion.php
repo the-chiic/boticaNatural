@@ -26,10 +26,12 @@ class ControladorAutenticacion extends Controller
     public function iniciarSesion(Request $solicitud)
     {
         $credenciales = $solicitud->validate([
-            'email' => ['nullable', 'email'],
-            'password' => ['nullable'],
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ], [
+            'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'El formato del correo electrónico no es válido.',
+            'password.required' => 'La contraseña es obligatoria.',
         ]);
 
         if (Auth::attempt(['email' => $solicitud->email, 'password' => $solicitud->password])) {
@@ -52,15 +54,18 @@ class ControladorAutenticacion extends Controller
     public function registrar(Request $solicitud)
     {
         $solicitud->validate([
-            'name' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:user'],
-            'password' => ['nullable', 'string', 'confirmed'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:user'],
+            'password' => ['required', 'string', 'confirmed'],
         ], [
+            'name.required' => 'El nombre completo es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de texto.',
             'name.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'El formato del correo electrónico no es válido.',
             'email.max' => 'El correo electrónico no puede tener más de 255 caracteres.',
             'email.unique' => 'Este correo electrónico ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 

@@ -11,7 +11,7 @@
         <div class="envolturaFormulario">
             
             <div class="cabeceraAutenticacion">
-                <a href="{{ url('/') }}" class="marca-premium" style="justify-content: center; margin-bottom: 2rem;">
+                <a href="{{ url('/') }}" class="marca-premium">
                     <img src="{{ asset('img/logo.jpg') }}" alt="Logo La Botica Natural" class="iconoMarca">
                     <span class="nombreMarca">{{ \Illuminate\Support\Facades\Cache::get('shop_name', 'LA BOTICA NATURAL') }}</span>
                 </a>
@@ -25,7 +25,7 @@
                     <label class="etiquetaFormulario" for="name">Nombre Completo</label>
                     <input type="text" name="name" id="name" class="controlFormulario" placeholder="Tu nombre" value="{{ old('name') }}">
                     @error('name')
-                        <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
+                        <span class="input-error-msg">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -33,7 +33,7 @@
                     <label class="etiquetaFormulario" for="email">Correo Electrónico</label>
                     <input type="text" name="email" id="email" class="controlFormulario" placeholder="ejemplo@correo.com" value="{{ old('email') }}">
                     @error('email')
-                        <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
+                        <span class="input-error-msg">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -46,7 +46,7 @@
                         </button>
                     </div>
                     @error('password')
-                        <span style="color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
+                        <span class="input-error-msg">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -60,8 +60,12 @@
                     </div>
                 </div>
 
+
+
                 <button type="submit" class="boton botonPrincipal">CREAR CUENTA</button>
             </form>
+
+            <div style="margin-top: 2rem;"></div>
 
             <div class="divisor">O REGÍSTRATE CON</div>
 
@@ -75,8 +79,8 @@
                 REGISTRARSE CON GOOGLE
             </a>
 
-            <p style="text-align: center; margin-top: 2rem; font-size: 0.875rem;">
-                ¿Ya tienes cuenta? <a href="{{ url('iniciar-sesion') }}" style="color: var(--color-principal); font-weight: 700;">Inicia sesión</a>
+            <p class="auth-footer-text">
+                ¿Ya tienes cuenta? <a href="{{ url('iniciar-sesion') }}">Inicia sesión</a>
             </p>
         </div>
 

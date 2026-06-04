@@ -533,8 +533,8 @@ input {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 1.875em 0;
-    /* 30px */
+    margin: 2.5em 0;
+    /* 40px */
     color: var(--color-texto-muy-claro);
     font-size: 0.75em;
     /* 12px */
@@ -1581,4 +1581,74 @@ input {
     .metodosPago {
         justify-content: center !important;
     }
+}
+
+/* Auth style cleanup: separation of CSS from PHP/HTML */
+.alert-status-success {
+    background-color: #dcfce7;
+    color: #166534;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    text-align: center;
+    border: 1px solid #bbf7d0;
+}
+
+.cabeceraAutenticacion .marca-premium {
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.auth-footer-text {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.875rem;
+    color: var(--color-texto-claro);
+    font-weight: 400;
+}
+
+.auth-footer-text a {
+    color: var(--color-principal);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-footer-text a:hover {
+    color: var(--color-acento);
+    text-decoration: underline;
+}
+
+.alert-errors-box {
+    background-color: #fde8e8;
+    color: #9b1c1c;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    border: 1px solid #f8b4b4;
+}
+
+.alert-errors-box ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.alert-errors-box li {
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.alert-errors-box li:last-child {
+    margin-bottom: 0;
+}
+
+.input-error-msg {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
 }

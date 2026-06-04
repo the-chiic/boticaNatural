@@ -6,6 +6,26 @@
         
         <!-- Estilos Responsivos Globales (Móvil y Tablet) -->
         <style>
+            /* Estilos para footer de autenticación */
+            .auth-footer-text {
+                text-align: center !important;
+                margin-top: 2rem !important;
+                font-size: 0.875rem !important;
+                color: var(--color-texto-claro) !important;
+                font-weight: 400 !important;
+            }
+
+            .auth-footer-text a {
+                color: var(--color-principal) !important;
+                font-weight: 700 !important;
+                text-decoration: none !important;
+            }
+
+            .auth-footer-text a:hover {
+                color: var(--color-acento) !important;
+                text-decoration: underline !important;
+            }
+
             /* Tablet y pantallas medianas (menores a 992px) */
             @media (max-width: 992px) {
                 .contenedorAutenticacion {
